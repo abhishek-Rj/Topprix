@@ -1,7 +1,16 @@
-import "./App.css";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
+import Signup from "./pages/Signup";
 
 function App() {
-    return <>{import.meta.env.VITE_APP_FIREBASE_API_KEY}</>;
+    return (
+        <>
+            <BrowserRouter>
+                <Routes>
+                    <Route path="/login" element={<Signup />} />
+                </Routes>
+            </BrowserRouter>
+        </>
+    );
 }
 
 export default App;

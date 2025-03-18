@@ -5,6 +5,13 @@ import React from "react";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { createContext, useContext } from "react";
 
+type FirebaseContextType = {
+    signInUserWithEmailAndPassword: (
+        email: string,
+        password: string
+    ) => Promise<any>;
+};
+
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_APP_FIREBASE_API_KEY,
     authDomain: import.meta.env.VITE_APP_FIREBASE_AUTH_DOMAIN,
@@ -18,7 +25,14 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
 
-export const FirebaseContext = createContext({});
+const defaultContextValue: FirebaseContextType = {
+    signInUserWithEmailAndPassword: async () => {
+        throw new Error("Function not implemented");
+    },
+};
+
+export const FirebaseContext =
+    createContext<FirebaseContextType>(defaultContextValue);
 
 export const useFirebase = () => {
     return useContext(FirebaseContext);
