@@ -4,11 +4,13 @@ import { initializeApp } from "firebase/app";
 import React from "react";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { createContext, useContext } from "react";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 type FirebaseContextType = {
     signInUserWithEmailAndPassword: (
         email: string,
-        password: string
+        password: string,
+        role: string
     ) => Promise<any>;
 };
 
@@ -23,7 +25,8 @@ const firebaseConfig = {
 };
 
 const firebaseApp = initializeApp(firebaseConfig);
-const auth = getAuth(firebaseApp);
+export const auth = getAuth(firebaseApp);
+export const db = getFirestore(firebaseApp);
 
 const defaultContextValue: FirebaseContextType = {
     signInUserWithEmailAndPassword: async () => {
@@ -45,7 +48,8 @@ export const FirebaseProvider = ({
 }) => {
     const signInUserWithEmailAndPassword = async (
         email: string,
-        password: string
+        password: string,
+        role: string
     ) => {
         try {
             const userCredential = await createUserWithEmailAndPassword(
@@ -53,7 +57,10 @@ export const FirebaseProvider = ({
                 email,
                 password
             );
-            return userCredential.user;
+            const user = userCredential.user;
+
+            await setDoc(doc(db, "users", user.uid), { role });
+            return user;
         } catch (error) {
             return error;
         }
