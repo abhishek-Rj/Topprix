@@ -2,12 +2,20 @@
 
 import { initializeApp } from "firebase/app";
 import React from "react";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+    getAuth,
+    createUserWithEmailAndPassword,
+    updateProfile,
+    GoogleAuthProvider,
+    signInWithPopup,
+} from "firebase/auth";
 import { createContext, useContext } from "react";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 type FirebaseContextType = {
+    signInWithGoogle: () => Promise<any>;
     signInUserWithEmailAndPassword: (
+        name: string,
         email: string,
         password: string,
         role: string
@@ -27,9 +35,13 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 export const auth = getAuth(firebaseApp);
 export const db = getFirestore(firebaseApp);
+export const googleProvider = new GoogleAuthProvider();
 
 const defaultContextValue: FirebaseContextType = {
     signInUserWithEmailAndPassword: async () => {
+        throw new Error("Function not implemented");
+    },
+    signInWithGoogle: async () => {
         throw new Error("Function not implemented");
     },
 };
@@ -47,6 +59,7 @@ export const FirebaseProvider = ({
     children: React.ReactNode;
 }) => {
     const signInUserWithEmailAndPassword = async (
+        name: string,
         email: string,
         password: string,
         role: string
@@ -59,14 +72,34 @@ export const FirebaseProvider = ({
             );
             const user = userCredential.user;
 
-            await setDoc(doc(db, "users", user.uid), { role });
+            await updateProfile(user, {
+                displayName: name,
+            });
+
+            await setDoc(doc(db, "users", user.uid), {
+                name,
+                email,
+                role,
+            });
+            return user;
+        } catch (error) {
+            return error;
+        }
+    };
+
+    const signInWithGoogle = async () => {
+        try {
+            const userCredential = await signInWithPopup(auth, googleProvider);
+            const user = userCredential.user;
             return user;
         } catch (error) {
             return error;
         }
     };
     return (
-        <FirebaseContext.Provider value={{ signInUserWithEmailAndPassword }}>
+        <FirebaseContext.Provider
+            value={{ signInUserWithEmailAndPassword, signInWithGoogle }}
+        >
             {children}
         </FirebaseContext.Provider>
     );
