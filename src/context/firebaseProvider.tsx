@@ -5,6 +5,7 @@ import React from "react";
 import {
     getAuth,
     createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
     updateProfile,
     GoogleAuthProvider,
     signInWithPopup,
@@ -14,7 +15,11 @@ import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 type FirebaseContextType = {
     signInWithGoogle: () => Promise<any>;
-    signInUserWithEmailAndPassword: (
+    logInWithEmailandPassword: (
+        email: string,
+        password: string
+    ) => Promise<any>;
+    signUpUserWithEmailAndPassword: (
         name: string,
         email: string,
         password: string,
@@ -38,7 +43,10 @@ export const db = getFirestore(firebaseApp);
 export const googleProvider = new GoogleAuthProvider();
 
 const defaultContextValue: FirebaseContextType = {
-    signInUserWithEmailAndPassword: async () => {
+    logInWithEmailandPassword: async () => {
+        throw new Error("Function not implemented");
+    },
+    signUpUserWithEmailAndPassword: async () => {
         throw new Error("Function not implemented");
     },
     signInWithGoogle: async () => {
@@ -58,7 +66,7 @@ export const FirebaseProvider = ({
 }: {
     children: React.ReactNode;
 }) => {
-    const signInUserWithEmailAndPassword = async (
+    const signUpUserWithEmailAndPassword = async (
         name: string,
         email: string,
         password: string,
@@ -87,6 +95,23 @@ export const FirebaseProvider = ({
         }
     };
 
+    const logInWithEmailandPassword = async (
+        email: string,
+        password: string
+    ) => {
+        try {
+            const userCredential = await signInWithEmailAndPassword(
+                auth,
+                email,
+                password
+            );
+            const user = userCredential.user;
+            return user;
+        } catch (error) {
+            return error;
+        }
+    };
+
     const signInWithGoogle = async () => {
         try {
             const userCredential = await signInWithPopup(auth, googleProvider);
@@ -98,7 +123,11 @@ export const FirebaseProvider = ({
     };
     return (
         <FirebaseContext.Provider
-            value={{ signInUserWithEmailAndPassword, signInWithGoogle }}
+            value={{
+                signUpUserWithEmailAndPassword,
+                signInWithGoogle,
+                logInWithEmailandPassword,
+            }}
         >
             {children}
         </FirebaseContext.Provider>

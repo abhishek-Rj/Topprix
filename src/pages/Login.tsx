@@ -1,21 +1,17 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useFirebase } from "../context/firebaseProvider";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock } from "react-icons/fi";
 import { ReactTyped } from "react-typed";
-import { MdOutlinePerson } from "react-icons/md";
 
-export default function Signup() {
-    const [name, setName] = useState<string>("");
+export default function Login() {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [emailError, setEmailError] = useState<boolean>(false);
     const [passwordError, setPasswordError] = useState<boolean>(false);
-    const [roleError, setRoleError] = useState<boolean>(false);
-    const roleRef = useRef<HTMLSelectElement>(null);
-    const { signUpUserWithEmailAndPassword, signInWithGoogle } = useFirebase();
+    const { logInWithEmailandPassword, signInWithGoogle } = useFirebase();
     const navigate = useNavigate();
 
     const validateEmail = (email: string): boolean => {
@@ -28,7 +24,6 @@ export default function Signup() {
         setError(null);
         setEmailError(false);
         setPasswordError(false);
-        setRoleError(false);
 
         if (!validateEmail(email)) {
             setEmailError(true);
@@ -44,20 +39,8 @@ export default function Signup() {
             return;
         }
 
-        if (!roleRef.current?.value) {
-            setRoleError(true);
-            setError("Please select a role.");
-            setLoading(false);
-            return;
-        }
-
         try {
-            const user = await signUpUserWithEmailAndPassword(
-                name,
-                email,
-                password,
-                roleRef.current.value
-            );
+            const user = await logInWithEmailandPassword(email, password);
             if (user) {
                 navigate("/");
             } else {
@@ -125,17 +108,18 @@ export default function Signup() {
                     </div>
                 </div>
 
+                {/* Right Side - Signup Form */}
                 <div className="w-full md:w-1/2 p-8 bg-white rounded-xl shadow-xl">
                     <h2 className="text-2xl font-bold text-gray-800 text-center">
-                        Create Your Account
+                        Login your Account
                     </h2>
-                    <p className="text-center hover:scale-105 transition-transform  text-gray-600 mt-2">
-                        Already have an account?{" "}
+                    <p className="text-center text-gray-600 hover:scale-105 transition-transform  mt-2">
+                        Don't have an account?{" "}
                         <a
-                            href="/login"
-                            className="text-yellow-600  hover:underline"
+                            href="/signup"
+                            className="text-yellow-600 hover:underline"
                         >
-                            Sign in
+                            Sign Up
                         </a>
                     </p>
 
@@ -145,67 +129,44 @@ export default function Signup() {
                         )}
 
                         <div className="relative">
-                            <MdOutlinePerson className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full hover:scale-105 transition-transform  pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500"
-                                required
-                            />
-                        </div>
-
-                        <div className="relative">
                             <FiMail className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
                             <input
                                 type="email"
                                 placeholder="Email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className={`w-full pl-10 p-2 border hover:scale-105 transition-transform  rounded-md focus:ring-yellow-500 focus:border-yellow-500 
+                                className={`w-full hover:scale-105 transition-transform pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
                                     ${emailError ? "border-red-500" : ""}`}
                                 required
                             />
                         </div>
 
                         <div className="relative">
-                            <FiLock className="absolute hover:scale-110 transition-transform  left-3 top-3 text-gray-400" />
+                            <FiLock className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
                             <input
                                 type="password"
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className={`w-full pl-10 p-2 hover:scale-110 transition-transform  border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
+                                className={`w-full hover:scale-105 transition-transform pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
                                     ${passwordError ? "border-red-500" : ""}`}
                                 required
                             />
                         </div>
 
-                        <div className="relative">
-                            <select
-                                ref={roleRef}
-                                className={`w-full hover:scale-105 transition-transform pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
-                                    ${roleError ? "border-red-500" : ""}`}
-                                required
-                            >
-                                <option value="">Select Role</option>
-                                <option value="user">Customer</option>
-                                <option value="admin">Business Owner</option>
-                            </select>
-                        </div>
-
                         <button
                             type="submit"
-                            className={`w-full hover:scale-105 transition-transform  py-2 text-white font-semibold rounded-md 
+                            className={`w-full hover:scale-105 transition-transform py-2 text-white font-semibold rounded-md 
                                 ${
                                     loading
-                                        ? "bg-yellow-300"
+                                        ? "bg-orange-400"
                                         : "bg-yellow-600 hover:bg-yellow-700"
                                 }`}
                             disabled={loading}
                         >
-                            {loading ? "Creating Account..." : "Sign Up"}
+                            {loading
+                                ? "Logging into your account..."
+                                : "Sign Up"}
                         </button>
                     </form>
 
@@ -219,7 +180,7 @@ export default function Signup() {
                                 });
                             }}
                             type="button"
-                            className="flex hover:scale-105 transition-transform  items-center justify-center w-full py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100"
+                            className="flex hover:scale-105 transition-transform items-center justify-center w-full py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100"
                         >
                             <img
                                 src="/google.svg"
