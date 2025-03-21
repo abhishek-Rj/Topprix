@@ -1,0 +1,21 @@
+{
+    "shortDescription": "Faites de grosses économies grâce à des offres et des réductions exclusives de vos marques préférées.",
+    "allBest": "Toutes les meilleures",
+    "discount": "réductions",
+    "offer": "offres",
+    "onePlace": "Un seul endroit",
+    "createAccount": "Créez votre compte",
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "name": "Nom",
+    "selectRole": "Sélectionnez un rôle",
+    "customer": "Cliente",
+    "owner": "Propriétaire d'entreprise",
+    "accountExist": "Vous avez déjà un compte ?",
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "creatingAccount": "Création de compte...",
+    "googleSignin": "Continuer avec Google"
+}

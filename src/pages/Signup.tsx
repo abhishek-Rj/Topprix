@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock } from "react-icons/fi";
 import { ReactTyped } from "react-typed";
 import { MdOutlinePerson } from "react-icons/md";
+import { useTranslation } from "react-i18next";
 
 export default function Signup() {
     const [name, setName] = useState<string>("");
@@ -17,6 +18,7 @@ export default function Signup() {
     const roleRef = useRef<HTMLSelectElement>(null);
     const { signUpUserWithEmailAndPassword, signInWithGoogle } = useFirebase();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const validateEmail = (email: string): boolean => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -91,51 +93,50 @@ export default function Signup() {
 
                     <div className="flex md:hidden justify-center items-center mt-6">
                         <h2 className="text-lg font-bold text-white text-center">
-                            All Best{" "}
-                            <span className="text-black">
+                            {t("allBest")}{" "}
+                            <span className="text-black min-w-[100px] inline-block text-center whitespace-nowrap">
                                 <ReactTyped
-                                    strings={["Deals", "Offers", "Discounts"]}
+                                    strings={[t("discount"), t("offer")]}
                                     typeSpeed={100}
                                     backSpeed={50}
                                     backDelay={1000}
                                     loop
                                 />
                             </span>{" "}
-                            , One Place
+                            , {t("onePlace")}
                         </h2>
                     </div>
 
                     <div className="hidden md:flex flex-col justify-center h-full mt-10">
                         <h2 className="text-3xl font-bold text-white">
-                            All Best{" "}
+                            {t("allBest")}{" "}
                             <ReactTyped
-                                strings={["Deals", "Offers", "Discounts"]}
+                                strings={[t("discount"), t("offer")]}
                                 typeSpeed={100}
                                 backSpeed={50}
                                 backDelay={1000}
                                 loop
                                 className="text-black"
                             />
-                            , One Place
+                            , {t("onePlace")}
                         </h2>
                         <p className="mt-4 text-white text-lg">
-                            Save big with exclusive offers and discounts from
-                            your favorite brands.
+                            {t("shortDescription")}
                         </p>
                     </div>
                 </div>
 
                 <div className="w-full md:w-1/2 p-8 bg-white rounded-xl shadow-xl">
                     <h2 className="text-2xl font-bold text-gray-800 text-center">
-                        Create Your Account
+                        {t("createAccount")}
                     </h2>
                     <p className="text-center hover:scale-105 transition-transform  text-gray-600 mt-2">
-                        Already have an account?{" "}
+                        {t("accountExist")}{" "}
                         <a
                             href="/login"
                             className="text-yellow-600  hover:underline"
                         >
-                            Sign in
+                            {t("signIn")}
                         </a>
                     </p>
 
@@ -148,7 +149,7 @@ export default function Signup() {
                             <MdOutlinePerson className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Name"
+                                placeholder={t("name")}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 className="w-full hover:scale-105 transition-transform  pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500"
@@ -160,7 +161,7 @@ export default function Signup() {
                             <FiMail className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
                             <input
                                 type="email"
-                                placeholder="Email"
+                                placeholder={t("email")}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className={`w-full pl-10 p-2 border hover:scale-105 transition-transform  rounded-md focus:ring-yellow-500 focus:border-yellow-500 
@@ -173,7 +174,7 @@ export default function Signup() {
                             <FiLock className="absolute hover:scale-110 transition-transform  left-3 top-3 text-gray-400" />
                             <input
                                 type="password"
-                                placeholder="Password"
+                                placeholder={t("password")}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className={`w-full pl-10 p-2 hover:scale-110 transition-transform  border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
@@ -189,9 +190,9 @@ export default function Signup() {
                                     ${roleError ? "border-red-500" : ""}`}
                                 required
                             >
-                                <option value="">Select Role</option>
-                                <option value="user">Customer</option>
-                                <option value="admin">Business Owner</option>
+                                <option value="">{t("selectRole")}</option>
+                                <option value="user">{t("customer")}</option>
+                                <option value="admin">{t("owner")}</option>
                             </select>
                         </div>
 
@@ -205,7 +206,7 @@ export default function Signup() {
                                 }`}
                             disabled={loading}
                         >
-                            {loading ? "Creating Account..." : "Sign Up"}
+                            {loading ? t("creatingAccount") : t("signUp")}
                         </button>
                     </form>
 
@@ -226,7 +227,7 @@ export default function Signup() {
                                 alt="Google Logo"
                                 className="w-5 h-5 mr-2"
                             />
-                            Continue with Google
+                            {t("googleSignin")}
                         </button>
                     </div>
                 </div>

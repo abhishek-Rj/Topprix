@@ -1,0 +1,21 @@
+{
+    "shortDescription": "Save big with exclusive offers and discounts from your favorite brands.",
+    "allBest": "All the best",
+    "discount": "discounts",
+    "onePlace": "One place",
+    "offer": "offers",
+    "createAccount": "Create Your account",
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "selectRole": "Select Role",
+    "customer": "Customer",
+    "owner": "Business Owner",
+    "accountExist": "Already have an account?",
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "creatingAccount": "Creating account...",
+    "googleSignin": "Continue with Google"
+}

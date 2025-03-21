@@ -3,6 +3,7 @@ import { useFirebase } from "../context/firebaseProvider";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock } from "react-icons/fi";
 import { ReactTyped } from "react-typed";
+import { useTranslation } from "react-i18next";
 
 export default function Login() {
     const [email, setEmail] = useState<string>("");
@@ -13,6 +14,7 @@ export default function Login() {
     const [passwordError, setPasswordError] = useState<boolean>(false);
     const { logInWithEmailandPassword, signInWithGoogle } = useFirebase();
     const navigate = useNavigate();
+    const { t } = useTranslation();
 
     const validateEmail = (email: string): boolean => {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -27,14 +29,14 @@ export default function Login() {
 
         if (!validateEmail(email)) {
             setEmailError(true);
-            setError("Please enter a valid email.");
+            setError(t("invalidEmail"));
             setLoading(false);
             return;
         }
 
         if (password.length < 6) {
             setPasswordError(true);
-            setError("Password must be at least 6 characters long.");
+            setError(t("passwordLength"));
             setLoading(false);
             return;
         }
@@ -44,11 +46,11 @@ export default function Login() {
             if (user) {
                 navigate("/");
             } else {
-                setError("User not created");
+                setError(t("userNotCreated"));
             }
         } catch (error) {
             console.error(error);
-            setError("Failed to create account");
+            setError(t("loginFailed"));
         } finally {
             setLoading(false);
         }
@@ -74,52 +76,51 @@ export default function Login() {
 
                     <div className="flex md:hidden justify-center items-center mt-6">
                         <h2 className="text-lg font-bold text-white text-center">
-                            All Best{" "}
+                            {t("allBest")}{" "}
                             <span className="text-black">
                                 <ReactTyped
-                                    strings={["Deals", "Offers", "Discounts"]}
+                                    strings={[t("discount"), t("offer")]}
                                     typeSpeed={100}
                                     backSpeed={50}
                                     backDelay={1000}
                                     loop
                                 />
                             </span>{" "}
-                            , One Place
+                            , {t("onePlace")}
                         </h2>
                     </div>
 
                     <div className="hidden md:flex flex-col justify-center h-full mt-10">
                         <h2 className="text-3xl font-bold text-white">
-                            All Best{" "}
+                            {t("allBest")}{" "}
                             <ReactTyped
-                                strings={["Deals", "Offers", "Discounts"]}
+                                strings={[t("discount"), t("offer")]}
                                 typeSpeed={100}
                                 backSpeed={50}
                                 backDelay={1000}
                                 loop
                                 className="text-black"
                             />
-                            , One Place
+                            , {t("onePlace")}
                         </h2>
                         <p className="mt-4 text-white text-lg">
-                            Save big with exclusive offers and discounts from
-                            your favorite brands.
+                            {t("shortDescription")}
                         </p>
                     </div>
                 </div>
 
-                {/* Right Side - Signup Form */}
+                {/* Right Side - Login Form */}
                 <div className="w-full md:w-1/2 p-8 bg-white rounded-xl shadow-xl">
                     <h2 className="text-2xl font-bold text-gray-800 text-center">
-                        Login your Account
+                        {t("login")}
                     </h2>
-                    <p className="text-center text-gray-600 hover:scale-105 transition-transform  mt-2">
-                        Don't have an account?{" "}
+                    <p className="text-center text-gray-600 hover:scale-105 transition-transform mt-2">
+                        {t("accountExist")}{" "}
                         <a
                             href="/signup"
                             className="text-yellow-600 hover:underline"
                         >
-                            Sign Up
+                            {t("signUp")}
                         </a>
                     </p>
 
@@ -132,7 +133,7 @@ export default function Login() {
                             <FiMail className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
                             <input
                                 type="email"
-                                placeholder="Email"
+                                placeholder={t("email")}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className={`w-full hover:scale-105 transition-transform pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
@@ -145,7 +146,7 @@ export default function Login() {
                             <FiLock className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
                             <input
                                 type="password"
-                                placeholder="Password"
+                                placeholder={t("password")}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className={`w-full hover:scale-105 transition-transform pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
@@ -164,9 +165,7 @@ export default function Login() {
                                 }`}
                             disabled={loading}
                         >
-                            {loading
-                                ? "Logging into your account..."
-                                : "Sign Up"}
+                            {loading ? t("loggingIn") : t("login")}
                         </button>
                     </form>
 
@@ -187,7 +186,7 @@ export default function Login() {
                                 alt="Google Logo"
                                 className="w-5 h-5 mr-2"
                             />
-                            Continue with Google
+                            {t("googleSignin")}
                         </button>
                     </div>
                 </div>

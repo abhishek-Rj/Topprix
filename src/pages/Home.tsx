@@ -3,9 +3,11 @@ import { auth } from "../context/firebaseProvider";
 import { useEffect, useState } from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { db } from "../context/firebaseProvider";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
     const [userRole, setUserRole] = useState<string | null>(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -38,7 +40,7 @@ export default function Home() {
     return (
         <>
             <div>
-                <h1>Hello</h1>
+                <h1>{t("shortDescription")}</h1>
             </div>
         </>
     );
