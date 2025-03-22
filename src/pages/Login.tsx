@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock } from "react-icons/fi";
 import { ReactTyped } from "react-typed";
 import { useTranslation } from "react-i18next";
+import GoogleAuthButton from "../components/googleAuthButton";
+import FacebookAuthButton from "../components/facebookAuthButton";
 
 export default function Login() {
     const [email, setEmail] = useState<string>("");
@@ -12,7 +14,7 @@ export default function Login() {
     const [loading, setLoading] = useState<boolean>(false);
     const [emailError, setEmailError] = useState<boolean>(false);
     const [passwordError, setPasswordError] = useState<boolean>(false);
-    const { logInWithEmailandPassword, signInWithGoogle } = useFirebase();
+    const { logInWithEmailandPassword } = useFirebase();
     const navigate = useNavigate();
     const { t } = useTranslation();
 
@@ -169,26 +171,19 @@ export default function Login() {
                         </button>
                     </form>
 
-                    <div className="mt-6 flex justify-center">
-                        <button
-                            onClick={() => {
-                                signInWithGoogle().then((user) => {
-                                    if (user) {
-                                        navigate("/");
-                                    }
-                                });
-                            }}
-                            type="button"
-                            className="flex hover:scale-105 transition-transform items-center justify-center w-full py-2 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-100"
-                        >
-                            <img
-                                src="/google.svg"
-                                alt="Google Logo"
-                                className="w-5 h-5 mr-2"
-                            />
-                            {t("googleSignin")}
-                        </button>
+                    <div className="mt-6 relative">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm">
+                            <span className="px-2 bg-white text-gray-500">
+                                {t("continueWith")}
+                            </span>
+                        </div>
                     </div>
+
+                    <GoogleAuthButton />
+                    <FacebookAuthButton />
                 </div>
             </div>
         </div>

@@ -16,6 +16,17 @@
     "accountExist": "Vous avez déjà un compte ?",
     "signIn": "Se connecter",
     "signUp": "S'inscrire",
+    "signOut": "Se déconnecter",
     "creatingAccount": "Création de compte...",
-    "googleSignin": "Continuer avec Google"
+    "googleSignin": "Continuer avec Google",
+    "facebookSignin": "Continuer avec Facebook",
+    "continueWith": "ou Continuer avec",
+    "navigation": {
+        "home": "Accueil",
+        "coupon": "Coupon",
+        "favourite": "Favori",
+        "profile": "Profil",
+        "search": "Rechercher",
+        "settings": "Paramètres"
+    }
 }

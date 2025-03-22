@@ -16,6 +16,15 @@
     "accountExist": "Already have an account?",
     "signIn": "Sign in",
     "signUp": "Sign up",
+    "signOut": "Sign out",
     "creatingAccount": "Creating account...",
-    "googleSignin": "Continue with Google"
+    "continueWith": "or Continue with",
+    "navigation": {
+        "home": "Home",
+        "coupon": "Coupon",
+        "favourite": "Favourite",
+        "profile": "Profile",
+        "search": "Search",
+        "settings": "Settings"
+    }
 }
