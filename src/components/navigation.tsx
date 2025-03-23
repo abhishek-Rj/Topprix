@@ -74,7 +74,7 @@ const Navigation = () => {
                             <Link
                                 key={link.path}
                                 to={link.path}
-                                className={`text-sm font-medium transition-colors hover:text-yellow-600 ${
+                                className={`text-sm hover:scale-105 transition-transform font-medium  hover:text-yellow-600 ${
                                     location.pathname === link.path
                                         ? "text-yellow-600 border-b-2 border-yellow-600 pb-1"
                                         : isScrolled
@@ -263,19 +263,13 @@ const Navigation = () => {
                                         >
                                             {t("navigation.profile")}
                                         </Link>
-                                        <Link
-                                            to="/orders"
-                                            className="text-center px-3 py-2 text-sm bg-gray-100 rounded-md text-gray-700 hover:bg-gray-200"
+                                        <button
+                                            onClick={() => auth.signOut()}
+                                            className="w-full px-3 py-2 text-sm bg-yellow-100 rounded-md text-yellow-800 hover:bg-yellow-200"
                                         >
-                                            {t("navigation.orders")}
-                                        </Link>
+                                            {t("signOut")}
+                                        </button>
                                     </div>
-                                    <button
-                                        onClick={() => auth.signOut()}
-                                        className="w-full px-3 py-2 text-sm bg-yellow-100 rounded-md text-yellow-800 hover:bg-yellow-200"
-                                    >
-                                        {t("navigation.signOut")}
-                                    </button>
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-2">
