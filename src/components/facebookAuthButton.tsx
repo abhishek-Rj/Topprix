@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router-dom";
-import { useFirebase } from "../context/firebaseProvider";
 
 export default function FacebookAuthButton() {
     const navigate = useNavigate();

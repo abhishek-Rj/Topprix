@@ -7,6 +7,7 @@ import { MdOutlinePerson } from "react-icons/md";
 import { useTranslation } from "react-i18next";
 import GoogleAuthButton from "../components/googleAuthButton";
 import FacebookAuthButton from "../components/facebookAuthButton";
+import Input from "../components/Input";
 
 export default function Signup() {
     const [name, setName] = useState<string>("");
@@ -56,16 +57,16 @@ export default function Signup() {
         }
 
         try {
-            const user = await signUpUserWithEmailAndPassword(
+            const userCredential = await signUpUserWithEmailAndPassword(
                 name,
                 email,
                 password,
                 roleRef.current.value
             );
-            if (user) {
+            if (userCredential.uid) {
                 navigate("/");
             } else {
-                setError("User not created");
+                setError("User not created, Try Login if have an account");
             }
         } catch (error) {
             console.error(error);
@@ -149,39 +150,36 @@ export default function Signup() {
 
                         <div className="relative">
                             <MdOutlinePerson className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder={t("name")}
+                            <Input
                                 value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full hover:scale-105 transition-transform  pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500"
-                                required
+                                setValue={setName}
+                                placeholder={t("name")}
                             />
                         </div>
 
                         <div className="relative">
                             <FiMail className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
-                            <input
+                            <Input
+                                value={email}
+                                setValue={setEmail}
+                                className={emailError ? "border-red-500" : ""}
                                 type="email"
                                 placeholder={t("email")}
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className={`w-full pl-10 p-2 border hover:scale-105 transition-transform  rounded-md focus:ring-yellow-500 focus:border-yellow-500 
-                                    ${emailError ? "border-red-500" : ""}`}
-                                required
                             />
                         </div>
 
                         <div className="relative">
                             <FiLock className="absolute hover:scale-110 transition-transform  left-3 top-3 text-gray-400" />
-                            <input
+                            <Input
+                                value={password}
+                                setValue={setPassword}
+                                className={
+                                    passwordError
+                                        ? "border-red-500 border-2"
+                                        : ""
+                                }
                                 type="password"
                                 placeholder={t("password")}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className={`w-full pl-10 p-2 hover:scale-110 transition-transform  border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
-                                    ${passwordError ? "border-red-500" : ""}`}
-                                required
                             />
                         </div>
 

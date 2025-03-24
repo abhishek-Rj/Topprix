@@ -6,6 +6,7 @@ import { ReactTyped } from "react-typed";
 import { useTranslation } from "react-i18next";
 import GoogleAuthButton from "../components/googleAuthButton";
 import FacebookAuthButton from "../components/facebookAuthButton";
+import Input from "../components/Input";
 
 export default function Login() {
     const [email, setEmail] = useState<string>("");
@@ -31,28 +32,31 @@ export default function Login() {
 
         if (!validateEmail(email)) {
             setEmailError(true);
-            setError(t("invalidEmail"));
+            setError(t("Enter a valid email address"));
             setLoading(false);
             return;
         }
 
         if (password.length < 6) {
             setPasswordError(true);
-            setError(t("passwordLength"));
+            setError(t("Enter a password with 6 or more characters"));
             setLoading(false);
             return;
         }
 
         try {
-            const user = await logInWithEmailandPassword(email, password);
-            if (user) {
+            const userCredential = await logInWithEmailandPassword(
+                email,
+                password
+            );
+            if (userCredential.uid) {
                 navigate("/");
             } else {
-                setError(t("userNotCreated"));
+                setError(t("Invalid email or password"));
             }
         } catch (error) {
             console.error(error);
-            setError(t("loginFailed"));
+            setError(t("Login failed"));
         } finally {
             setLoading(false);
         }
@@ -111,7 +115,6 @@ export default function Login() {
                     </div>
                 </div>
 
-                {/* Right Side - Login Form */}
                 <div className="w-full md:w-1/2 p-8 bg-white rounded-xl shadow-xl">
                     <h2 className="text-2xl font-bold text-gray-800 text-center">
                         {t("login")}
@@ -133,27 +136,25 @@ export default function Login() {
 
                         <div className="relative">
                             <FiMail className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
-                            <input
+                            <Input
+                                value={email}
+                                setValue={setEmail}
                                 type="email"
                                 placeholder={t("email")}
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className={`w-full hover:scale-105 transition-transform pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
-                                    ${emailError ? "border-red-500" : ""}`}
-                                required
+                                className={emailError ? "border-red-500" : ""}
                             />
                         </div>
 
                         <div className="relative">
                             <FiLock className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
-                            <input
+                            <Input
+                                value={password}
+                                setValue={setPassword}
                                 type="password"
                                 placeholder={t("password")}
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className={`w-full hover:scale-105 transition-transform pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
-                                    ${passwordError ? "border-red-500" : ""}`}
-                                required
+                                className={
+                                    passwordError ? "border-red-500" : ""
+                                }
                             />
                         </div>
 
