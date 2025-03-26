@@ -1,7 +1,4 @@
-import { useNavigate } from "react-router-dom";
-
 export default function FacebookAuthButton() {
-    const navigate = useNavigate();
     return (
         <div className="mt-6 flex justify-center">
             <button
