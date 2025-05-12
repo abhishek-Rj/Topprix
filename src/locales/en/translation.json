@@ -12,13 +12,16 @@
     "name": "Name",
     "selectRole": "Select Role",
     "customer": "Customer",
-    "owner": "Business Owner",
+    "retailer": "Retailer",
+    "admin": "Admin",
     "accountExist": "Already have an account?",
     "signIn": "Sign in",
     "signUp": "Sign up",
     "signOut": "Sign out",
     "creatingAccount": "Creating account...",
     "continueWith": "or Continue with",
+    "cancel": "cancel",
+    "save": "save",
     "navigation": {
         "home": "Home",
         "coupon": "Coupon",
@@ -37,6 +40,20 @@
         "accountAction": "Account Actions",
         "edit": "Edit",
         "saveChanges": "Save Changes",
-        "saving": "Saving Changes..."
+        "saving": "Saving Changes...",
+        "locaiton": "Location",
+        "accountActions": "Account Actions",
+        "deleteAccount": "Delete Account"
+    },
+    "home": {
+        "setLocationTitle": "Set Your Location",
+        "setLocationPrompt": "Please enter your location to continue.",
+        "locationPlaceholder": "Enter your location",
+        "welcomeBack": "Welcome Back!",
+        "getStarted": "Get Started",
+        "goDashboard": "Go to Dashboard",
+        "exploreDeals": "Explore Deals",
+        "userMessage": "Happy Exploring",
+        "adminMessage": "Happy Fixing"
     }
 }

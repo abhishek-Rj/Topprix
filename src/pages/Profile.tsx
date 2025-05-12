@@ -4,6 +4,10 @@ import { db, auth } from "../context/firebaseProvider";
 import Navigation from "../components/navigation";
 import Loader from "../components/loading";
 import { useTranslation } from "react-i18next";
+import { TiDelete } from "react-icons/ti";
+import { useFirebase } from "../context/firebaseProvider";
+import { IoLocationOutline } from "react-icons/io5";
+
 import {
     FiUser,
     FiMail,
@@ -20,10 +24,14 @@ import { useNavigate } from "react-router-dom";
 export default function Profile() {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const { deleteAccountwithCredentials } = useFirebase();
     const [user, setUser] = useState<any>(null);
+    const [password, setPassword] = useState<string>("");
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
     const [loader, setLoader] = useState<boolean>(true);
     const [editing, setEditing] = useState<boolean>(false);
     const [editedName, setEditedName] = useState<string>("");
+    const [editedLocation, setEditedLocation] = useState<string>("");
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [accountCreatedDate, setAccountCreatedDate] = useState<Date | null>(
@@ -42,6 +50,7 @@ export default function Profile() {
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
                     setUser(userData);
+                    setEditedLocation(userData.location || "");
                     setEditedName(userData.name || "");
 
                     if (userData.createdAt) {
@@ -62,6 +71,32 @@ export default function Profile() {
 
         return () => unsubscribe();
     }, [navigate]);
+
+    const handleOnClickDelete = async () => {
+        if (!auth.currentUser) return;
+
+        try {
+            const userDelete = await fetch(
+                `https://server.topprix.re/user/delete/${user?.email}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            const userDeleteFirebase = await deleteAccountwithCredentials(
+                password
+            );
+
+            if (!userDelete.ok || !userDeleteFirebase) {
+                throw new Error("Failed to delete user account");
+            }
+            navigate("/signup");
+        } catch (error) {
+            console.error("Error deleting user account:", error);
+        }
+    };
     const handleSave = async () => {
         if (!auth.currentUser) return;
 
@@ -69,16 +104,37 @@ export default function Profile() {
         setError(null);
 
         try {
-            await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                name: editedName,
-            });
+            const updateUser = await fetch(
+                `https://server.topprix.re/user/update/${user?.email}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        name: editedName,
+                        location: editedLocation,
+                    }),
+                }
+            );
 
-            setUser({
-                ...user,
-                name: editedName,
-            });
+            const data = await updateUser.json();
+            const data2 = await updateDoc(
+                doc(db, "users", auth.currentUser.uid),
+                {
+                    name: editedName,
+                }
+            );
+            if (data && data2) {
+                setUser({
+                    ...user,
+                    name: editedName,
+                });
 
-            setEditing(false);
+                setEditing(false);
+            } else {
+                throw new Error("Failed to update user data");
+            }
         } catch (error: any) {
             console.error("Error updating profile:", error);
             setError(error.message || "Failed to update profile");
@@ -136,8 +192,8 @@ export default function Profile() {
                             <div className="mt-3">
                                 <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-800 text-white">
                                     <FiTag className="mr-1" />
-                                    {user?.role === "admin"
-                                        ? "Business Owner"
+                                    {user?.role === "ADMIN"
+                                        ? "Admin"
                                         : "Customer"}
                                 </span>
                                 {accountCreatedDate && (
@@ -245,11 +301,45 @@ export default function Profile() {
                                 <div className="flex items-center">
                                     <FiShield className="text-gray-400 mr-2" />
                                     <span className="text-gray-800">
-                                        {user?.role === "user"
-                                            ? t("customer")
-                                            : t("owner")}
+                                        <span className="text-gray-800">
+                                            {user?.role === "ADMIN"
+                                                ? t("admin")
+                                                : user?.role === "RETAILER"
+                                                ? t("retailer")
+                                                : t("customer")}
+                                        </span>
                                     </span>
                                 </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    {t("profile.location")}
+                                </label>
+                                {editing ? (
+                                    <div className="mt-1 relative rounded-md shadow-sm">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <IoLocationOutline className="text-gray-400" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={editedLocation}
+                                            onChange={(e) =>
+                                                setEditedLocation(
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="flex items-center">
+                                        <IoLocationOutline className="text-gray-400 mr-2" />
+                                        <span className="text-gray-800">
+                                            {user?.location || "—"}
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -274,7 +364,7 @@ export default function Profile() {
                     </div>
 
                     {/* Account Actions */}
-                    <div className="border-t border-gray-200 p-6 sm:p-10">
+                    <div className="border-t space-y-4 border-gray-200 p-6 sm:p-10">
                         <h2 className="text-xl font-semibold text-gray-800 mb-6">
                             {t("profile.accountActions")}
                         </h2>
@@ -282,11 +372,67 @@ export default function Profile() {
                         <div className="space-y-4">
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center text-red-600 hover:text-red-800 transition-colors duration-200"
+                                className="flex items-center bg-slate-100 rounded-lg p-2 text-yellow-600 hover:text-yellow-800 hover:scale-105 transition duration-200"
                             >
                                 <FiLogOut className="mr-2" />
                                 {t("logout")}
                             </button>
+                        </div>
+                        <div className="space-y-4">
+                            <button
+                                onClick={() => setShowDeleteConfirm(true)}
+                                className="flex items-center hover:scale-105 bg-gray-100 rounded-lg p-2 text-red-600 hover:text-red-800 transition duration-200"
+                            >
+                                <TiDelete className="mr-2" />
+                                {t("profile.deleteAccount")}
+                            </button>
+
+                            {showDeleteConfirm && (
+                                <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+                                    <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4 shadow-xl">
+                                        <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                                            {t("profile.confirmDeleteTitle") ||
+                                                "Confirm Account Deletion"}
+                                        </h3>
+                                        <p className="text-sm text-gray-700 mb-4">
+                                            {t("profile.confirmDeleteText") ||
+                                                "Please enter your password to confirm account deletion. This action cannot be undone."}
+                                        </p>
+                                        <input
+                                            type="password"
+                                            placeholder={
+                                                t(
+                                                    "profile.passwordPlaceholder"
+                                                ) || "Enter your password"
+                                            }
+                                            className="w-full px-3 py-2 mb-4 border rounded-md focus:outline-none focus:ring focus:ring-red-300"
+                                            value={password}
+                                            onChange={(e) =>
+                                                setPassword(e.target.value)
+                                            }
+                                        />
+                                        <div className="flex justify-end gap-3">
+                                            <button
+                                                onClick={() =>
+                                                    setShowDeleteConfirm(false)
+                                                }
+                                                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                                            >
+                                                {t("cancel") || "Cancel"}
+                                            </button>
+                                            <button
+                                                onClick={handleOnClickDelete}
+                                                disabled={!password}
+                                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
+                                            >
+                                                {t(
+                                                    "profile.confirmDeleteButton"
+                                                ) || "Delete"}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

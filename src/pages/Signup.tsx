@@ -57,13 +57,28 @@ export default function Signup() {
         }
 
         try {
+            const registerUser = await fetch(
+                "https://server.topprix.re/register",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        username: name,
+                        email: email,
+                        role: roleRef.current.value,
+                    }),
+                }
+            );
+            const data = await registerUser.json();
             const userCredential = await signUpUserWithEmailAndPassword(
                 name,
                 email,
                 password,
                 roleRef.current.value
             );
-            if (userCredential.uid) {
+            if (userCredential.uid && data.user) {
                 navigate("/");
             } else {
                 setError("User not created, Try Login if have an account");
@@ -191,8 +206,11 @@ export default function Signup() {
                                 required
                             >
                                 <option value="">{t("selectRole")}</option>
-                                <option value="user">{t("customer")}</option>
-                                <option value="admin">{t("owner")}</option>
+                                <option value="USER">{t("customer")}</option>
+                                <option value="RETAILER">
+                                    {t("retailer")}
+                                </option>
+                                <option value="ADMIN">{t("admin")}</option>
                             </select>
                         </div>
 

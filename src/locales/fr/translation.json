@@ -12,7 +12,8 @@
     "name": "Nom",
     "selectRole": "Sélectionnez un rôle",
     "customer": "Cliente",
-    "owner": "Propriétaire d'entreprise",
+    "retailer": "Commerçant",
+    "admin": "Administrateur",
     "accountExist": "Vous avez déjà un compte ?",
     "signIn": "Se connecter",
     "signUp": "S'inscrire",
@@ -21,6 +22,9 @@
     "googleSignin": "Continuer avec Google",
     "facebookSignin": "Continuer avec Facebook",
     "continueWith": "ou Continuer avec",
+    "cancel": "annuler",
+    "save": "sauvegarder",
+
     "navigation": {
         "home": "Accueil",
         "coupon": "Coupon",
@@ -39,6 +43,19 @@
         "accountActions": "Actions de compte",
         "edit": "Modifier",
         "saveChanges": "Enregistrer les modifications",
-        "saving": "Enregistrement des modifications..."
+        "saving": "Enregistrement des modifications...",
+        "location": "Emplacement",
+        "deleteAccount": "Supprimer le compte"
+    },
+    "home": {
+        "setLocationTitle": "Définir votre emplacement",
+        "setLocationPrompt": "Veuillez entrer votre emplacement pour continuer.",
+        "locationPlaceholder": "Entrez votre emplacement",
+        "welcomeBack": "Content de vous revoir !",
+        "getStarted": "Commencer",
+        "goDashboard": "Aller au tableau de bord",
+        "exploreDeals": "Explorer les offres",
+        "userMessage": "Heureux d'explorer",
+        "adminMessage": "Heureux de réparer"
     }
 }
