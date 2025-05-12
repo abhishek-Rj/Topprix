@@ -28,5 +28,17 @@
         "profile": "Profil",
         "search": "Rechercher",
         "settings": "Paramètres"
+    },
+    "profile": {
+        "name": "Nom",
+        "email": "E-mail",
+        "phone": "Téléphone",
+        "address": "Adresse",
+        "role": "Rôle",
+        "personalInfo": "Informations personnelles",
+        "accountActions": "Actions de compte",
+        "edit": "Modifier",
+        "saveChanges": "Enregistrer les modifications",
+        "saving": "Enregistrement des modifications..."
     }
 }

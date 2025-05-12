@@ -25,7 +25,6 @@ export default function Home() {
                     if (userDoc.exists()) {
                         const userData = userDoc.data();
                         setUserRole(userData.role);
-                        // Store role but don't redirect
                     } else {
                         console.log("No user document found");
                     }

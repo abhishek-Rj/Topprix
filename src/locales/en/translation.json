@@ -26,5 +26,17 @@
         "profile": "Profile",
         "search": "Search",
         "settings": "Settings"
+    },
+    "profile": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "address": "Address",
+        "role": "Role",
+        "personalInfo": "Personal Information",
+        "accountAction": "Account Actions",
+        "edit": "Edit",
+        "saveChanges": "Save Changes",
+        "saving": "Saving Changes..."
     }
 }

@@ -31,13 +31,12 @@ export default function Profile() {
     );
 
     useEffect(() => {
-        const currentUser = auth.currentUser;
-        if (!currentUser) {
-            navigate("/login");
-            return;
-        }
+        const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+            if (!currentUser) {
+                navigate("/login");
+                return;
+            }
 
-        const fetchUser = async () => {
             try {
                 const userDoc = await getDoc(doc(db, "users", currentUser.uid));
                 if (userDoc.exists()) {
@@ -45,7 +44,6 @@ export default function Profile() {
                     setUser(userData);
                     setEditedName(userData.name || "");
 
-                    // If there's a createdAt field, convert it to a Date
                     if (userData.createdAt) {
                         const createdAt = userData.createdAt.toDate
                             ? userData.createdAt.toDate()
@@ -60,11 +58,10 @@ export default function Profile() {
             } finally {
                 setLoader(false);
             }
-        };
+        });
 
-        fetchUser();
+        return () => unsubscribe();
     }, [navigate]);
-
     const handleSave = async () => {
         if (!auth.currentUser) return;
 
@@ -248,9 +245,9 @@ export default function Profile() {
                                 <div className="flex items-center">
                                     <FiShield className="text-gray-400 mr-2" />
                                     <span className="text-gray-800">
-                                        {user?.role === "admin"
-                                            ? t("profile.businessOwner")
-                                            : t("profile.customer")}
+                                        {user?.role === "user"
+                                            ? t("customer")
+                                            : t("owner")}
                                     </span>
                                 </div>
                             </div>
@@ -288,7 +285,7 @@ export default function Profile() {
                                 className="flex items-center text-red-600 hover:text-red-800 transition-colors duration-200"
                             >
                                 <FiLogOut className="mr-2" />
-                                {t("profile.logout")}
+                                {t("logout")}
                             </button>
                         </div>
                     </div>
