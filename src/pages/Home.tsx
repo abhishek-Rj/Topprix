@@ -9,7 +9,6 @@ import Navigation from "../components/navigation";
 import Loader from "../components/loading";
 
 export default function Home() {
-    const [userData, setUserData] = useState<any>(null);
     const [userExists, setUserExists] = useState<boolean | null>(null);
     const [userRole, setUserRole] = useState<string | null>(null);
     const [locationInput, setLocationInput] = useState<string>("");
@@ -88,18 +87,53 @@ export default function Home() {
                             </button>
                             <button
                                 onClick={async () => {
-                                    if (locationInput && auth.currentUser) {
-                                        await updateDoc(
-                                            doc(
-                                                db,
-                                                "users",
-                                                auth.currentUser.uid
-                                            ),
-                                            {
-                                                location: locationInput,
+                                    try {
+                                        if (locationInput && auth.currentUser) {
+                                            const updateUserResponse =
+                                                await fetch(
+                                                    `${
+                                                        import.meta.env
+                                                            .VITE_APP_BASE_URL
+                                                    }user/update/${
+                                                        auth.currentUser.email
+                                                    }`,
+                                                    {
+                                                        method: "POST",
+                                                        headers: {
+                                                            "Content-Type":
+                                                                "application/json",
+                                                        },
+                                                        body: JSON.stringify({
+                                                            location:
+                                                                locationInput,
+                                                        }),
+                                                    }
+                                                );
+                                            const data =
+                                                await updateUserResponse.json();
+                                            if (!data.user) {
+                                                throw new Error(
+                                                    "User update during db save failed"
+                                                );
                                             }
+                                            await updateDoc(
+                                                doc(
+                                                    db,
+                                                    "users",
+                                                    auth.currentUser.uid
+                                                ),
+                                                {
+                                                    location: locationInput,
+                                                }
+                                            );
+                                            setShowLocationModal(false);
+                                        }
+                                    } catch (error) {
+                                        console.error(
+                                            "Error updating user location:",
+                                            error
                                         );
-                                        setShowLocationModal(false);
+                                        setShowLocationModal(true);
                                     }
                                 }}
                                 className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 text-sm"
@@ -122,45 +156,36 @@ export default function Home() {
                                 <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
                                     {userRole === "ADMIN"
                                         ? t("home.adminMessage")
+                                        : userRole === "RETAILER"
+                                        ? t("home.retailerMessage")
                                         : t("home.userMessage")}
                                     ! {userName}
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                    {userRole === "ADMIN" ? (
-                                        <>
-                                            <button
-                                                onClick={() =>
-                                                    navigate(
-                                                        userRole === "ADMIN"
-                                                            ? "/admin-dashboard"
-                                                            : userRole ===
-                                                              "RETAILER"
-                                                            ? "/retailer-dashboard"
-                                                            : "/user-dashboard"
-                                                    )
-                                                }
-                                                className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
-                                            >
-                                                {t("home.goDashboard")}
-                                            </button>
-                                            <button
-                                                onClick={() =>
-                                                    navigate("/deals")
-                                                }
-                                                className="px-6 py-3 bg-white text-yellow-600 border border-yellow-600 rounded-lg hover:bg-yellow-50 transition-colors"
-                                            >
-                                                {t("home.exploreDeals")}
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <button
-                                            onClick={() => navigate("/deals")}
-                                            className="px-6 py-3 bg-white text-yellow-600 border border-yellow-600 rounded-lg hover:bg-yellow-50 transition-colors"
-                                        >
-                                            {userRole === "RETAILER"} ? "CREATE
-                                            DEALS" : "EXPLORE DEALS"
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() =>
+                                            navigate(
+                                                userRole === "ADMIN"
+                                                    ? "/admin-dashboard"
+                                                    : userRole === "RETAILER"
+                                                    ? "/retailer-dashboard"
+                                                    : "/user-dashboard"
+                                            )
+                                        }
+                                        className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                                    >
+                                        {t("home.goDashboard")}
+                                    </button>
+                                    <button
+                                        onClick={() => navigate("/deals")}
+                                        className="px-6 py-3 bg-white text-yellow-600 border border-yellow-600 rounded-lg hover:bg-yellow-50 transition-colors"
+                                    >
+                                        {userRole === "ADMIN"
+                                            ? t("home.manageDeals")
+                                            : userRole === "RETAILER"
+                                            ? t("home.createDeals")
+                                            : t("home.exploreDeals")}
+                                    </button>
                                 </div>
                             </div>
                         ) : (

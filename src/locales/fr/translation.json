@@ -45,7 +45,8 @@
         "saveChanges": "Enregistrer les modifications",
         "saving": "Enregistrement des modifications...",
         "location": "Emplacement",
-        "deleteAccount": "Supprimer le compte"
+        "deleteAccount": "Supprimer le compte",
+        "cancel": "annuler"
     },
     "home": {
         "setLocationTitle": "Définir votre emplacement",
@@ -56,6 +57,12 @@
         "goDashboard": "Aller au tableau de bord",
         "exploreDeals": "Explorer de nouvelles offres",
         "userMessage": "Heureux d'explorer",
-        "adminMessage": "Heureux de réparer"
+        "adminMessage": "Heureux de réparer",
+        "retailerMessage": "Heureux de vendre",
+        "createDeals": "Créer des offres",
+        "manageDeals": "Gérer les offres",
+        "askLocationTitle": "Accès à la localisation requis",
+        "askLocationMessage": "Nous avons besoin de votre emplacement pour vous montrer les meilleures offres à proximité.",
+        "enterLocation": "Entrez votre emplacement"
     }
 }

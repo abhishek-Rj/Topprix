@@ -79,7 +79,9 @@ export default function Profile() {
 
         try {
             const userDelete = await fetch(
-                `https://server.topprix.re/user/delete/${user?.email}`,
+                `${import.meta.env.VITE_APP_BASE_URL}user/delete/${
+                    user?.email
+                }`,
                 {
                     method: "DELETE",
                     headers: {
@@ -109,14 +111,17 @@ export default function Profile() {
         }
     };
     const handleSave = async () => {
-        if (!auth.currentUser) return;
+        const currentUser = auth.currentUser;
+        if (!currentUser) return;
 
         setIsSaving(true);
         setError(null);
 
         try {
             const updateUser = await fetch(
-                `https://server.topprix.re/user/update/${user?.email}`,
+                `${import.meta.env.VITE_APP_BASE_URL}user/update/${
+                    currentUser?.email
+                }`,
                 {
                     method: "POST",
                     headers: {
@@ -130,28 +135,21 @@ export default function Profile() {
             );
 
             const data = await updateUser.json();
-            const data2 = await updateDoc(
-                doc(db, "users", auth.currentUser.uid),
-                {
-                    name: editedName,
-                }
-            );
-            if (data.user && data2) {
-                setUser({
-                    ...user,
-                    name: editedName,
-                });
-
-                setEditing(false);
-            } else {
+            if (!data.user) {
                 throw new Error("Failed to update user data");
             }
+            await updateDoc(doc(db, "users", currentUser.uid), {
+                name: editedName,
+                location: editedLocation,
+            });
         } catch (error: any) {
             console.error("Error updating profile:", error);
             setError(error.message || "Failed to update profile");
         } finally {
             setIsSaving(false);
         }
+        setEditing(false);
+        window.location.reload();
     };
 
     const handleLogout = async () => {

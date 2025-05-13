@@ -16,7 +16,7 @@ export default function GoogleAuthButton() {
 
                 try {
                     const registerUser = await fetch(
-                        `https://server.tppprix.re/register`,
+                        `${import.meta.env.VITE_APP_BASE_URL}register`,
                         {
                             method: "POST",
                             headers: {

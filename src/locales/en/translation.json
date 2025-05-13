@@ -43,7 +43,8 @@
         "saving": "Saving Changes...",
         "locaiton": "Location",
         "accountActions": "Account Actions",
-        "deleteAccount": "Delete Account"
+        "deleteAccount": "Delete Account",
+        "cancel": "cancel"
     },
     "home": {
         "setLocationTitle": "Set Your Location",
@@ -54,6 +55,12 @@
         "goDashboard": "Go to Dashboard",
         "exploreDeals": "Explore New Deals",
         "userMessage": "Happy Exploring",
-        "adminMessage": "Happy Fixing"
+        "adminMessage": "Happy Fixing",
+        "retailerMessage": "Happy Selling",
+        "createDeals": "Create Deals",
+        "manageDeals": "Manage Deals",
+        "askLocationTitle": "Location Access Required",
+        "askLocationMessage": "We need your location to show you the best deals nearby.",
+        "enterLocation": "Enter your location"
     }
 }

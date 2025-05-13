@@ -57,8 +57,9 @@ export default function Signup() {
         }
 
         try {
-            const registerUser = await fetch(
-                "https://server.topprix.re/register",
+            console.log("Starting backend registration...");
+            const registerUserResponse = await fetch(
+                `${import.meta.env.VITE_APP_BASE_URL}register`,
                 {
                     method: "POST",
                     headers: {
@@ -66,27 +67,38 @@ export default function Signup() {
                     },
                     body: JSON.stringify({
                         username: name,
-                        email: email,
+                        email,
                         role: roleRef.current.value,
                     }),
                 }
             );
-            const data = await registerUser.json();
+            console.log("Backend registration completed.");
+
+            const data = await registerUserResponse.json();
+            if (!data.user) {
+                throw new Error("Failed to register user");
+            }
+
+            console.log("Starting Firebase sign-up...");
             const userCredential = await signUpUserWithEmailAndPassword(
                 name,
                 email,
                 password,
                 roleRef.current.value
             );
-            if (userCredential.uid && data.user) {
-                navigate("/");
-            } else {
-                setError("User not created, Try Login if have an account");
+            console.log("Firebase sign-up completed.");
+
+            if (!userCredential || !userCredential.uid) {
+                throw new Error("Failed to create user");
             }
+
+            console.log("Navigating to home...");
+            navigate("/");
         } catch (error) {
-            console.error(error);
+            console.error("Error during sign-up:", error);
             setError("Failed to create account");
         } finally {
+            console.log("Sign-up process finished.");
             setLoading(false);
         }
     };

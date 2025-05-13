@@ -109,7 +109,8 @@ export const FirebaseProvider = ({
             });
             return user;
         } catch (error) {
-            return error;
+            console.error("Error signing up: ", error);
+            throw error;
         }
     };
 
