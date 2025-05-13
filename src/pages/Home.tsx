@@ -120,7 +120,7 @@ export default function Home() {
                                     {t("home.welcomeBack")}
                                 </h1>
                                 <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-                                    {userRole === "admin"
+                                    {userRole === "ADMIN"
                                         ? t("home.adminMessage")
                                         : t("home.userMessage")}
                                     ! {userName}

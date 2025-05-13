@@ -30,6 +30,7 @@ type FirebaseContextType = {
         password: string,
         role: string
     ) => Promise<any>;
+    signInWithFacebook: () => Promise<any>;
     deleteAccountwithCredentials: (password: string) => Promise<any>;
     deleteAccountwithProviders: (provider: string) => Promise<any>;
 };
@@ -58,6 +59,9 @@ const defaultContextValue: FirebaseContextType = {
         throw new Error("Function not implemented");
     },
     signInWithGoogle: async () => {
+        throw new Error("Function not implemented");
+    },
+    signInWithFacebook: async () => {
         throw new Error("Function not implemented");
     },
     deleteAccountwithCredentials: async () => {
@@ -136,6 +140,19 @@ export const FirebaseProvider = ({
         }
     };
 
+    const signInWithFacebook = async () => {
+        try {
+            const userCredential = await signInWithPopup(
+                auth,
+                facebookProvider
+            );
+            const user = userCredential.user;
+            return user;
+        } catch (error) {
+            return error;
+        }
+    };
+
     const deleteAccountwithCredentials = async (password: string) => {
         const user = auth.currentUser;
         const credential = EmailAuthProvider.credential(user?.email!, password);
@@ -178,6 +195,7 @@ export const FirebaseProvider = ({
                 logInWithEmailandPassword,
                 deleteAccountwithCredentials,
                 deleteAccountwithProviders,
+                signInWithFacebook,
             }}
         >
             {children}

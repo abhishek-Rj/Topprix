@@ -24,7 +24,8 @@ import { useNavigate } from "react-router-dom";
 export default function Profile() {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const { deleteAccountwithCredentials } = useFirebase();
+    const { deleteAccountwithCredentials, deleteAccountwithProviders } =
+        useFirebase();
     const [user, setUser] = useState<any>(null);
     const [password, setPassword] = useState<string>("");
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
@@ -73,7 +74,8 @@ export default function Profile() {
     }, [navigate]);
 
     const handleOnClickDelete = async () => {
-        if (!auth.currentUser) return;
+        const user = auth.currentUser;
+        if (!user) return;
 
         try {
             const userDelete = await fetch(
@@ -85,9 +87,18 @@ export default function Profile() {
                     },
                 }
             );
-            const userDeleteFirebase = await deleteAccountwithCredentials(
-                password
-            );
+            let userDeleteFirebase: any = null;
+            if (user.providerData[0].providerId === "password") {
+                userDeleteFirebase = await deleteAccountwithCredentials(
+                    password
+                );
+            } else if (user.providerData[0].providerId === "google.com") {
+                userDeleteFirebase = await deleteAccountwithProviders("google");
+            } else {
+                userDeleteFirebase = await deleteAccountwithProviders(
+                    "facebook"
+                );
+            }
 
             if (!userDelete.ok || !userDeleteFirebase) {
                 throw new Error("Failed to delete user account");
@@ -125,7 +136,7 @@ export default function Profile() {
                     name: editedName,
                 }
             );
-            if (data && data2) {
+            if (data.user && data2) {
                 setUser({
                     ...user,
                     name: editedName,
