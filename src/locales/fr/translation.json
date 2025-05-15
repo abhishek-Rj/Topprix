@@ -46,7 +46,10 @@
         "saving": "Enregistrement des modifications...",
         "location": "Emplacement",
         "deleteAccount": "Supprimer le compte",
-        "cancel": "annuler"
+        "cancel": "annuler",
+        "confirmDeleteTitle": "Confirmer la suppression du compte",
+        "confirmDeleteText": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action ne peut pas être annulée.",
+        "confirmDeleteButton": "Supprimer le compte"
     },
     "home": {
         "setLocationTitle": "Définir votre emplacement",

@@ -6,27 +6,31 @@ import AdminDashboard from "./pages/AdminDashboard";
 import UserDashboard from "./pages/UserDashboard";
 import Deals from "./pages/Deals";
 import Profile from "./pages/Profile";
+import RetailerStores from "./pages/Retailer/RetailerStore";
+import CreateNewStore from "./pages/Retailer/createNewStore";
 
 function App() {
-    return (
-        <>
-            <BrowserRouter>
-                <Routes>
-                    <Route path="/signup" element={<Signup />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/" element={<Home />} />
-                    <Route path="/profile" element={<Profile />} />
-                    <Route
-                        path="/admin-dashboard"
-                        element={<AdminDashboard />}
-                    />
-                    <Route path="/deals" element={<Deals />} />
+  return (
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/retailer-stores" element={<RetailerStores />} />
+          <Route
+            path="retailer-stores/create-new-store"
+            element={<CreateNewStore />}
+          />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/deals" element={<Deals />} />
 
-                    <Route path="/user-dashboard" element={<UserDashboard />} />
-                </Routes>
-            </BrowserRouter>
-        </>
-    );
+          <Route path="/user-dashboard" element={<UserDashboard />} />
+        </Routes>
+      </BrowserRouter>
+    </>
+  );
 }
 
 export default App;

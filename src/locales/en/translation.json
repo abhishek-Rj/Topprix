@@ -44,7 +44,10 @@
         "locaiton": "Location",
         "accountActions": "Account Actions",
         "deleteAccount": "Delete Account",
-        "cancel": "cancel"
+        "cancel": "cancel",
+        "confirmDeleteTitle": "Confirm Delete Account",
+        "confirmDeleteText": "Are you sure you want to delete your account? This action cannot be undone.",
+        "confirmDeleteButton": "Delete Account"
     },
     "home": {
         "setLocationTitle": "Set Your Location",
