@@ -154,17 +154,19 @@ export default function Home() {
                           : "/user-dashboard"
                       )
                     }
-                    className="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                    className="px-6 py-3 hover:scale-105 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition"
                   >
                     {t("home.goDashboard")}
                   </button>
                   <button
                     onClick={() =>
                       navigate(
-                        userRole === "RETAILER" ? "/retailer-stores" : "/deals"
+                        userRole === "RETAILER" || "ADMIN"
+                          ? "/retailer-stores"
+                          : "/deals"
                       )
                     }
-                    className="px-6 py-3 bg-white text-yellow-600 border border-yellow-600 rounded-lg hover:bg-yellow-50 transition-colors"
+                    className="px-6 py-3 bg-white hover:scale-105 transition text-yellow-600 border border-yellow-600 rounded-lg hover:bg-yellow-50 "
                   >
                     {userRole === "ADMIN"
                       ? t("home.manageDeals")

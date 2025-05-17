@@ -38,7 +38,7 @@ export default function useAuthenticate() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [userRole, navigate]);
 
   return { authenticated, user, userRole, loading };
 }

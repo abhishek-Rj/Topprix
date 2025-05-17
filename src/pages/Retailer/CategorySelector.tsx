@@ -64,8 +64,8 @@ export default function CategorySelector({ selected, onChange }: Props) {
 
   return (
     <div className="space-y-3">
-      <label className="block text-sm font-medium text-gray-700">
-        Categories
+      <label className="block text-sm font-bold text-gray-700">
+        Select Categories <span className="text-red-600">*</span>
       </label>
       <div className="flex flex-wrap gap-2">
         {categories.map((cat) => (

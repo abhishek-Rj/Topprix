@@ -8,6 +8,9 @@ import Deals from "./pages/Deals";
 import Profile from "./pages/Profile";
 import RetailerStores from "./pages/Retailer/RetailerStore";
 import CreateNewStore from "./pages/Retailer/createNewStore";
+import NotFound from "./pages/NotFound";
+import Store from "./pages/Retailer/Store";
+import EditStore from "./pages/Retailer/EditStore";
 
 function App() {
   return (
@@ -23,9 +26,14 @@ function App() {
             path="retailer-stores/create-new-store"
             element={<CreateNewStore />}
           />
+          <Route
+            path="/retailer-stores/edit-store/:id"
+            element={<EditStore />}
+          />
+          <Route path="/retailer-stores/store/:id" element={<Store />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/deals" element={<Deals />} />
-
+          <Route path="/not-found" element={<NotFound />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
         </Routes>
       </BrowserRouter>

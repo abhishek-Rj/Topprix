@@ -3,31 +3,99 @@ import { useNavigate } from "react-router-dom";
 import Navigation from "../../components/navigation";
 import Loader from "../../components/loading";
 import useAuthenticate from "../../hooks/authenticationt";
+import baseUrl from "../../hooks/baseurl";
+import { toast } from "react-toastify";
+import { HiDotsVertical, HiPencil, HiTrash } from "react-icons/hi";
 
 export default function RetailerStores() {
-  const { userRole, loading } = useAuthenticate();
+  const { user, userRole, loading } = useAuthenticate();
   const [stores, setStores] = useState<any[]>([]);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [confirmStoreName, setConfirmStoreName] = useState("");
+  const [storeToDelete, setStoreToDelete] = useState<any>(null);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (userRole === "USER") {
-      navigate("/not-found");
-    }
-  });
-
-  if (loading) {
-    return (
-      <>
-        <Navigation />
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader />
-        </div>
-      </>
-    );
+  if (userRole === "USER") {
+    navigate("/not-found");
   }
 
-  return (
+  useEffect(() => {
+    const fetchStores = async () => {
+      try {
+        const response = await fetch(`${baseUrl}stores`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user?.email || "",
+          },
+        });
+        const data = await response.json();
+        if (data.stores) {
+          setStores(data.stores);
+        } else {
+          throw new Error("No stores found");
+        }
+      } catch (error) {
+        toast.error("No stores found");
+        console.error("Error fetching stores:", error);
+      }
+    };
+
+    fetchStores();
+  }, []);
+
+  const handleDeletePrompt = (store: any) => {
+    setStoreToDelete(store);
+    setConfirmDeleteId(store.id);
+    setConfirmStoreName("");
+  };
+
+  const confirmDelete = async () => {
+    if (confirmStoreName !== storeToDelete.name) {
+      toast.info("Store name does not match. Please try again.");
+      setConfirmDeleteId(null);
+      setStoreToDelete(null);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${baseUrl}store/${storeToDelete.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "user-email": user?.email || "",
+        },
+      });
+
+      if (response.ok) {
+        toast.success("Store deleted successfully");
+        window.location.reload();
+      } else {
+        toast.error("Failed to delete store");
+        setConfirmDeleteId(null);
+        setStoreToDelete(null);
+        setMenuOpenId(null);
+        throw new Error("Failed to delete store");
+      }
+    } catch (error) {
+      console.error("Error deleting store:", error);
+    }
+  };
+
+  const handleEdit = (storeId: string) => {
+    navigate(`/retailer-stores/edit-store/${storeId}`);
+  };
+
+  return loading ? (
+    <>
+      <Navigation />
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader />
+      </div>
+    </>
+  ) : (
     <div className="min-h-screen bg-yellow-50">
       <Navigation />
       <main className="pt-20">
@@ -49,15 +117,75 @@ export default function RetailerStores() {
               {stores.map((store) => (
                 <div
                   key={store.id}
-                  className="bg-white rounded-lg shadow p-5 hover:shadow-md transition cursor-pointer"
-                  onClick={() => navigate(`/store/${store.id}`)}
+                  className="relative bg-white border-2 rounded-xl shadow group overflow-hidden hover:scale-[1.02] transition"
                 >
-                  <h2 className="text-xl font-semibold text-gray-800 mb-2">
-                    {store.name}
-                  </h2>
-                  <p className="text-sm text-gray-600">
-                    {store.description || "No description available."}
-                  </p>
+                  {/* Dropdown Menu */}
+                  <div className="absolute top-4 right-4 z-20">
+                    <button
+                      className="text-gray-500 hover:text-gray-700"
+                      onClick={() =>
+                        setMenuOpenId(menuOpenId === store.id ? null : store.id)
+                      }
+                    >
+                      <HiDotsVertical size={20} />
+                    </button>
+                    {menuOpenId === store.id && (
+                      <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-50">
+                        <button
+                          onClick={() => handleEdit(store.id)}
+                          className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <HiPencil className="text-yellow-600" />
+                          Edit Details
+                        </button>
+                        {userRole === "ADMIN" && (
+                          <button
+                            onClick={() => handleDeletePrompt(store)}
+                            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
+                          >
+                            <HiTrash className="text-red-500" />
+                            Delete
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Content */}
+                  <div
+                    className="cursor-pointer"
+                    onClick={() =>
+                      navigate(`/retailer-stores/store/${store.id}`)
+                    }
+                  >
+                    {/* Title section (clean white background) */}
+                    <div className="px-4 pt-5 pb-3 bg-white">
+                      <h2 className="text-xl font-bold text-gray-900">
+                        {store.name}
+                      </h2>
+                    </div>
+
+                    {/* Bottom section with yellow gradient */}
+                    <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 px-4 pb-4 pt-3">
+                      <p className="text-sm text-gray-700 mb-2">
+                        {store.description || "No description available."}
+                      </p>
+
+                      {/* Category Tags */}
+                      <div className="flex flex-wrap gap-2">
+                        {(store.categories || []).map(
+                          (cat: any, idx: number) => (
+                            <span
+                              key={cat.id || idx}
+                              className="bg-yellow-300 text-yellow-900 px-3 py-1 rounded-full text-xs font-medium"
+                            >
+                              #{cat.name}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -68,6 +196,43 @@ export default function RetailerStores() {
           )}
         </div>
       </main>
+      {confirmDeleteId && storeToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Confirm Delete
+            </h3>
+            <p className="text-sm text-gray-600 mb-2">
+              Type <span className="font-bold">{storeToDelete.name}</span> to
+              confirm deletion.
+            </p>
+            <input
+              type="text"
+              value={confirmStoreName}
+              onChange={(e) => setConfirmStoreName(e.target.value)}
+              className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              placeholder="Enter store name"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setConfirmDeleteId(null);
+                  setStoreToDelete(null);
+                }}
+                className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
