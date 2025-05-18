@@ -106,23 +106,23 @@ export default function RetailerStores() {
             </h1>
             <button
               onClick={() => navigate("/retailer-stores/create-new-store")}
-              className="px-5 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition"
+              className="px-5 py-2 bg-yellow-600 hover:scale-105 text-white rounded-md hover:bg-yellow-700 transition"
             >
               + Create New Store
             </button>
           </div>
 
           {stores.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {stores.map((store) => (
                 <div
                   key={store.id}
-                  className="relative bg-white border-2 rounded-xl shadow group overflow-hidden hover:scale-[1.02] transition"
+                  className="relative aspect-square bg-white rounded-2xl shadow-lg group overflow-hidden hover:scale-[1.02] transition-all duration-300"
                 >
                   {/* Dropdown Menu */}
                   <div className="absolute top-4 right-4 z-20">
                     <button
-                      className="text-gray-500 hover:text-gray-700"
+                      className="text-gray-500 hover:text-gray-700 bg-white/80 p-1 rounded-full backdrop-blur-sm"
                       onClick={() =>
                         setMenuOpenId(menuOpenId === store.id ? null : store.id)
                       }
@@ -153,31 +153,50 @@ export default function RetailerStores() {
 
                   {/* Card Content */}
                   <div
-                    className="cursor-pointer"
+                    className="cursor-pointer h-full flex flex-col"
                     onClick={() =>
                       navigate(`/retailer-stores/store/${store.id}`)
                     }
                   >
-                    {/* Title section (clean white background) */}
-                    <div className="px-4 pt-5 pb-3 bg-white">
-                      <h2 className="text-xl font-bold text-gray-900">
-                        {store.name}
-                      </h2>
+                    {/* Logo/Image Section */}
+                    <div
+                      className="h-1/2 relative bg-gradient-to-br from-yellow-100 to-yellow-200"
+                      style={{
+                        backgroundImage: store.logo
+                          ? `url(${store.logo})`
+                          : "none",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    >
+                      {!store.logo && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-4xl text-yellow-600/50">
+                            {store.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                     </div>
 
-                    {/* Bottom section with yellow gradient */}
-                    <div className="bg-gradient-to-br from-yellow-100 to-yellow-200 px-4 pb-4 pt-3">
-                      <p className="text-sm text-gray-700 mb-2">
-                        {store.description || "No description available."}
-                      </p>
+                    {/* Content Section */}
+                    <div className="flex-1 p-4 flex flex-col justify-between bg-white">
+                      <div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
+                          {store.name}
+                        </h2>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          {store.description || "No description available."}
+                        </p>
+                      </div>
 
                       {/* Category Tags */}
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1.5">
                         {(store.categories || []).map(
                           (cat: any, idx: number) => (
                             <span
                               key={cat.id || idx}
-                              className="bg-yellow-300 text-yellow-900 px-3 py-1 rounded-full text-xs font-medium"
+                              className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs font-medium"
                             >
                               #{cat.name}
                             </span>
@@ -196,9 +215,11 @@ export default function RetailerStores() {
           )}
         </div>
       </main>
+
+      {/* Delete Confirmation Modal */}
       {confirmDeleteId && storeToDelete && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Confirm Delete
             </h3>
