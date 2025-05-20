@@ -71,8 +71,9 @@ export default function CategorySelector({ selected, onChange }: Props) {
         {categories.map((cat) => (
           <button
             key={cat.id}
+            type="button"
             onClick={() => toggleCategory(cat.id)}
-            className={`px-4 py-1 rounded-full text-sm border transition ${
+            className={`px-4 py-1 hover:scale-105 rounded-full text-sm border transition ${
               selected.includes(cat.id)
                 ? "bg-yellow-600 text-white border-yellow-600"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-yellow-50"

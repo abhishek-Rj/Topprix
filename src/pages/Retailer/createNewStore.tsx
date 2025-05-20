@@ -17,7 +17,7 @@ import {
 } from "react-icons/fi";
 import { FaStore } from "react-icons/fa";
 import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
-import { storage, db } from "../../context/firebaseProvider";
+import { storage } from "../../context/firebaseProvider";
 import ReactCrop, { Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 
@@ -167,10 +167,8 @@ export default function CreateNewStore() {
     }
 
     try {
-      // Get coordinates
       const coordinates = await getCoordinates(zipCode, country);
 
-      // Upload logo if exists
       let logoUrl = "";
       if (logo) {
         const fileRef = ref(

@@ -7,6 +7,9 @@ import { toast } from "react-toastify";
 import CategorySelector from "./CategorySelector";
 import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
 import { storage } from "../../context/firebaseProvider";
+import { MdCancel } from "react-icons/md";
+import useAuthenticate from "../../hooks/authenticationt";
+import Loader from "../../components/loading";
 
 export default function StoreDetailPage() {
   const { id } = useParams();
@@ -15,6 +18,7 @@ export default function StoreDetailPage() {
   const [store, setStore] = useState<any>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [code, setCode] = useState("");
   const [discount, setDiscount] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -23,6 +27,15 @@ export default function StoreDetailPage() {
   const [barcodePreview, setBarcodePreview] = useState<string | null>(null);
   const [qrCodePreview, setQrCodePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { user, loading } = useAuthenticate();
+
+  useEffect(() => {
+    if (localStorage.getItem("lastVisited") === "flyers") {
+      setActiveTab("flyers");
+    } else {
+      setActiveTab("coupons");
+    }
+  }, []);
 
   useEffect(() => {
     const fetchStoreDetails = async () => {
@@ -85,7 +98,6 @@ export default function StoreDetailPage() {
       let barcodeUrl = "";
       let qrCodeUrl = "";
 
-      // Upload barcode image
       if (barcodeFile) {
         const barcodeRef = ref(
           storage,
@@ -95,7 +107,6 @@ export default function StoreDetailPage() {
         barcodeUrl = await getDownloadURL(barcodeRef);
       }
 
-      // Upload QR code image
       if (qrCodeFile) {
         const qrCodeRef = ref(
           storage,
@@ -107,6 +118,7 @@ export default function StoreDetailPage() {
 
       const data = {
         title,
+        description,
         storeId: id,
         code,
         barcodeUrl,
@@ -116,11 +128,12 @@ export default function StoreDetailPage() {
       };
 
       const response = await fetch(
-        `${baseUrl}${activeTab === "flyers" ? "flyer" : "coupon"}`,
+        `${baseUrl}${activeTab === "flyers" ? "flyer" : "coupons"}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "user-email": user?.email,
           },
           body: JSON.stringify(data),
         }
@@ -157,6 +170,15 @@ export default function StoreDetailPage() {
 
   if (!store) return null;
 
+  if (loading) {
+    <>
+      <Navigation />
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader />
+      </div>
+    </>;
+  }
+
   return (
     <div className="min-h-screen bg-yellow-50">
       <Navigation />
@@ -186,7 +208,10 @@ export default function StoreDetailPage() {
             <div className="flex justify-between items-center mb-6">
               <div className="flex">
                 <button
-                  onClick={() => setActiveTab("flyers")}
+                  onClick={() => {
+                    setActiveTab("flyers");
+                    localStorage.setItem("lastVisited", "flyers");
+                  }}
                   className={`flex items-center gap-2 px-6 py-2 rounded-l-full border border-yellow-500 font-medium transition-all ${
                     activeTab === "flyers"
                       ? "bg-yellow-500 text-white"
@@ -197,7 +222,10 @@ export default function StoreDetailPage() {
                   Flyers
                 </button>
                 <button
-                  onClick={() => setActiveTab("coupons")}
+                  onClick={() => {
+                    setActiveTab("coupons");
+                    localStorage.setItem("lastVisited", "coupons");
+                  }}
                   className={`flex items-center gap-2 px-6 py-2 rounded-r-full border border-yellow-500 font-medium transition-all ${
                     activeTab === "coupons"
                       ? "bg-yellow-500 text-white"
@@ -270,8 +298,19 @@ export default function StoreDetailPage() {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="w-full px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Description
+                </label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 />
               </div>
 
@@ -283,7 +322,7 @@ export default function StoreDetailPage() {
                   type="text"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="w-full px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   required
                 />
               </div>
@@ -297,15 +336,12 @@ export default function StoreDetailPage() {
                   value={discount}
                   onChange={(e) => setDiscount(e.target.value)}
                   placeholder="e.g., 20% off or $10 off"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="w-full px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Categories <span className="text-red-500">*</span>
-                </label>
                 <CategorySelector
                   selected={selectedCategories}
                   onChange={setSelectedCategories}
@@ -321,14 +357,20 @@ export default function StoreDetailPage() {
                     type="file"
                     accept="image/png, image/jpeg"
                     onChange={(e) => handleFileChange(e, "barcode")}
-                    className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
+                    className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
                   />
                   {barcodePreview && (
-                    <img
-                      src={barcodePreview}
-                      alt="Barcode Preview"
-                      className="mt-2 h-16 rounded shadow object-contain"
-                    />
+                    <div className="relative inline-block mt-2 h-16">
+                      <img
+                        src={barcodePreview}
+                        alt="Barcode Preview"
+                        className="h-full rounded shadow object-contain"
+                      />
+                      <MdCancel
+                        onClick={() => setBarcodePreview(null)}
+                        className="absolut scale-x-150 scale-y-150 hover:scale-105 top-0 right-0 p-1 text-sm text-red bg-opacity-50 rounded-bl"
+                      />
+                    </div>
                   )}
                 </div>
 
@@ -340,14 +382,21 @@ export default function StoreDetailPage() {
                     type="file"
                     accept="image/png, image/jpeg"
                     onChange={(e) => handleFileChange(e, "qrcode")}
-                    className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
+                    className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
                   />
                   {qrCodePreview && (
-                    <img
-                      src={qrCodePreview}
-                      alt="QR Code Preview"
-                      className="mt-2 h-16 rounded shadow object-contain"
-                    />
+                    <>
+                      {" "}
+                      <img
+                        src={qrCodePreview}
+                        alt="QR Code Preview"
+                        className="mt-2 h-16 rounded shadow object-contain"
+                      />
+                      <MdCancel
+                        onClick={() => setBarcodePreview(null)}
+                        className="absolut scale-x-150 scale-y-150 hover:scale-105 top-0 right-0 p-1 text-sm text-red bg-opacity-50 rounded-bl"
+                      />
+                    </>
                   )}
                 </div>
               </div>
@@ -359,14 +408,14 @@ export default function StoreDetailPage() {
                     setShowDialog(false);
                     resetForm();
                   }}
-                  className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className="px-4 py-2 rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-md bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50"
+                  className="px-4 py-2 rounded-md hover:scale-105 transition bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50"
                 >
                   {isSubmitting ? "Creating..." : "Create"}
                 </button>
