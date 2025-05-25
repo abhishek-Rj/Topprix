@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import {
-  HiTag,
+  HiNewspaper,
   HiSearch,
   HiFilter,
   HiSortAscending,
@@ -8,163 +8,167 @@ import {
   HiHeart,
   HiShoppingCart,
 } from "react-icons/hi";
-import Footer from "../components/Footer";
 import { FaStore } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Navigation from "../components/navigation";
+import Footer from "../components/Footer";
 
-interface Coupon {
+interface Flyer {
   id: number;
   title: string;
   store: string;
-  discount: string;
-  code: string;
+  description: string;
   category: string;
-  expiryDate: string;
+  validUntil: string;
   image: string;
+  featured: boolean;
 }
 
-export default function CouponPage() {
-  const [coupons, setCoupons] = useState<Coupon[]>([]);
+export default function FlyerPage() {
+  const [flyers, setFlyers] = useState<Flyer[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const itemsPerPage = 9;
 
-  // Mock data for coupons
-  const mockCoupons: Coupon[] = [
+  // Mock data for flyers
+  const mockFlyers: Flyer[] = [
     {
       id: 1,
-      title: "Summer Sale",
-      store: "Fashion Store",
-      discount: "50% OFF",
-      code: "SUMMER50",
+      title: "Mega Sale Event",
+      store: "Shopping Mall",
+      description:
+        "Huge discounts on all items. Up to 70% off on selected items.",
       category: "Fashion",
-      expiryDate: "2024-08-31",
+      validUntil: "2024-08-31",
       image:
-        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+        "https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: true,
     },
     {
       id: 2,
-      title: "Weekend Special",
-      store: "Electronics Hub",
-      discount: "$100 OFF",
-      code: "WEEKEND100",
+      title: "Tech Expo 2024",
+      store: "Tech Store",
+      description:
+        "Latest gadgets and deals. Special launch prices on new products.",
       category: "Electronics",
-      expiryDate: "2024-07-15",
+      validUntil: "2024-07-15",
       image:
         "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: true,
     },
     {
       id: 3,
       title: "Food Festival",
       store: "Food Court",
-      discount: "30% OFF",
-      code: "FOOD30",
+      description:
+        "Taste the world. Special discounts on international cuisines.",
       category: "Food",
-      expiryDate: "2024-06-30",
+      validUntil: "2024-06-30",
       image:
         "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: true,
     },
     {
       id: 4,
-      title: "Back to School",
+      title: "Back to School Sale",
       store: "Book Store",
-      discount: "25% OFF",
-      code: "SCHOOL25",
+      description: "Everything you need for the new academic year.",
       category: "Education",
-      expiryDate: "2024-09-15",
+      validUntil: "2024-09-15",
       image:
         "https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: false,
     },
     {
       id: 5,
-      title: "Gaming Bundle",
+      title: "Gaming Convention",
       store: "Game Stop",
-      discount: "40% OFF",
-      code: "GAME40",
+      description: "Exclusive deals on gaming consoles and accessories.",
       category: "Gaming",
-      expiryDate: "2024-07-31",
+      validUntil: "2024-07-31",
       image:
         "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: false,
     },
     {
       id: 6,
-      title: "Home Decor",
+      title: "Home Decor Sale",
       store: "Home Goods",
-      discount: "20% OFF",
-      code: "HOME20",
+      description: "Transform your living space with our exclusive collection.",
       category: "Home",
-      expiryDate: "2024-08-15",
+      validUntil: "2024-08-15",
       image:
         "https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: false,
     },
     {
       id: 7,
-      title: "Fitness Gear",
+      title: "Fitness Gear Sale",
       store: "Sports World",
-      discount: "35% OFF",
-      code: "FIT35",
+      description:
+        "Get fit with our premium sports equipment at special prices.",
       category: "Sports",
-      expiryDate: "2024-07-31",
+      validUntil: "2024-07-31",
       image:
         "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: false,
     },
     {
       id: 8,
-      title: "Beauty Box",
+      title: "Beauty Box Launch",
       store: "Cosmetics Store",
-      discount: "45% OFF",
-      code: "BEAUTY45",
+      description: "New beauty products with amazing introductory offers.",
       category: "Beauty",
-      expiryDate: "2024-08-31",
+      validUntil: "2024-08-31",
       image:
         "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: false,
     },
     {
       id: 9,
-      title: "Tech Bundle",
+      title: "Tech Bundle Sale",
       store: "Tech Store",
-      discount: "60% OFF",
-      code: "TECH60",
+      description: "Bundle deals on the latest technology products.",
       category: "Electronics",
-      expiryDate: "2024-07-15",
+      validUntil: "2024-07-15",
       image:
         "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: false,
     },
     {
       id: 10,
-      title: "Pet Supplies",
+      title: "Pet Care Event",
       store: "Pet Shop",
-      discount: "25% OFF",
-      code: "PET25",
+      description: "Special offers on pet food and accessories.",
       category: "Pets",
-      expiryDate: "2024-08-31",
+      validUntil: "2024-08-31",
       image:
         "https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: false,
     },
     {
       id: 11,
-      title: "Movie Night",
+      title: "Movie Night Special",
       store: "Cinema",
-      discount: "2 for 1",
-      code: "MOVIE2X1",
+      description: "Special screening events with exclusive deals.",
       category: "Entertainment",
-      expiryDate: "2024-07-31",
+      validUntil: "2024-07-31",
       image:
         "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: false,
     },
     {
       id: 12,
-      title: "Coffee Break",
+      title: "Coffee Festival",
       store: "Coffee Shop",
-      discount: "Buy 1 Get 1",
-      code: "COFFEEBOGO",
+      description: "Taste different coffee varieties with special discounts.",
       category: "Food",
-      expiryDate: "2024-08-15",
+      validUntil: "2024-08-15",
       image:
         "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+      featured: false,
     },
   ];
 
@@ -184,42 +188,38 @@ export default function CouponPage() {
 
   useEffect(() => {
     // In a real app, this would be an API call
-    setCoupons(mockCoupons);
+    setFlyers(mockFlyers);
   }, []);
 
-  const filteredCoupons = coupons.filter((coupon) => {
+  const filteredFlyers = flyers.filter((flyer) => {
     const matchesSearch =
-      coupon.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      coupon.store.toLowerCase().includes(searchQuery.toLowerCase());
+      flyer.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      flyer.store.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      flyer.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory =
-      selectedCategory === "all" || coupon.category === selectedCategory;
+      selectedCategory === "all" || flyer.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const sortedCoupons = [...filteredCoupons].sort((a, b) => {
+  const sortedFlyers = [...filteredFlyers].sort((a, b) => {
     if (sortBy === "newest") {
       return (
-        new Date(b.expiryDate).getTime() - new Date(a.expiryDate).getTime()
+        new Date(b.validUntil).getTime() - new Date(a.validUntil).getTime()
       );
     }
     if (sortBy === "oldest") {
       return (
-        new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime()
+        new Date(a.validUntil).getTime() - new Date(b.validUntil).getTime()
       );
     }
     return 0;
   });
 
-  const totalPages = Math.ceil(sortedCoupons.length / itemsPerPage);
-  const currentCoupons = sortedCoupons.slice(
+  const totalPages = Math.ceil(sortedFlyers.length / itemsPerPage);
+  const currentFlyers = sortedFlyers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-
-  const copyToClipboard = (code: string) => {
-    navigator.clipboard.writeText(code);
-    // You might want to add a toast notification here
-  };
 
   return (
     <>
@@ -229,7 +229,7 @@ export default function CouponPage() {
       <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Hero Section - Only show on first page */}
-          {currentPage === 1 ? (
+          {currentPage === 1 && (
             <div className="relative pt-24 pb-16">
               <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-yellow-600/20 rounded-3xl -z-10" />
               <div className="text-center max-w-4xl mx-auto">
@@ -239,8 +239,8 @@ export default function CouponPage() {
                   transition={{ duration: 0.5 }}
                   className="text-5xl md:text-6xl font-bold text-gray-900 mb-6"
                 >
-                  Unlock Amazing
-                  <span className="text-yellow-600"> Savings</span>
+                  Latest
+                  <span className="text-yellow-600"> Flyers</span>
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
@@ -248,9 +248,8 @@ export default function CouponPage() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="text-xl text-gray-600 mb-8"
                 >
-                  Discover exclusive deals and discounts from your favorite
-                  stores. Save more on every purchase with our curated
-                  collection of coupons.
+                  Discover the latest deals and promotions from your favorite
+                  stores. Stay updated with our collection of current flyers.
                 </motion.p>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -259,18 +258,16 @@ export default function CouponPage() {
                   className="flex flex-wrap justify-center gap-4 mb-8"
                 >
                   <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                    <HiTag className="text-yellow-600" />
-                    <span className="text-gray-700">
-                      12,000+ Active Coupons
-                    </span>
+                    <HiNewspaper className="text-yellow-600" />
+                    <span className="text-gray-700">500+ Active Flyers</span>
                   </div>
                   <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
                     <FaStore className="text-yellow-600" />
-                    <span className="text-gray-700">500+ Partner Stores</span>
+                    <span className="text-gray-700">200+ Partner Stores</span>
                   </div>
                   <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
                     <HiUser className="text-yellow-600" />
-                    <span className="text-gray-700">1M+ Happy Users</span>
+                    <span className="text-gray-700">50K+ Monthly Views</span>
                   </div>
                 </motion.div>
                 <motion.div
@@ -293,55 +290,6 @@ export default function CouponPage() {
                     </button>
                   </div>
                 </motion.div>
-              </div>
-            </div>
-          ) : (
-            <div className="pt-8">
-              {/* Filters and Search */}
-              <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="relative">
-                    <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search coupons..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    />
-                  </div>
-                  <div className="relative">
-                    <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    >
-                      {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {category.charAt(0).toUpperCase() + category.slice(1)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="relative">
-                    <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    >
-                      <option value="newest">Newest First</option>
-                      <option value="oldest">Oldest First</option>
-                    </select>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-gray-600">
-                      Showing {currentCoupons.length} of{" "}
-                      {filteredCoupons.length} coupons
-                    </span>
-                  </div>
-                </div>
               </div>
             </div>
           )}
@@ -374,19 +322,117 @@ export default function CouponPage() {
             </div>
           )}
 
-          {/* Coupon Grid */}
+          {/* Filters and Search */}
+          {currentPage === 1 ? (
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="relative">
+                  <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search flyers..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  />
+                </div>
+                <div className="relative">
+                  <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  >
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="relative">
+                  <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                  </select>
+                </div>
+                <div className="text-right">
+                  <span className="text-gray-600">
+                    Showing {currentFlyers.length} of {filteredFlyers.length}{" "}
+                    flyers
+                  </span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="pt-8">
+              {/* Filters and Search */}
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="relative">
+                    <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search flyers..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    />
+                  </div>
+                  <div className="relative">
+                    <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    >
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {category.charAt(0).toUpperCase() + category.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="relative">
+                    <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                    </select>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-gray-600">
+                      Showing {currentFlyers.length} of {filteredFlyers.length}{" "}
+                      flyers
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Flyer Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentCoupons.map((coupon) => (
+            {currentFlyers.map((flyer) => (
               <motion.div
-                key={coupon.id}
+                key={flyer.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition"
               >
                 <div className="h-48 overflow-hidden">
                   <img
-                    src={coupon.image}
-                    alt={coupon.title}
+                    src={flyer.image}
+                    alt={flyer.title}
                     className="w-full h-full object-cover hover:scale-110 transition duration-300"
                   />
                 </div>
@@ -394,27 +440,18 @@ export default function CouponPage() {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <h3 className="text-xl font-semibold text-gray-900">
-                        {coupon.title}
+                        {flyer.title}
                       </h3>
-                      <p className="text-gray-600">{coupon.store}</p>
+                      <p className="text-gray-600">{flyer.store}</p>
                     </div>
                     <span className="bg-yellow-100 text-yellow-800 text-sm font-medium px-3 py-1 rounded-full">
-                      {coupon.category}
+                      {flyer.category}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-2xl font-bold text-yellow-600">
-                      {coupon.discount}
-                    </span>
-                    <button
-                      onClick={() => copyToClipboard(coupon.code)}
-                      className="text-sm text-gray-500 hover:text-yellow-600"
-                    >
-                      Code: {coupon.code}
-                    </button>
-                  </div>
+                  <p className="text-gray-600 mb-4">{flyer.description}</p>
                   <div className="text-sm text-gray-500 mb-4">
-                    Expires: {new Date(coupon.expiryDate).toLocaleDateString()}
+                    Valid until:{" "}
+                    {new Date(flyer.validUntil).toLocaleDateString()}
                   </div>
                   <div className="flex justify-end gap-2">
                     <button

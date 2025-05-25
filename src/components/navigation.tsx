@@ -2,18 +2,36 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiMenu, FiX, FiSearch, FiUser } from "react-icons/fi";
-import { auth } from "../context/firebaseProvider";
+import { auth, db } from "../context/firebaseProvider";
 import { onAuthStateChanged } from "firebase/auth";
-import useAuthenticate from "../hooks/authenticationt";
+import { getDoc, doc } from "firebase/firestore";
+import { HiShoppingCart } from "react-icons/hi";
+import CartSidebar from "./CartSidebar";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
   const { t, i18n } = useTranslation();
-  const { userRole } = useAuthenticate();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          setUserRole(userData.role);
+        } else {
+          setUserRole("USER");
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -39,155 +57,162 @@ const Navigation = () => {
   }, [location]);
 
   const navLinks = [
-    { name: t("navigation.coupon"), path: "/deals" },
+    { name: t("navigation.coupon"), path: "/explore/coupons" },
+    { name: t("navigation.flyer"), path: "/explore/flyers" },
     { name: t("navigation.favourite"), path: "/favourite" },
     { name: t("navigation.wishlist"), path: "/wishlist" },
     { name: t("navigation.profile"), path: "/profile" },
   ];
 
-  if (userRole !== "USER") {
-    navLinks.unshift({ name: t("navigation.dashboard"), path: userRole === "RETAILER" ? "/retailer-dashboard" : "/admin-dashboard" });
+  if (userRole === "RETAILER" || userRole === "ADMIN") {
+    navLinks.unshift({
+      name: t("navigation.dashboard"),
+      path:
+        userRole === "RETAILER" ? "/retailer-dashboard" : "/admin-dashboard",
+    });
   }
 
   return (
-    <header
-      className={`fixed w-full z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white shadow-md py-2" : "bg-yellow-50 py-4"
-      }`}
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <img
-              src="/logowb.png"
-              alt="Topprix"
-              className="h-10 w-10 rounded-lg"
-            />
-            <span
-              className={`text-2xl font-bold ${
-                isScrolled ? "text-yellow-600" : "text-yellow-600"
-              }`}
-            >
-              Topprix
-            </span>
-          </Link>
-
-          <nav className="hidden md:flex items-center space-x-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`text-sm hover:scale-105 transition-transform font-medium  hover:text-yellow-600 ${
-                  location.pathname === link.path
-                    ? "text-yellow-600 border-b-2 border-yellow-600 pb-1"
-                    : isScrolled
-                    ? "text-gray-800"
-                    : "text-gray-800"
+    <>
+      <header
+        className={`fixed w-full z-50 transition-all duration-300 ${
+          isScrolled ? "bg-white shadow-md py-2" : "bg-yellow-50 py-4"
+        }`}
+      >
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <img
+                src="/logowb.png"
+                alt="Topprix"
+                className="h-10 w-10 rounded-lg"
+              />
+              <span
+                className={`text-2xl font-bold ${
+                  isScrolled ? "text-yellow-600" : "text-yellow-600"
                 }`}
               >
-                {link.name}
-              </Link>
-            ))}
-          </nav>
+                Topprix
+              </span>
+            </Link>
 
-          <div className="hidden md:flex items-center space-x-6">
-            <div className="relative">
-              <button
-                onClick={() => setSearchOpen(!searchOpen)}
-                className="text-gray-600 hover:text-yellow-600 transition-colors"
-              >
-                <FiSearch size={20} />
-              </button>
-              {searchOpen && (
-                <div className="absolute right-0 top-10 w-72 bg-white rounded-lg shadow-lg p-3 border border-gray-200">
-                  <div className="relative">
-                    <input
-                      type="text"
-                      placeholder={t("navigation.search")}
-                      className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    />
-                    <FiSearch
-                      className="absolute left-2 top-3 text-gray-400"
-                      size={16}
-                    />
+            <nav className="hidden md:flex items-center space-x-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-sm hover:scale-105 transition-transform font-medium  hover:text-yellow-600 ${
+                    location.pathname === link.path
+                      ? "text-yellow-600 border-b-2 border-yellow-600 pb-1"
+                      : isScrolled
+                      ? "text-gray-800"
+                      : "text-gray-800"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="hidden md:flex items-center space-x-6">
+              <div className="relative">
+                <button
+                  onClick={() => setSearchOpen(!searchOpen)}
+                  className="text-gray-600 hover:text-yellow-600 transition-colors"
+                >
+                  <FiSearch size={20} />
+                </button>
+                {searchOpen && (
+                  <div className="absolute right-0 top-10 w-72 bg-white rounded-lg shadow-lg p-3 border border-gray-200">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder={t("navigation.search")}
+                        className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                      />
+                      <FiSearch
+                        className="absolute left-2 top-3 text-gray-400"
+                        size={16}
+                      />
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-
-            {/* Language Selector */}
-            <div className="relative group">
-              <button className="text-gray-600 hover:text-yellow-600 font-medium text-sm">
-                {i18n.language === "en" ? "EN" : i18n.language.toUpperCase()}
-              </button>
-              <div className="absolute right-0 mt-2 w-28 bg-white rounded-lg shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                <button
-                  onClick={() => changeLanguage("fr")}
-                  className={`block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 w-full text-left ${
-                    i18n.language === "fr"
-                      ? "font-semibold text-yellow-600"
-                      : ""
-                  }`}
-                >
-                  Française
-                </button>
-                <button
-                  onClick={() => changeLanguage("en")}
-                  className={`block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 w-full text-left ${
-                    i18n.language === "en"
-                      ? "font-semibold text-yellow-600"
-                      : ""
-                  }`}
-                >
-                  English
-                </button>
+                )}
               </div>
-            </div>
 
-            {user ? (
+              {/* Language Selector */}
               <div className="relative group">
-                <button className="flex items-center space-x-1 text-gray-600 hover:text-yellow-600">
-                  <div className="w-8 h-8 rounded-full bg-yellow-200 flex items-center justify-center text-yellow-800 font-semibold">
-                    {user.displayName
-                      ? user.displayName.charAt(0).toUpperCase()
-                      : user.email.charAt(0).toUpperCase()}
-                  </div>
+                <button className="text-gray-600 hover:text-yellow-600 font-medium text-sm">
+                  {i18n.language === "en" ? "EN" : i18n.language.toUpperCase()}
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50"
-                  >
-                    {t("navigation.settings")}
-                  </Link>
+                <div className="absolute right-0 mt-2 w-28 bg-white rounded-lg shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
                   <button
-                    onClick={() => auth.signOut()}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 border-t border-gray-100"
+                    onClick={() => changeLanguage("fr")}
+                    className={`block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 w-full text-left ${
+                      i18n.language === "fr"
+                        ? "font-semibold text-yellow-600"
+                        : ""
+                    }`}
                   >
-                    {t("signOut")}
+                    Française
+                  </button>
+                  <button
+                    onClick={() => changeLanguage("en")}
+                    className={`block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 w-full text-left ${
+                      i18n.language === "en"
+                        ? "font-semibold text-yellow-600"
+                        : ""
+                    }`}
+                  >
+                    English
                   </button>
                 </div>
               </div>
-            ) : (
-              <Link
-                to="/login"
-                className="flex items-center text-sm font-medium text-gray-600 hover:text-yellow-600"
-              >
-                <FiUser className="mr-1" size={18} />
-                {t("signIn")}
-              </Link>
-            )}
-          </div>
 
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden text-gray-600 hover:text-yellow-600 focus:outline-none"
-          >
-            {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-          </button>
+              {user ? (
+                <div className="relative group">
+                  <button className="flex items-center space-x-1 text-gray-600 hover:text-yellow-600">
+                    <div className="w-8 h-8 rounded-full bg-yellow-200 flex items-center justify-center text-yellow-800 font-semibold">
+                      {user.displayName
+                        ? user.displayName.charAt(0).toUpperCase()
+                        : user.email.charAt(0).toUpperCase()}
+                    </div>
+                  </button>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50"
+                    >
+                      {t("navigation.settings")}
+                    </Link>
+                    <button
+                      onClick={() => auth.signOut()}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 border-t border-gray-100"
+                    >
+                      {t("signOut")}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center text-sm font-medium text-gray-600 hover:text-yellow-600"
+                >
+                  <FiUser className="mr-1" size={18} />
+                  {t("signIn")}
+                </Link>
+              )}
+            </div>
+
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden text-gray-600 hover:text-yellow-600 focus:outline-none"
+            >
+              {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
@@ -293,7 +318,16 @@ const Navigation = () => {
           </div>
         </div>
       )}
-    </header>
+
+      <button
+        onClick={() => setIsCartOpen(true)}
+        className="p-2 text-gray-500 hover:text-yellow-600 transition-colors"
+      >
+        <HiShoppingCart className="w-6 h-6" />
+      </button>
+
+      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+    </>
   );
 };
 

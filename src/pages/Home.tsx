@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { HiNewspaper, HiTag, HiUser, HiSearch } from "react-icons/hi";
+import { HiNewspaper, HiTag, HiUser } from "react-icons/hi";
 import { FaStore } from "react-icons/fa";
 import { motion } from "framer-motion";
-
+import Footer from "../components/Footer";
 export default function Home() {
   const navigate = useNavigate();
 
@@ -70,6 +70,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
+              <img
+                src={"/logowb.png"}
+                alt="Topprix Logo"
+                className="w-10 h-10 mr-2"
+              />
               <h1 className="text-2xl font-bold text-yellow-600">Topprix</h1>
             </div>
             <div className="flex items-center gap-4">
@@ -151,7 +156,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900">
-              Featured Coupons
+              Popular Coupons
             </h2>
             <button
               onClick={() => navigate("/explore/coupons")}
@@ -200,9 +205,7 @@ export default function Home() {
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Featured Flyers
-            </h2>
+            <h2 className="text-3xl font-bold text-gray-900">Popular Flyers</h2>
             <button
               onClick={() => navigate("/explore/flyers")}
               className="text-yellow-600 hover:text-yellow-700 font-medium"
@@ -258,6 +261,7 @@ export default function Home() {
           </button>
         </div>
       </section>
+      <Footer />
     </div>
   );
 }

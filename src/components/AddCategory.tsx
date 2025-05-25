@@ -9,7 +9,7 @@ interface Props {
   onAdded: (newCategory: { id: string; name: string }) => void;
 }
 
-export default function AddCategoryDialog({ open, onClose, onAdded }: Props) {
+export default function AddCategoryDialog({ open, onClose }: Props) {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<any>();
