@@ -29,7 +29,8 @@
     "profile": "Profile",
     "search": "Search",
     "settings": "Settings",
-    "wishlist": "Wishlist"
+    "wishlist": "Wishlist",
+    "dashboard": "Dashboard"
   },
   "profile": {
     "name": "Name",

@@ -39,12 +39,15 @@ const Navigation = () => {
   }, [location]);
 
   const navLinks = [
-    { name: t("navigation.home"), path: "/" },
     { name: t("navigation.coupon"), path: "/deals" },
     { name: t("navigation.favourite"), path: "/favourite" },
     { name: t("navigation.wishlist"), path: "/wishlist" },
     { name: t("navigation.profile"), path: "/profile" },
   ];
+
+  if (userRole !== "USER") {
+    navLinks.unshift({ name: t("navigation.dashboard"), path: userRole === "RETAILER" ? "/retailer-dashboard" : "/admin-dashboard" });
+  }
 
   return (
     <header

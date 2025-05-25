@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 import GoogleAuthButton from "../components/googleAuthButton";
 import FacebookAuthButton from "../components/facebookAuthButton";
 import Input from "../components/Input";
+import { getDoc, doc } from "firebase/firestore";
+import { db } from "../context/firebaseProvider";
 
 export default function Login() {
     const [email, setEmail] = useState<string>("");
@@ -50,7 +52,20 @@ export default function Login() {
                 password
             );
             if (userCredential.uid) {
-                navigate("/");
+                console.log(userCredential);
+                const userDoc = await getDoc(doc(db, "users", userCredential.uid));
+                const userData = userDoc.data();
+                if (userData) {
+                    if (userData?.role === "USER") {
+                        navigate("/coupons");
+                    } else if (userData?.role === "RETAILER") {
+                        navigate("/retailer-dashboard");
+                    } else if (userData?.role === "ADMIN") {
+                        navigate("/admin-dashboard");
+                    }
+                } else {
+                    setError(t("Could not find user data"));
+                }
             } else {
                 setError(t("Invalid email or password"));
             }
