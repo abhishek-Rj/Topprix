@@ -14,7 +14,6 @@ import StoreDetailPage from "./pages/Retailer/Store";
 import CouponPage from "./pages/Coupon";
 import FlyerPage from "./pages/Flyer";
 import FavoritesPage from "./pages/Favorites";
-import Wishlist from "./pages/Wishlist";
 
 function App() {
   return (
@@ -41,7 +40,6 @@ function App() {
           <Route path="/explore/coupons" element={<CouponPage />} />
           <Route path="/explore/flyers" element={<FlyerPage />} />
           <Route path="/favourite" element={<FavoritesPage />} />
-          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/deals" element={<Deals />} />
           <Route path="/not-found" element={<NotFound />} />

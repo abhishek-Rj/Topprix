@@ -291,7 +291,14 @@ const Navigation = () => {
                       {t("navigation.profile")}
                     </Link>
                     <button
-                      onClick={() => auth.signOut()}
+                      onClick={async () => {
+                        try {
+                          await auth.signOut(); // Wait for sign-out to complete
+                          window.location.reload(); // Reload the page
+                        } catch (error) {
+                          console.error("Error signing out:", error);
+                        }
+                      }}
                       className="w-full px-3 py-2 text-sm bg-yellow-100 rounded-md text-yellow-800 hover:bg-yellow-200"
                     >
                       {t("signOut")}

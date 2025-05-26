@@ -1,10 +1,38 @@
 import { useNavigate } from "react-router-dom";
-import { HiNewspaper, HiTag, HiUser } from "react-icons/hi";
+import { HiNewspaper, HiTag, HiUser, HiMenu, HiX } from "react-icons/hi";
 import { FaStore } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import Footer from "../components/Footer";
+import { auth, db } from "../context/firebaseProvider";
+import { getDoc, doc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { toast } from "react-toastify";
+
 export default function Home() {
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [userName, setUsername] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [loginButtonClassName, setLoginButtonClassName] = useState<string>("");
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          setUsername(userData.name);
+          setUserRole(userData.role);
+          setLoginButtonClassName("text-yellow-800 font-bold bg-yellow-200");
+        } else {
+          toast.info("You are not signed in");
+        }
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const featuredCoupons = [
     {
@@ -77,7 +105,9 @@ export default function Home() {
               />
               <h1 className="text-2xl font-bold text-yellow-600">Topprix</h1>
             </div>
-            <div className="flex items-center gap-4">
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-4">
               <button
                 onClick={() => navigate("/explore/coupons")}
                 className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-yellow-600 transition"
@@ -93,14 +123,77 @@ export default function Home() {
                 Explore Flyers
               </button>
               <button
-                onClick={() => navigate("/login")}
-                className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
+                onClick={() => {
+                  if (userName) {
+                    navigate("/profile");
+                  } else {
+                    navigate("/login");
+                  }
+                }}
+                className={`flex items-center gap-2 px-4 py-2 ${loginButtonClassName} rounded-full hover:bg-yellow-300 transition`}
               >
-                <HiUser />
-                Login
+                {userName ? (
+                  <>{userName.charAt(0).toUpperCase()}</>
+                ) : (
+                  <>
+                    <HiUser />
+                    Login
+                  </>
+                )}
               </button>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 text-gray-700 hover:text-yellow-600 transition"
+            >
+              {isMobileMenuOpen ? <HiX size={24} /> : <HiMenu size={24} />}
+            </button>
           </div>
+
+          {/* Mobile Navigation */}
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="md:hidden bg-white border-t"
+            >
+              <div className="px-2 pt-2 pb-3 space-y-1">
+                <button
+                  onClick={() => {
+                    navigate("/explore/coupons");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition"
+                >
+                  <HiTag />
+                  Explore Coupons
+                </button>
+                <button
+                  onClick={() => {
+                    navigate("/explore/flyers");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition"
+                >
+                  <HiNewspaper />
+                  Explore Flyers
+                </button>
+                <button
+                  onClick={() => {
+                    navigate("/login");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
+                >
+                  <HiUser />
+                  Login
+                </button>
+              </div>
+            </motion.div>
+          )}
         </div>
       </nav>
 
@@ -253,7 +346,13 @@ export default function Home() {
             with thousands of potential customers.
           </p>
           <button
-            onClick={() => navigate("/create-store")}
+            onClick={() => {
+              if (userRole === "ADMIN" || "RETAILER") {
+                navigate("retailer-stores/create-new-store");
+              }
+              toast.info("You need to SignIn as a Retailer");
+              navigate("/signup");
+            }}
             className="flex items-center gap-2 px-8 py-3 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition shadow-lg hover:shadow-xl mx-auto"
           >
             <FaStore />

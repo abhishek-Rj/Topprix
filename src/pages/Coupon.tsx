@@ -12,6 +12,11 @@ import Footer from "../components/Footer";
 import { FaStore } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Navigation from "../components/navigation";
+import CartSidebar from "../components/CartSidebar";
+import { auth, db } from "../context/firebaseProvider";
+import { getDoc, doc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { toast } from "react-toastify";
 
 interface Coupon {
   id: number;
@@ -30,6 +35,11 @@ export default function CouponPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [userData, setUserData] = useState<any>({
+    name: "",
+    role: "",
+  });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const itemsPerPage = 9;
 
   // Mock data for coupons
@@ -184,7 +194,24 @@ export default function CouponPage() {
 
   useEffect(() => {
     // In a real app, this would be an API call
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const userData = docSnap.data();
+          setUserData({
+            name: userData.name,
+            role: userData.role || "USER",
+          });
+        }
+      } else {
+        toast.info("User not Signed in");
+      }
+    });
+
     setCoupons(mockCoupons);
+    return () => unsubscribe();
   }, []);
 
   const filteredCoupons = coupons.filter((coupon) => {
@@ -227,6 +254,24 @@ export default function CouponPage() {
         <Navigation />
       </div>
       <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white pt-16">
+        {userData.name && (
+          <>
+            <motion.button
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="fixed bottom-8 right-8 z-50 bg-yellow-500 text-white p-4 rounded-full shadow-lg hover:bg-yellow-600 transition-colors duration-200 flex items-center justify-center"
+            >
+              <HiShoppingCart className="w-6 h-6" />
+            </motion.button>
+            <CartSidebar
+              isOpen={isMobileMenuOpen}
+              onClose={() => setIsMobileMenuOpen(false)}
+            />
+          </>
+        )}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Hero Section - Only show on first page */}
           {currentPage === 1 ? (
