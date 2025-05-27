@@ -184,62 +184,62 @@ export default function StoreDetailPage() {
       <Navigation />
       <main className="pt-20 pb-10">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6">
+          <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6">
             {/* Store Header with Name, Description & Edit Button */}
-            <div className="mb-6 bg-yellow-100 rounded-xl p-6 shadow-sm">
-              <div className="flex justify-between items-center mb-3">
-                <h1 className="text-3xl font-bold text-gray-900">
+            <div className="mb-6 bg-yellow-100 rounded-xl p-4 sm:p-6 shadow-sm">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-3">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {store.name}
                 </h1>
                 <button
                   onClick={handleEditStore}
-                  className="flex items-center gap-2 text-sm px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
                 >
                   <HiPencil />
                   Edit Store
                 </button>
               </div>
-              <p className="text-gray-700">
+              <p className="text-sm sm:text-base text-gray-700">
                 {store.description || "No description provided."}
               </p>
             </div>
 
             {/* Tabs and Create Button */}
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex">
+            <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 sm:gap-0 mb-6">
+              <div className="flex w-full sm:w-auto">
                 <button
                   onClick={() => {
                     setActiveTab("flyers");
                     localStorage.setItem("lastVisited", "flyers");
                   }}
-                  className={`flex items-center gap-2 px-6 py-2 rounded-l-full border border-yellow-500 font-medium transition-all ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-l-full border border-yellow-500 font-medium transition-all ${
                     activeTab === "flyers"
                       ? "bg-yellow-500 text-white"
                       : "bg-white text-yellow-600 hover:bg-yellow-100"
                   }`}
                 >
                   <HiNewspaper />
-                  Flyers
+                  <span className="hidden sm:inline">Flyers</span>
                 </button>
                 <button
                   onClick={() => {
                     setActiveTab("coupons");
                     localStorage.setItem("lastVisited", "coupons");
                   }}
-                  className={`flex items-center gap-2 px-6 py-2 rounded-r-full border border-yellow-500 font-medium transition-all ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-r-full border border-yellow-500 font-medium transition-all ${
                     activeTab === "coupons"
                       ? "bg-yellow-500 text-white"
                       : "bg-white text-yellow-600 hover:bg-yellow-100"
                   }`}
                 >
                   <HiTag />
-                  Coupons
+                  <span className="hidden sm:inline">Coupons</span>
                 </button>
               </div>
 
               <button
                 onClick={handleCreate}
-                className="flex items-center gap-2 bg-yellow-500 text-white font-semibold px-5 py-2 rounded-md hover:bg-yellow-600 transition"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-yellow-500 text-white font-semibold px-5 py-2 rounded-md hover:bg-yellow-600 transition"
               >
                 <HiPlus />
                 {activeTab === "flyers" ? "Create Flyer" : "Create Coupon"}
@@ -247,22 +247,26 @@ export default function StoreDetailPage() {
             </div>
 
             {/* Tab Content Area */}
-            <div className="min-h-[300px] bg-yellow-50 rounded-xl p-5 shadow-inner">
+            <div className="min-h-[200px] sm:min-h-[300px] bg-yellow-50 rounded-xl p-4 sm:p-5 shadow-inner">
               {activeTab === "flyers" ? (
                 <div className="text-center text-gray-700">
-                  <h2 className="text-xl font-semibold flex items-center justify-center gap-2 mb-4">
+                  <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
                     <HiNewspaper className="text-yellow-600" />
                     Flyers
                   </h2>
-                  <p>No flyers yet. Click "Create Flyer" to add one.</p>
+                  <p className="text-sm sm:text-base">
+                    No flyers yet. Click "Create Flyer" to add one.
+                  </p>
                 </div>
               ) : (
                 <div className="text-center text-gray-700">
-                  <h2 className="text-xl font-semibold flex items-center justify-center gap-2 mb-4">
+                  <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
                     <HiTag className="text-yellow-600" />
                     Coupons
                   </h2>
-                  <p>No coupons yet. Click "Create Coupon" to add one.</p>
+                  <p className="text-sm sm:text-base">
+                    No coupons yet. Click "Create Coupon" to add one.
+                  </p>
                 </div>
               )}
             </div>
@@ -272,10 +276,10 @@ export default function StoreDetailPage() {
 
       {/* Create Dialog */}
       {showDialog && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full mx-4 p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-auto p-4 sm:p-6">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Create {activeTab === "flyers" ? "Flyer" : "Coupon"}
               </h2>
               <button
@@ -289,7 +293,7 @@ export default function StoreDetailPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
                   Title <span className="text-red-500">*</span>
@@ -298,7 +302,7 @@ export default function StoreDetailPage() {
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   required
                 />
               </div>
@@ -310,7 +314,7 @@ export default function StoreDetailPage() {
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 />
               </div>
 
@@ -322,7 +326,7 @@ export default function StoreDetailPage() {
                   type="text"
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   required
                 />
               </div>
@@ -336,7 +340,7 @@ export default function StoreDetailPage() {
                   value={discount}
                   onChange={(e) => setDiscount(e.target.value)}
                   placeholder="e.g., 20% off or $10 off"
-                  className="w-full px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   required
                 />
               </div>
@@ -348,7 +352,7 @@ export default function StoreDetailPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Barcode Image
@@ -368,7 +372,7 @@ export default function StoreDetailPage() {
                       />
                       <MdCancel
                         onClick={() => setBarcodePreview(null)}
-                        className="absolut scale-x-150 scale-y-150 hover:scale-105 top-0 right-0 p-1 text-sm text-red bg-opacity-50 rounded-bl"
+                        className="absolute scale-x-150 scale-y-150 hover:scale-105 top-0 right-0 p-1 text-sm text-red bg-opacity-50 rounded-bl"
                       />
                     </div>
                   )}
@@ -385,37 +389,36 @@ export default function StoreDetailPage() {
                     className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
                   />
                   {qrCodePreview && (
-                    <>
-                      {" "}
+                    <div className="relative inline-block mt-2 h-16">
                       <img
                         src={qrCodePreview}
                         alt="QR Code Preview"
-                        className="mt-2 h-16 rounded shadow object-contain"
+                        className="h-full rounded shadow object-contain"
                       />
                       <MdCancel
-                        onClick={() => setBarcodePreview(null)}
-                        className="absolut scale-x-150 scale-y-150 hover:scale-105 top-0 right-0 p-1 text-sm text-red bg-opacity-50 rounded-bl"
+                        onClick={() => setQrCodePreview(null)}
+                        className="absolute scale-x-150 scale-y-150 hover:scale-105 top-0 right-0 p-1 text-sm text-red bg-opacity-50 rounded-bl"
                       />
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3">
+              <div className="flex flex-col sm:flex-row justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => {
                     setShowDialog(false);
                     resetForm();
                   }}
-                  className="px-4 py-2 rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className="w-full sm:w-auto px-4 py-2 rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-2 rounded-md hover:scale-105 transition bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50"
+                  className="w-full sm:w-auto px-4 py-2 rounded-md hover:scale-105 transition bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50"
                 >
                   {isSubmitting ? "Creating..." : "Create"}
                 </button>

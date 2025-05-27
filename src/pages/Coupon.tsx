@@ -204,9 +204,9 @@ export default function CouponPage() {
             name: userData.name,
             role: userData.role || "USER",
           });
+        } else {
+          toast.info("You are not Signed in");
         }
-      } else {
-        toast.info("User not Signed in");
       }
     });
 

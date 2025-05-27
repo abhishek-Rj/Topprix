@@ -99,28 +99,28 @@ export default function RetailerStores() {
     <div className="min-h-screen bg-yellow-50">
       <Navigation />
       <main className="pt-20">
-        <div className="container mx-auto px-4 py-12">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold translate-x-4 text-gray-900">
+        <div className="container mx-auto px-4 py-8 sm:py-12">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Your Stores
             </h1>
             <button
               onClick={() => navigate("/retailer-stores/create-new-store")}
-              className="px-5 py-2 bg-yellow-600 hover:scale-105 text-white rounded-md hover:bg-yellow-700 transition"
+              className="w-full sm:w-auto px-5 py-2 bg-yellow-600 hover:scale-105 text-white rounded-md hover:bg-yellow-700 transition"
             >
               + Create New Store
             </button>
           </div>
 
           {stores.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {stores.map((store) => (
                 <div
                   key={store.id}
-                  className="relative aspect-square bg-white rounded-2xl shadow-lg group overflow-hidden hover:scale-[1.02] transition-all duration-300"
+                  className="relative aspect-square bg-white rounded-xl sm:rounded-2xl shadow-lg group overflow-hidden hover:scale-[1.02] transition-all duration-300"
                 >
                   {/* Dropdown Menu */}
-                  <div className="absolute top-4 right-4 z-20">
+                  <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20">
                     <button
                       className="text-gray-500 hover:text-gray-700 bg-white/80 p-1 rounded-full backdrop-blur-sm"
                       onClick={() =>
@@ -171,7 +171,7 @@ export default function RetailerStores() {
                     >
                       {!store.logo && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-4xl text-yellow-600/50">
+                          <span className="text-3xl sm:text-4xl text-yellow-600/50">
                             {store.name.charAt(0).toUpperCase()}
                           </span>
                         </div>
@@ -180,23 +180,23 @@ export default function RetailerStores() {
                     </div>
 
                     {/* Content Section */}
-                    <div className="flex-1 p-4 flex flex-col justify-between bg-white">
+                    <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between bg-white">
                       <div>
-                        <h2 className="text-xl font-bold text-gray-900 mb-2 line-clamp-1">
+                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2 line-clamp-1">
                           {store.name}
                         </h2>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-2">
                           {store.description || "No description available."}
                         </p>
                       </div>
 
                       {/* Category Tags */}
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1 sm:gap-1.5">
                         {(store.categories || []).map(
                           (cat: any, idx: number) => (
                             <span
                               key={cat.id || idx}
-                              className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-xs font-medium"
+                              className="bg-yellow-100 text-yellow-800 px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium"
                             >
                               #{cat.name}
                             </span>
@@ -209,7 +209,7 @@ export default function RetailerStores() {
               ))}
             </div>
           ) : (
-            <div className="text-center text-gray-600 text-lg">
+            <div className="text-center text-gray-600 text-base sm:text-lg">
               You haven't created any stores yet.
             </div>
           )}
@@ -218,12 +218,12 @@ export default function RetailerStores() {
 
       {/* Delete Confirmation Modal */}
       {confirmDeleteId && storeToDelete && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
               Confirm Delete
             </h3>
-            <p className="text-sm text-gray-600 mb-2">
+            <p className="text-xs sm:text-sm text-gray-600 mb-2">
               Type <span className="font-bold">{storeToDelete.name}</span> to
               confirm deletion.
             </p>
@@ -234,19 +234,19 @@ export default function RetailerStores() {
               className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-500"
               placeholder="Enter store name"
             />
-            <div className="flex justify-end gap-3">
+            <div className="flex flex-col sm:flex-row justify-end gap-3">
               <button
                 onClick={() => {
                   setConfirmDeleteId(null);
                   setStoreToDelete(null);
                 }}
-                className="px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
+                className="w-full sm:w-auto px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
               >
                 Cancel
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+                className="w-full sm:w-auto px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
               >
                 Delete
               </button>

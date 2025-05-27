@@ -5,8 +5,6 @@ import { FiMenu, FiX, FiSearch, FiUser } from "react-icons/fi";
 import { auth, db } from "../context/firebaseProvider";
 import { onAuthStateChanged } from "firebase/auth";
 import { getDoc, doc } from "firebase/firestore";
-import { HiShoppingCart } from "react-icons/hi";
-import CartSidebar from "./CartSidebar";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,7 +14,6 @@ const Navigation = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
   const { t, i18n } = useTranslation();
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -186,7 +183,18 @@ const Navigation = () => {
                       {t("navigation.settings")}
                     </Link>
                     <button
-                      onClick={() => auth.signOut()}
+                      onClick={async () => {
+                        try {
+                          await auth.signOut();
+                          // Wait for a short delay to ensure auth state is cleared
+                          await new Promise((resolve) =>
+                            setTimeout(resolve, 100)
+                          );
+                          window.location.href = "/"; // Redirect to home page instead of reload
+                        } catch (error) {
+                          console.error("Error signing out:", error);
+                        }
+                      }}
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 border-t border-gray-100"
                     >
                       {t("signOut")}
@@ -216,8 +224,8 @@ const Navigation = () => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 absolute w-full left-0 top-full shadow-lg">
-          <div className="px-4 py-3 space-y-3">
+        <div className="md:hidden fixed inset-x-0 top-[72px] bg-white border-t border-gray-100 shadow-lg z-50">
+          <div className="px-4 py-3 space-y-3 max-h-[calc(100vh-72px)] overflow-y-auto">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
@@ -293,8 +301,12 @@ const Navigation = () => {
                     <button
                       onClick={async () => {
                         try {
-                          await auth.signOut(); // Wait for sign-out to complete
-                          window.location.reload(); // Reload the page
+                          await auth.signOut();
+                          // Wait for a short delay to ensure auth state is cleared
+                          await new Promise((resolve) =>
+                            setTimeout(resolve, 100)
+                          );
+                          window.location.href = "/"; // Redirect to home page instead of reload
                         } catch (error) {
                           console.error("Error signing out:", error);
                         }
@@ -325,15 +337,6 @@ const Navigation = () => {
           </div>
         </div>
       )}
-
-      <button
-        onClick={() => setIsCartOpen(true)}
-        className="p-2 text-gray-500 hover:text-yellow-600 transition-colors"
-      >
-        <HiShoppingCart className="w-6 h-6" />
-      </button>
-
-      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </>
   );
 };

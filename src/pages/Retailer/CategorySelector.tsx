@@ -67,13 +67,13 @@ export default function CategorySelector({ selected, onChange }: Props) {
       <label className="block text-sm font-bold text-gray-700">
         Select Categories <span className="text-red-600">*</span>
       </label>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {categories.map((cat) => (
           <button
             key={cat.id}
             type="button"
             onClick={() => toggleCategory(cat.id)}
-            className={`px-4 py-1 hover:scale-105 rounded-full text-sm border transition ${
+            className={`px-2 sm:px-4 py-1 hover:scale-105 rounded-full text-xs sm:text-sm border transition ${
               selected.includes(cat.id)
                 ? "bg-yellow-600 text-white border-yellow-600"
                 : "bg-white text-gray-700 border-gray-300 hover:bg-yellow-50"
@@ -85,33 +85,35 @@ export default function CategorySelector({ selected, onChange }: Props) {
       </div>
 
       {adding ? (
-        <div className="flex gap-2 mt-2">
+        <div className="flex flex-col sm:flex-row gap-2 mt-2">
           <input
             value={newCat}
             onChange={(e) => setNewCat(e.target.value)}
             placeholder="New category"
             className="px-3 py-2 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500 w-full"
           />
-          <button
-            onClick={handleAddNew}
-            className="px-4 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
-          >
-            Add
-          </button>
-          <button
-            onClick={() => {
-              setAdding(false);
-              setNewCat("");
-            }}
-            className="text-sm text-gray-500 hover:underline"
-          >
-            Cancel
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleAddNew}
+              className="flex-1 sm:flex-none px-4 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+            >
+              Add
+            </button>
+            <button
+              onClick={() => {
+                setAdding(false);
+                setNewCat("");
+              }}
+              className="flex-1 sm:flex-none text-sm text-gray-500 hover:underline"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       ) : (
         <button
           onClick={() => setDialogOpen(true)}
-          className="text-sm text-yellow-600 hover:underline mt-2"
+          className="text-xs sm:text-sm text-yellow-600 hover:underline mt-2"
         >
           + Add New Category
         </button>

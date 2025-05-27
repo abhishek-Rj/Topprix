@@ -35,6 +35,41 @@ export default function CartSidebar({ isOpen, onClose }: CartSidebarProps) {
       type: "flyer",
       description: "Latest gadgets and deals",
     },
+    {
+      id: 3,
+      title: "Tech Expo 2024",
+      store: "Tech Store",
+      type: "flyer",
+      description: "Latest gadgets and deals",
+    },
+    {
+      id: 4,
+      title: "Tech Expo 2024",
+      store: "Tech Store",
+      type: "flyer",
+      description: "Latest gadgets and deals",
+    },
+    {
+      id: 5,
+      title: "Tech Expo 2024",
+      store: "Tech Store",
+      type: "flyer",
+      description: "Latest gadgets and deals",
+    },
+    {
+      id: 6,
+      title: "Tech Expo 2024",
+      store: "Tech Store",
+      type: "flyer",
+      description: "Latest gadgets and deals",
+    },
+    {
+      id: 7,
+      title: "Tech Expo 2024",
+      store: "Tech Store",
+      type: "flyer",
+      description: "Latest gadgets and deals",
+    },
   ]);
 
   return (

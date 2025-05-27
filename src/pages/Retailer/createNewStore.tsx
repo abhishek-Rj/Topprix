@@ -216,28 +216,28 @@ export default function CreateNewStore() {
       <Navigation />
       <main className="pt-20 pb-10">
         <div className="container mx-auto px-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl mx-auto p-10 transition-all duration-300 hover:shadow-yellow-200">
-            <div className="max-w-4xl mx-auto mb-8">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl max-w-4xl mx-auto p-4 sm:p-6 md:p-10 transition-all duration-300 hover:shadow-yellow-200">
+            <div className="max-w-4xl mx-auto mb-6 sm:mb-8">
               <div
-                className="w-full h-30 sm:h-60 bg-cover bg-center rounded-xl flex items-center justify-center shadow-inner"
+                className="w-full h-24 sm:h-30 md:h-60 bg-cover bg-center rounded-xl flex items-center justify-center shadow-inner"
                 style={{
                   backgroundImage: `url('/createStore.png')`,
                   backgroundPosition: "center",
                   backgroundSize: "cover",
                 }}
               >
-                <div className="text-center bg-white/60 backdrop-blur-sm px-6 py-4 rounded-md shadow">
-                  <h2 className="text-3xl font-extrabold text-yellow-700 mb-1">
+                <div className="text-center bg-white/60 backdrop-blur-sm px-4 sm:px-6 py-3 sm:py-4 rounded-md shadow">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-yellow-700 mb-1">
                     Create a New Store
                   </h2>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-xs sm:text-sm text-gray-700">
                     Fill in the details to launch your store presence
                   </p>
                 </div>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <CategorySelector
                 selected={selectedCategories}
                 onChange={setSelectedCategories}
@@ -300,7 +300,7 @@ export default function CreateNewStore() {
                   </div>
                 </div>
 
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <div className="group relative flex-1">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                       ZIP/Postal Code <span className="text-red-500">*</span>
@@ -386,7 +386,7 @@ export default function CreateNewStore() {
                   Store Logo
                 </label>
                 <div className="relative group">
-                  <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-yellow-500 bg-gray-100 flex items-center justify-center">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-yellow-500 bg-gray-100 flex items-center justify-center">
                     {logo ? (
                       <img
                         src={URL.createObjectURL(logo)}
@@ -394,10 +394,10 @@ export default function CreateNewStore() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <FiImage className="w-12 h-12 text-gray-400" />
+                      <FiImage className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" />
                     )}
                     <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <FiCamera className="w-8 h-8 text-white" />
+                      <FiCamera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                     </div>
                   </div>
                   <input
@@ -407,16 +407,16 @@ export default function CreateNewStore() {
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-xs sm:text-sm text-gray-500">
                   Click to upload or drag and drop
                 </p>
               </div>
 
               {/* Crop Modal */}
               {showCropModal && imageSrc && (
-                <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50">
-                  <div className="bg-white/95 backdrop-blur-md rounded-lg p-6 max-w-2xl w-full mx-4 shadow-2xl border border-yellow-100">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white/95 backdrop-blur-md rounded-lg p-4 sm:p-6 max-w-2xl w-full mx-4 shadow-2xl border border-yellow-100">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
                       Crop Your Logo
                     </h3>
                     <div className="mb-4">
@@ -430,25 +430,25 @@ export default function CreateNewStore() {
                           ref={imageRef}
                           src={imageSrc}
                           alt="Crop preview"
-                          className="max-h-[60vh] object-contain"
+                          className="max-h-[50vh] sm:max-h-[60vh] object-contain"
                         />
                       </ReactCrop>
                     </div>
-                    <div className="flex justify-end space-x-4">
+                    <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
                       <button
                         type="button"
                         onClick={() => {
                           setShowCropModal(false);
                           setImageSrc(null);
                         }}
-                        className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                        className="w-full sm:w-auto px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                       >
                         Cancel
                       </button>
                       <button
                         type="button"
                         onClick={handleCropComplete}
-                        className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors"
+                        className="w-full sm:w-auto px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors"
                       >
                         Apply Crop
                       </button>
