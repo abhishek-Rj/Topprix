@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navigation from "../../components/navigation";
 import { HiNewspaper, HiTag, HiPlus, HiPencil, HiX } from "react-icons/hi";
 import baseUrl from "../../hooks/baseurl";
@@ -11,6 +11,9 @@ import { MdCancel } from "react-icons/md";
 import useAuthenticate from "../../hooks/authenticationt";
 import Loader from "../../components/loading";
 import { Calendar } from "@/components/ui/calendar";
+import useClickOutside from "@/hooks/useClickOutside";
+import CouponList from "@/components/CouponCard";
+import Footer from "@/components/Footer";
 
 export default function StoreDetailPage() {
   const { id } = useParams();
@@ -22,6 +25,7 @@ export default function StoreDetailPage() {
   const [description, setDescription] = useState("");
   const [code, setCode] = useState("");
   const [discount, setDiscount] = useState("");
+  const [coupons, setCoupons] = useState<any>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [barcodeFile, setBarcodeFile] = useState<File | null>(null);
   const [qrCodeFile, setQrCodeFile] = useState<File | null>(null);
@@ -30,11 +34,41 @@ export default function StoreDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user, loading } = useAuthenticate();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [pagination, setPagination] = useState<any>(null);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [showStartDateCalender, setShowStartDateCalender] =
     useState<boolean>(false);
   const [showEndDateCalender, setShowEndDateCalender] =
     useState<boolean>(false);
+
+  const barcodeRef = useRef<HTMLInputElement>(null);
+  const qrCodeRef = useRef<HTMLInputElement>(null);
+
+  const startRef = useRef(null);
+  const endRef = useRef(null);
+
+  useClickOutside(startRef, () => setShowStartDateCalender(false));
+  useClickOutside(endRef, () => setShowEndDateCalender(false));
+
+  useEffect(() => {
+    if (activeTab === "coupons") {
+      (async () => {
+        try {
+          const fetchCoupons = await fetch(`${baseUrl}coupons?storeId=${id}`);
+          if (fetchCoupons.ok) {
+            const couponsData = await fetchCoupons.json();
+            setCoupons(couponsData.coupons);
+            setPagination(couponsData.pagination);
+          } else {
+            toast.error("could fetch coupons");
+          }
+        } catch (err) {
+          toast.error("Something went wrong" + err);
+        }
+      })();
+    } else {
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     if (localStorage.getItem("lastVisited") === "flyers") {
@@ -91,6 +125,21 @@ export default function StoreDetailPage() {
     }
   };
 
+  const onPagination = async (page: number) => {
+    try {
+      const fetchMoreCoupons = await fetch(`${baseUrl}coupons?page=${page}`);
+      if (!fetchMoreCoupons.ok) {
+        toast.error(`Couldn't fetch more coupons`);
+        throw new Error("Cannot fetch more Coupons");
+      }
+      const moreCoupons = await fetchMoreCoupons.json();
+      setCoupons(moreCoupons.coupons);
+      setPagination(moreCoupons.pagination);
+    } catch (error) {
+      toast.error("Cannot load page" + error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -130,6 +179,8 @@ export default function StoreDetailPage() {
         code,
         barcodeUrl,
         qrCodeUrl,
+        startDate,
+        endDate,
         discount,
         categoryIds: selectedCategories,
       };
@@ -154,6 +205,7 @@ export default function StoreDetailPage() {
         );
         setShowDialog(false);
         resetForm();
+        window.location.reload();
       } else {
         throw new Error("Failed to create");
       }
@@ -192,7 +244,7 @@ export default function StoreDetailPage() {
     <div className="min-h-screen bg-yellow-50">
       <Navigation />
       <main className="pt-20 pb-10">
-        <div className="max-w-6xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6">
             {/* Store Header with Name, Description & Edit Button */}
             <div className="mb-6 bg-yellow-100 rounded-xl p-4 sm:p-6 shadow-sm">
@@ -267,6 +319,14 @@ export default function StoreDetailPage() {
                     No flyers yet. Click "Create Flyer" to add one.
                   </p>
                 </div>
+              ) : coupons ? (
+                <>
+                  <CouponList
+                    coupons={coupons}
+                    pagination={pagination}
+                    onPageChange={(page: number) => onPagination(page)}
+                  />
+                </>
               ) : (
                 <div className="text-center text-gray-700">
                   <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
@@ -286,7 +346,7 @@ export default function StoreDetailPage() {
       {/* Create Dialog */}
       {showDialog && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-auto p-4 sm:p-6">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto p-4 sm:p-6">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Create {activeTab === "flyers" ? "Flyer" : "Coupon"}
@@ -303,18 +363,33 @@ export default function StoreDetailPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Title <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Code <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    required
+                  />
+                </div>
               </div>
+
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">
                   Description
@@ -327,34 +402,30 @@ export default function StoreDetailPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Code <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Discount <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={discount}
+                    onChange={(e) => setDiscount(e.target.value)}
+                    placeholder="e.g., 20% off or $10 off"
+                    className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <CategorySelector
+                    selected={selectedCategories}
+                    onChange={setSelectedCategories}
+                  />
+                </div>
               </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Discount <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={discount}
-                  onChange={(e) => setDiscount(e.target.value)}
-                  placeholder="e.g., 20% off or $10 off"
-                  className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  required
-                />
-              </div>
-              <div className="relative flex flex-col sm:flex-row justify-between gap-6 sm:gap-12">
-                <div className="relative">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                {/* Start Date */}
+                <div ref={startRef} className="relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Start Date <span className="text-red-500">*</span>
                   </label>
@@ -363,12 +434,12 @@ export default function StoreDetailPage() {
                     value={startDate ? startDate.toLocaleDateString() : ""}
                     onFocus={() => setShowStartDateCalender(true)}
                     readOnly
-                    placeholder={`Select Start Date`}
+                    placeholder="Select Start Date"
                     className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                     required
                   />
                   {showStartDateCalender && (
-                    <div className="absolute top-full left-0 z-50 bg-white border border-gray-300 mt-1 rounded-md shadow-lg">
+                    <div className="absolute bottom-full left-0 z-50 bg-white/80 backdrop-blur-md border border-yellow-400 mt-1 rounded-xl shadow-2xl p-2">
                       <Calendar
                         mode="single"
                         selected={startDate}
@@ -381,7 +452,8 @@ export default function StoreDetailPage() {
                   )}
                 </div>
 
-                <div className="relative">
+                {/* End Date */}
+                <div ref={endRef} className="relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     End Date <span className="text-red-500">*</span>
                   </label>
@@ -390,12 +462,12 @@ export default function StoreDetailPage() {
                     value={endDate ? endDate.toLocaleDateString() : ""}
                     onFocus={() => setShowEndDateCalender(true)}
                     readOnly
-                    placeholder={`Select End Date`}
+                    placeholder="Select End Date"
                     className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                     required
                   />
                   {showEndDateCalender && (
-                    <div className="absolute top-full left-0 z-50 bg-white border border-gray-300 mt-1 rounded-md shadow-lg">
+                    <div className="absolute bottom-full left-0 z-50 bg-white/80 backdrop-blur-md border border-yellow-400 mt-1 rounded-xl shadow-2xl p-2">
                       <Calendar
                         mode="single"
                         selected={endDate}
@@ -408,20 +480,16 @@ export default function StoreDetailPage() {
                   )}
                 </div>
               </div>
-              <div>
-                <CategorySelector
-                  selected={selectedCategories}
-                  onChange={setSelectedCategories}
-                />
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                {/* Barcode Upload */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Barcode Image
                   </label>
                   <input
                     type="file"
+                    ref={barcodeRef}
                     accept="image/png, image/jpeg"
                     onChange={(e) => handleFileChange(e, "barcode")}
                     className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
@@ -433,20 +501,29 @@ export default function StoreDetailPage() {
                         alt="Barcode Preview"
                         className="h-full rounded shadow object-contain"
                       />
-                      <MdCancel
-                        onClick={() => setBarcodePreview(null)}
-                        className="absolute scale-x-150 scale-y-150 hover:scale-105 top-0 right-0 p-1 text-sm text-red bg-opacity-50 rounded-bl"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBarcodePreview(null);
+                          setBarcodeFile(null);
+                          if (barcodeRef.current) barcodeRef.current.value = "";
+                        }}
+                        className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                      >
+                        <MdCancel className="text-lg" />
+                      </button>
                     </div>
                   )}
                 </div>
 
+                {/* QR Code Upload */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     QR Code Image
                   </label>
                   <input
                     type="file"
+                    ref={qrCodeRef}
                     accept="image/png, image/jpeg"
                     onChange={(e) => handleFileChange(e, "qrcode")}
                     className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
@@ -458,30 +535,36 @@ export default function StoreDetailPage() {
                         alt="QR Code Preview"
                         className="h-full rounded shadow object-contain"
                       />
-                      <MdCancel
-                        onClick={() => setQrCodePreview(null)}
-                        className="absolute scale-x-150 scale-y-150 hover:scale-105 top-0 right-0 p-1 text-sm text-red bg-opacity-50 rounded-bl"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setQrCodePreview(null);
+                          setQrCodeFile(null);
+                          if (qrCodeRef.current) qrCodeRef.current.value = "";
+                        }}
+                        className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                      >
+                        <MdCancel className="text-lg" />
+                      </button>
                     </div>
                   )}
                 </div>
               </div>
-
-              <div className="flex flex-col sm:flex-row justify-end gap-3">
+              <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
                   onClick={() => {
                     setShowDialog(false);
                     resetForm();
                   }}
-                  className="w-full sm:w-auto px-4 py-2 rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className="px-6 py-2 rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full sm:w-auto px-4 py-2 rounded-md hover:scale-105 transition bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50"
+                  className="px-6 py-2 rounded-md hover:scale-105 transition bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50"
                 >
                   {isSubmitting ? "Creating..." : "Create"}
                 </button>
@@ -490,6 +573,7 @@ export default function StoreDetailPage() {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 }
