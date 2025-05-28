@@ -182,6 +182,18 @@ const Navigation = () => {
                     >
                       {t("navigation.settings")}
                     </Link>
+                    {userRole !== "USER" ? (
+                      <>
+                        <Link
+                          to="/stores"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50"
+                        >
+                          {t("navigation.yourStore")}
+                        </Link>
+                      </>
+                    ) : (
+                      <></>
+                    )}
                     <button
                       onClick={async () => {
                         try {
@@ -298,6 +310,18 @@ const Navigation = () => {
                     >
                       {t("navigation.profile")}
                     </Link>
+                    {userRole !== "USER" ? (
+                      <>
+                        <Link
+                          to="/stores"
+                          className="text-center px-3 py-2 text-sm bg-gray-100 rounded-md text-gray-700 hover:bg-gray-200"
+                        >
+                          {t("navigation.yourStore")}
+                        </Link>
+                      </> 
+                    ) : (
+                      <></>
+                    )}
                     <button
                       onClick={async () => {
                         try {

@@ -10,6 +10,7 @@ import { storage } from "../../context/firebaseProvider";
 import { MdCancel } from "react-icons/md";
 import useAuthenticate from "../../hooks/authenticationt";
 import Loader from "../../components/loading";
+import { Calendar } from "@/components/ui/calendar";
 
 export default function StoreDetailPage() {
   const { id } = useParams();
@@ -28,6 +29,12 @@ export default function StoreDetailPage() {
   const [qrCodePreview, setQrCodePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user, loading } = useAuthenticate();
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [showStartDateCalender, setShowStartDateCalender] =
+    useState<boolean>(false);
+  const [showEndDateCalender, setShowEndDateCalender] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (localStorage.getItem("lastVisited") === "flyers") {
@@ -126,6 +133,8 @@ export default function StoreDetailPage() {
         discount,
         categoryIds: selectedCategories,
       };
+
+      console.log(data);
 
       const response = await fetch(
         `${baseUrl}${activeTab === "flyers" ? "flyer" : "coupons"}`,
@@ -344,7 +353,61 @@ export default function StoreDetailPage() {
                   required
                 />
               </div>
+              <div className="relative flex flex-col sm:flex-row justify-between gap-6 sm:gap-12">
+                <div className="relative">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Start Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={startDate ? startDate.toLocaleDateString() : ""}
+                    onFocus={() => setShowStartDateCalender(true)}
+                    readOnly
+                    placeholder={`Select Start Date`}
+                    className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    required
+                  />
+                  {showStartDateCalender && (
+                    <div className="absolute top-full left-0 z-50 bg-white border border-gray-300 mt-1 rounded-md shadow-lg">
+                      <Calendar
+                        mode="single"
+                        selected={startDate}
+                        onSelect={(date) => {
+                          setStartDate(date);
+                          setShowStartDateCalender(false);
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
 
+                <div className="relative">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    End Date <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={endDate ? endDate.toLocaleDateString() : ""}
+                    onFocus={() => setShowEndDateCalender(true)}
+                    readOnly
+                    placeholder={`Select End Date`}
+                    className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    required
+                  />
+                  {showEndDateCalender && (
+                    <div className="absolute top-full left-0 z-50 bg-white border border-gray-300 mt-1 rounded-md shadow-lg">
+                      <Calendar
+                        mode="single"
+                        selected={endDate}
+                        onSelect={(date) => {
+                          setEndDate(date);
+                          setShowEndDateCalender(false);
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
               <div>
                 <CategorySelector
                   selected={selectedCategories}

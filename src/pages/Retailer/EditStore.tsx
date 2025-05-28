@@ -4,7 +4,7 @@ import Navigation from "../../components/navigation";
 import Loader from "../../components/loading";
 import useAuthenticate from "../../hooks/authenticationt";
 import baseUrl from "../../hooks/baseurl";
-import CategorySelector from "./CategorySelector";
+import CategorySelector from "../Common/CategorySelector";
 import { toast } from "react-toastify";
 import { FaStore } from "react-icons/fa";
 import {

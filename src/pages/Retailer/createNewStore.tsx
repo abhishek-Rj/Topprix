@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "../../components/navigation";
-import CategorySelector from "./CategorySelector";
+import CategorySelector from "../Common/CategorySelector";
 import useAuthenticate from "../../hooks/authenticationt";
 import Loader from "../../components/loading";
 import baseUrl from "../../hooks/baseurl";
@@ -203,7 +203,7 @@ export default function CreateNewStore() {
         throw new Error("Store creation failed");
       }
       toast.success("Store created successfully");
-      navigate("/retailer-stores");
+      navigate("/stores");
     } catch (error: any) {
       toast.error(error.message || "Error creating store");
     } finally {

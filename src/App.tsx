@@ -10,7 +10,7 @@ import RetailerStores from "./pages/Retailer/RetailerStore";
 import CreateNewStore from "./pages/Retailer/createNewStore";
 import NotFound from "./pages/NotFound";
 import EditStore from "./pages/Retailer/EditStore";
-import StoreDetailPage from "./pages/Retailer/Store";
+import StoreDetailPage from "./pages/Common/Store";
 import CouponPage from "./pages/Coupon";
 import FlyerPage from "./pages/Flyer";
 import FavoritesPage from "./pages/Favorites";
@@ -24,7 +24,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/retailer-stores" element={<RetailerStores />} />
+          <Route path="/stores" element={<RetailerStores />} />
           <Route
             path="retailer-stores/create-new-store"
             element={<CreateNewStore />}
