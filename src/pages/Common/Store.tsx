@@ -54,7 +54,9 @@ export default function StoreDetailPage() {
     if (activeTab === "coupons") {
       (async () => {
         try {
-          const fetchCoupons = await fetch(`${baseUrl}coupons?storeId=${id}`);
+          const fetchCoupons = await fetch(
+            `${baseUrl}coupons?storeId=${id}&limit=${12}`
+          );
           if (fetchCoupons.ok) {
             const couponsData = await fetchCoupons.json();
             setCoupons(couponsData.coupons);
@@ -127,7 +129,9 @@ export default function StoreDetailPage() {
 
   const onPagination = async (page: number) => {
     try {
-      const fetchMoreCoupons = await fetch(`${baseUrl}coupons?page=${page}`);
+      const fetchMoreCoupons = await fetch(
+        `${baseUrl}coupons?storeId=${id}&page=${page}&limit=${12}`
+      );
       if (!fetchMoreCoupons.ok) {
         toast.error(`Couldn't fetch more coupons`);
         throw new Error("Cannot fetch more Coupons");
@@ -144,7 +148,14 @@ export default function StoreDetailPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (!title || !code || !discount || selectedCategories.length === 0) {
+    if (
+      !title ||
+      !code ||
+      !discount ||
+      selectedCategories.length === 0 ||
+      !startDate ||
+      !endDate
+    ) {
       toast.error("Please fill in all required fields.");
       setIsSubmitting(false);
       return;
@@ -218,6 +229,14 @@ export default function StoreDetailPage() {
     }
   };
 
+  useEffect(() => {
+    if (showDialog) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+  }, [showDialog]);
+
   const resetForm = () => {
     setTitle("");
     setCode("");
@@ -245,24 +264,46 @@ export default function StoreDetailPage() {
       <Navigation />
       <main className="pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-4 sm:p-6">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-9xl mx-auto max-h-max overflow-y-auto p-4 sm:p-6">
             {/* Store Header with Name, Description & Edit Button */}
             <div className="mb-6 bg-yellow-100 rounded-xl p-4 sm:p-6 shadow-sm">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-3">
-                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {store.name}
-                </h1>
-                <button
-                  onClick={handleEditStore}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
-                >
-                  <HiPencil />
-                  Edit Store
-                </button>
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
+                {/* Store Logo */}
+                <div className="w-full sm:w-32 shrink-0">
+                  {store.logo ? (
+                    <img
+                      src={store.logo}
+                      alt={`${store.name} Logo`}
+                      className="w-full aspect-[4/3] object-cover rounded-md border border-yellow-300 shadow-sm"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[4/3] flex items-center justify-center text-2xl font-semibold text-yellow-700 bg-yellow-200 rounded-md border border-yellow-300 shadow-sm">
+                      {store.name?.charAt(0).toUpperCase() || "S"}
+                    </div>
+                  )}
+                </div>
+
+                {/* Store Info */}
+                <div className="flex flex-col w-full">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                      {store.name}
+                    </h1>
+                    <button
+                      onClick={handleEditStore}
+                      className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
+                    >
+                      <HiPencil />
+                      Edit Store
+                    </button>
+                  </div>
+
+                  {/* Store Description */}
+                  <p className="text-sm sm:text-base text-gray-700 mt-1">
+                    {store.description || "No description provided."}
+                  </p>
+                </div>
               </div>
-              <p className="text-sm sm:text-base text-gray-700">
-                {store.description || "No description provided."}
-              </p>
             </div>
 
             {/* Tabs and Create Button */}
@@ -324,6 +365,7 @@ export default function StoreDetailPage() {
                   <CouponList
                     coupons={coupons}
                     pagination={pagination}
+                    showLogo={false}
                     onPageChange={(page: number) => onPagination(page)}
                   />
                 </>
@@ -346,7 +388,7 @@ export default function StoreDetailPage() {
       {/* Create Dialog */}
       {showDialog && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto p-4 sm:p-6">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto max-h-[90vh] overflow-y-auto p-4 sm:p-6 scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-transparent">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Create {activeTab === "flyers" ? "Flyer" : "Coupon"}

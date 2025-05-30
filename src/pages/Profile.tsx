@@ -178,7 +178,9 @@ export default function Profile() {
           <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
               <span className="text-yellow-600 text-4xl font-bold">
-                {user?.name?.charAt(0) || user?.email?.charAt(0) || "?"}
+                {user?.name?.charAt(0).toUpperCase() ||
+                  user?.email?.charAt(0).toUpperCase() ||
+                  "?"}
               </span>
             </div>
             <div className="flex-1 text-center sm:text-left">

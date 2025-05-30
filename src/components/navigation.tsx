@@ -5,6 +5,7 @@ import { FiMenu, FiX, FiSearch, FiUser } from "react-icons/fi";
 import { auth, db } from "../context/firebaseProvider";
 import { onAuthStateChanged } from "firebase/auth";
 import { getDoc, doc } from "firebase/firestore";
+import SkeletonNav from "./ui/navbarSkeleton";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -53,20 +54,40 @@ const Navigation = () => {
     setIsMenuOpen(false);
   }, [location]);
 
-  const navLinks = [
-    { name: t("navigation.coupon"), path: "/explore/coupons" },
-    { name: t("navigation.flyer"), path: "/explore/flyers" },
-    { name: t("navigation.favourite"), path: "/favourite" },
-    { name: t("navigation.wishlist"), path: "/wishlist" },
-    { name: t("navigation.profile"), path: "/profile" },
-  ];
+  let navLinks: any = [];
 
-  if (userRole === "RETAILER" || userRole === "ADMIN") {
-    navLinks.unshift({
-      name: t("navigation.dashboard"),
-      path:
-        userRole === "RETAILER" ? "/retailer-dashboard" : "/admin-dashboard",
-    });
+  if (user && userRole === null) {
+    return <SkeletonNav />;
+  }
+
+  if (userRole === "USER") {
+    navLinks = [
+      { name: t("navigation.coupon"), path: "/explore/coupons" },
+      { name: t("navigation.flyer"), path: "/explore/flyers" },
+      { name: t("navigation.favourite"), path: "/favourite" },
+      { name: t("navigation.wishlist"), path: "/wishlist" },
+      { name: t("navigation.profile"), path: "/profile" },
+    ];
+  }
+
+  if (userRole === "RETAILER") {
+    navLinks = [
+      { name: t("navigation.dashboard"), path: "/retailer-dashboard" },
+      { name: t("navigation.yourStores"), path: "/stores" },
+      { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
+      { name: t("navigation.yourFlyers"), path: "/explore/flyers" },
+      { name: t("navigation.profile"), path: "/profile" },
+    ];
+  }
+
+  if (userRole === "ADMIN") {
+    navLinks = [
+      { name: t("navigation.dashboard"), path: "/admin-dashboard" },
+      { name: t("navigation.yourStores"), path: "/stores" },
+      { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
+      { name: t("navigation.yourFlyers"), path: "/explore/flyers" },
+      { name: t("navigation.profile"), path: "/profile" },
+    ];
   }
 
   return (
@@ -95,7 +116,7 @@ const Navigation = () => {
             </Link>
 
             <nav className="hidden md:flex items-center space-x-6">
-              {navLinks.map((link) => (
+              {navLinks.map((link: any) => (
                 <Link
                   key={link.path}
                   to={link.path}
@@ -188,7 +209,7 @@ const Navigation = () => {
                           to="/stores"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50"
                         >
-                          {t("navigation.yourStore")}
+                          {t("navigation.yourStores")}
                         </Link>
                       </>
                     ) : (
@@ -238,7 +259,7 @@ const Navigation = () => {
       {isMenuOpen && (
         <div className="md:hidden fixed inset-x-0 top-[72px] bg-white border-t border-gray-100 shadow-lg z-50">
           <div className="px-4 py-3 space-y-3 max-h-[calc(100vh-72px)] overflow-y-auto">
-            {navLinks.map((link) => (
+            {navLinks.map((link: any) => (
               <Link
                 key={link.path}
                 to={link.path}
@@ -316,9 +337,9 @@ const Navigation = () => {
                           to="/stores"
                           className="text-center px-3 py-2 text-sm bg-gray-100 rounded-md text-gray-700 hover:bg-gray-200"
                         >
-                          {t("navigation.yourStore")}
+                          {t("navigation.yourStores")}
                         </Link>
-                      </> 
+                      </>
                     ) : (
                       <></>
                     )}

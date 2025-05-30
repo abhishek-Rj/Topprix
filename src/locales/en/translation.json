@@ -25,14 +25,16 @@
   "navigation": {
     "home": "Home",
     "coupon": "Coupon",
-    "yourStore": "Your Store",
     "favourite": "Favourite",
     "profile": "Profile",
     "search": "Search",
     "settings": "Settings",
     "wishlist": "Wishlist",
     "dashboard": "Dashboard",
-    "flyer": "Flyer"
+    "flyer": "Flyer",
+    "yourStores": "Your Stores",
+    "yourCoupons": "Your Coupons",
+    "yourFlyers": "Your Flyers"
   },
   "profile": {
     "name": "Name",

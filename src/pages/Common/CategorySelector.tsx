@@ -21,6 +21,14 @@ export default function CategorySelector({ selected, onChange }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
+    if (dialogOpen) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+  }, [dialogOpen]);
+
+  useEffect(() => {
     (async () => {
       try {
         const getCategories = await fetch(`${baseUrl}categories`, {

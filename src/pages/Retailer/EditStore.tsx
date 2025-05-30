@@ -234,72 +234,93 @@ export default function EditStore() {
     <div className="min-h-screen bg-yellow-50">
       <Navigation />
       <main className="pt-20 pb-10">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto mb-6 sm:mb-8">
-            <div
-              className="w-full h-24 sm:h-30 md:h-60 bg-cover bg-center rounded-xl flex items-center justify-center shadow-inner"
-              style={{
-                backgroundImage: `url('/editStore.png')`,
-                backgroundPosition: "center",
-                backgroundSize: "cover",
-              }}
-            >
-              <div className="text-center bg-white/60 backdrop-blur-sm px-4 sm:px-6 py-3 sm:py-4 rounded-md shadow">
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-yellow-700 mb-1">
-                  Edit Store Details
-                </h2>
-                <p className="text-xs sm:text-sm text-gray-700">
-                  Update your store information below
-                </p>
-              </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl max-w-5xl mx-auto p-4 sm:p-6 md:p-10 transition-all duration-300 hover:shadow-yellow-200">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 bg-yellow-100 border border-yellow-100 rounded-xl px-4 py-3 shadow-inner">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Edit Store Details
+              </h1>
+              <p className="text-sm text-gray-700">
+                Update your store information below
+              </p>
             </div>
-          </div>
 
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl max-w-4xl mx-auto p-4 sm:p-6 md:p-10 transition-all duration-300 hover:shadow-yellow-200">
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              <CategorySelector
-                selected={selectedCategories}
-                onChange={setSelectedCategories}
-              />
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Logo and Basic Info Section */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Logo Upload */}
+                <div className="flex flex-col items-center bg-yellow-50/50 p-4 rounded-xl border border-yellow-100">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Store Logo
+                  </label>
+                  <div className="relative group">
+                    <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-yellow-500 bg-gray-100 flex items-center justify-center">
+                      {logoPreview ? (
+                        <img
+                          src={logoPreview}
+                          alt="Store Logo"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <FiImage className="w-10 h-10 text-gray-400" />
+                      )}
+                      <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <FiCamera className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg"
+                      onChange={handleFileChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">Click to upload</p>
+                </div>
 
-              <div className="group relative">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Store Name <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                    <FiHome />
-                  </span>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Store Name"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all group-hover:shadow-md hover:scale-105"
-                    required
-                  />
+                {/* Store Name and Description */}
+                <div className="md:col-span-2 space-y-4">
+                  <div className="group relative">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Store Name <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                        <FiHome />
+                      </span>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Store Name"
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all group-hover:shadow-md"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="group relative">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-4 text-gray-400">
+                        <FiEdit />
+                      </span>
+                      <textarea
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        rows={3}
+                        placeholder="Describe your store"
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all group-hover:shadow-md"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="group relative">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Description
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-4 text-gray-400">
-                    <FiEdit />
-                  </span>
-                  <textarea
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={4}
-                    placeholder="Describe your store"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all group-hover:shadow-md hover:scale-105"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
+              {/* Location Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="group relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Address <span className="text-red-500">*</span>
@@ -313,16 +334,16 @@ export default function EditStore() {
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="Street Address"
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all group-hover:shadow-md hover:scale-105"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all group-hover:shadow-md"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="group relative flex-1">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="group relative">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      ZIP/Postal Code <span className="text-red-500">*</span>
+                      ZIP Code <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -332,14 +353,14 @@ export default function EditStore() {
                         type="text"
                         value={zipCode}
                         onChange={(e) => setZipCode(e.target.value)}
-                        placeholder="ZIP/Postal Code"
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all group-hover:shadow-md hover:scale-105"
+                        placeholder="ZIP Code"
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all group-hover:shadow-md"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="group relative flex-1">
+                  <div className="group relative">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                       Country <span className="text-red-500">*</span>
                     </label>
@@ -350,10 +371,10 @@ export default function EditStore() {
                       <select
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all group-hover:shadow-md hover:scale-105 appearance-none"
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all group-hover:shadow-md appearance-none"
                         required
                       >
-                        <option value="">Select a country</option>
+                        <option value="">Select country</option>
                         <optgroup label="North America">
                           <option value="US">🇺🇸 United States</option>
                           <option value="CA">🇨🇦 Canada</option>
@@ -400,35 +421,15 @@ export default function EditStore() {
                 </div>
               </div>
 
-              <div className="flex flex-col items-center">
-                <label className="block text-sm font-semibold text-gray-700 mb-4">
-                  Store Logo
+              {/* Categories */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Store Categories <span className="text-red-500">*</span>
                 </label>
-                <div className="relative group">
-                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 border-yellow-500 bg-gray-100 flex items-center justify-center">
-                    {logoPreview ? (
-                      <img
-                        src={logoPreview}
-                        alt="Store Logo"
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <FiImage className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400" />
-                    )}
-                    <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <FiCamera className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                    </div>
-                  </div>
-                  <input
-                    type="file"
-                    accept="image/png, image/jpeg"
-                    onChange={handleFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  />
-                </div>
-                <p className="mt-2 text-xs sm:text-sm text-gray-500">
-                  Click to upload or drag and drop
-                </p>
+                <CategorySelector
+                  selected={selectedCategories}
+                  onChange={setSelectedCategories}
+                />
               </div>
 
               {/* Crop Modal */}
@@ -476,21 +477,33 @@ export default function EditStore() {
                 </div>
               )}
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-3 px-6 bg-gradient-to-r from-yellow-500 to-yellow-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-transform duration-300 flex items-center justify-center gap-2 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submitting ? (
-                  <Loader />
-                ) : (
-                  <>
-                    <span className="absolute inset-0 bg-yellow-300 opacity-10 rounded-xl blur-xl group-hover:opacity-20 transition-opacity duration-300"></span>
-                    <FaStore className="text-lg" />
-                    <span className="z-10">Save Changes</span>
-                  </>
-                )}
-              </button>
+              <div className="flex justify-end gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => navigate("/stores")}
+                  className="px-6 py-2 rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-6 py-2 bg-gradient-to-r from-yellow-500 to-yellow-700 text-white font-semibold rounded-md shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {submitting ? (
+                    <>
+                      <span className="absolute inset-0 bg-yellow-500 opacity-10 rounded-md blur-xl group-hover:opacity-20 transition-opacity duration-300"></span>
+                      <span className="z-10">Saving...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="absolute inset-0 bg-yellow-300 opacity-10 rounded-md blur-xl group-hover:opacity-20 transition-opacity duration-300"></span>
+                      <FaStore className="text-lg" />
+                      <span className="z-10">Save Changes</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
           </div>
         </div>

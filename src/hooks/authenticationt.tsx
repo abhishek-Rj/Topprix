@@ -30,7 +30,6 @@ export default function useAuthenticate() {
         setAuthenticated(true);
         setUser(user);
       } else {
-        navigate("/login");
         setUser(null);
         setAuthenticated(false);
       }

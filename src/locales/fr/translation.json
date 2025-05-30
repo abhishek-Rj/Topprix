@@ -35,7 +35,9 @@
     "wishlist": "Liste de souhaits",
     "dashboard": "Tableau de bord",
     "flyer": "Flyer",
-    "yourStore": "Votre magasin"
+    "yourStores": "Votre magasin",
+    "yourCoupons": "Vos coupons",
+    "yourFlyers": "Vos prospectus"
   },
   "profile": {
     "name": "Nom",
