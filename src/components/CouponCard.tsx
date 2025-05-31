@@ -82,11 +82,13 @@ const CouponCard = ({
       });
 
       if (response.ok) {
-        window.location.reload();
         toast.success("Coupon deleted successfully");
         if (onDelete) {
           onDelete(coupon.id);
         }
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       } else {
         throw new Error("Failed to delete coupon");
       }
@@ -117,7 +119,7 @@ const CouponCard = ({
   return (
     <>
       <Card
-        className="w-full max-w-md rounded-2xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow relative group"
+        className="w-full hover:translate-y-2 max-w-md rounded-2xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-all relative group"
         onClick={() => setShowPreview(true)}
       >
         {/* Action Buttons - Only visible on hover for authorized users */}
@@ -149,7 +151,7 @@ const CouponCard = ({
               </h2>
               <p className="text-sm text-gray-600">{coupon.code}</p>
             </div>
-            {showlogo && (
+            {showlogo && coupon.store.logo && (
               <img
                 src={coupon.store.logo}
                 alt={coupon.store.name}
@@ -474,13 +476,17 @@ const CouponList = ({
   onEdit,
   onDelete,
 }: {
-  coupons: any;
+  coupons: any[];
   pagination: any;
   onPageChange: (page: number) => void;
   showLogo: boolean;
   onEdit?: (coupon: any) => void;
   onDelete?: (couponId: string) => void;
 }) => {
+  if (!Array.isArray(coupons)) {
+    return null;
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -495,25 +501,27 @@ const CouponList = ({
         ))}
       </div>
 
-      <div className="flex justify-center gap-2 mt-6">
-        <Button
-          variant="outline"
-          disabled={!pagination.hasPreviousPage}
-          onClick={() => onPageChange(pagination.page - 1)}
-        >
-          Previous
-        </Button>
-        <div className="text-sm text-gray-600 translate-y-2">
-          Page {pagination.page} of {pagination.totalPages}
+      {pagination && (
+        <div className="flex justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            disabled={!pagination.hasPreviousPage}
+            onClick={() => onPageChange(pagination.page - 1)}
+          >
+            Previous
+          </Button>
+          <div className="text-sm text-gray-600 translate-y-2">
+            Page {pagination.page} of {pagination.totalPages}
+          </div>
+          <Button
+            variant="outline"
+            disabled={!pagination.hasNextPage}
+            onClick={() => onPageChange(pagination.page + 1)}
+          >
+            Next
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          disabled={!pagination.hasNextPage}
-          onClick={() => onPageChange(pagination.page + 1)}
-        >
-          Next
-        </Button>
-      </div>
+      )}
     </div>
   );
 };

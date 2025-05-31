@@ -21,6 +21,8 @@ export default function StoreDetailPage() {
   const [activeTab, setActiveTab] = useState<"flyers" | "coupons">("flyers");
   const [store, setStore] = useState<any>(null);
   const [showDialog, setShowDialog] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedCoupon, setSelectedCoupon] = useState<any>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [code, setCode] = useState("");
@@ -102,6 +104,35 @@ export default function StoreDetailPage() {
   }, [id]);
 
   const handleCreate = () => {
+    setIsEditing(false);
+    setSelectedCoupon(null);
+    resetForm();
+    setShowDialog(true);
+  };
+
+  let categories: Map<string, string[]> = new Map();
+
+  coupons?.forEach((coupon: any) => {
+    coupon.categories.forEach((category: any) => {
+      categories.set(coupon.id, [
+        ...(categories.get(coupon.id) || []),
+        category.id,
+      ]);
+    });
+  });
+
+  const handleEdit = (coupon: any) => {
+    setIsEditing(true);
+    setSelectedCoupon(coupon);
+    setTitle(coupon.title);
+    setDescription(coupon.description);
+    setCode(coupon.code);
+    setDiscount(coupon.discount);
+    setSelectedCategories(categories.get(coupon.id) || []);
+    setBarcodePreview(coupon.barcodeUrl);
+    setQrCodePreview(coupon.qrCodeUrl);
+    setStartDate(coupon.startDate ? new Date(coupon.startDate) : undefined);
+    setEndDate(coupon.endDate ? new Date(coupon.endDate) : undefined);
     setShowDialog(true);
   };
 
@@ -183,46 +214,59 @@ export default function StoreDetailPage() {
         qrCodeUrl = await getDownloadURL(qrCodeRef);
       }
 
-      const data = {
+      const couponData = {
         title,
         description,
-        storeId: id,
         code,
-        barcodeUrl,
-        qrCodeUrl,
+        discount,
+        storeId: id,
+        categories: selectedCategories,
+        barcodeUrl:
+          barcodeUrl || (isEditing ? selectedCoupon.barcodeUrl : null),
+        qrCodeUrl: qrCodeUrl || (isEditing ? selectedCoupon.qrCodeUrl : null),
         startDate,
         endDate,
-        discount,
-        categoryIds: selectedCategories,
       };
 
-      console.log(data);
+      const url = isEditing
+        ? `${baseUrl}coupons/${selectedCoupon.id}`
+        : `${baseUrl}coupons`;
 
-      const response = await fetch(
-        `${baseUrl}${activeTab === "flyers" ? "flyer" : "coupons"}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "user-email": user?.email,
-          },
-          body: JSON.stringify(data),
-        }
-      );
+      const response = await fetch(url, {
+        method: isEditing ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "user-email": user?.email || "",
+        },
+        body: JSON.stringify(couponData),
+      });
 
-      if (response.ok) {
-        toast.success(
-          `${activeTab === "flyers" ? "Flyer" : "Coupon"} created successfully`
+      if (!response.ok) {
+        throw new Error(
+          isEditing ? "Failed to update coupon" : "Failed to create coupon"
         );
-        setShowDialog(false);
-        resetForm();
-        window.location.reload();
-      } else {
-        throw new Error("Failed to create");
       }
+      if (isEditing) {
+        toast.success("Coupon updated successfully");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        toast.success("Coupon created successfully");
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+
+      setShowDialog(false);
+      resetForm();
     } catch (error) {
+      console.error(
+        isEditing ? "Error updating coupon:" : "Error creating coupon:",
+        error
+      );
       toast.error(
-        `Error creating ${activeTab === "flyers" ? "flyer" : "coupon"}`
+        isEditing ? "Error updating coupon" : "Error creating coupon"
       );
     } finally {
       setIsSubmitting(false);
@@ -363,10 +407,11 @@ export default function StoreDetailPage() {
               ) : coupons ? (
                 <>
                   <CouponList
+                    showLogo={false}
                     coupons={coupons}
                     pagination={pagination}
-                    showLogo={false}
-                    onPageChange={(page: number) => onPagination(page)}
+                    onPageChange={onPagination}
+                    onEdit={handleEdit}
                   />
                 </>
               ) : (
@@ -608,7 +653,13 @@ export default function StoreDetailPage() {
                   disabled={isSubmitting}
                   className="px-6 py-2 rounded-md hover:scale-105 transition bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50"
                 >
-                  {isSubmitting ? "Creating..." : "Create"}
+                  {isSubmitting
+                    ? isEditing
+                      ? "Updating..."
+                      : "Creating..."
+                    : isEditing
+                    ? "Update"
+                    : "Create"}
                 </button>
               </div>
             </form>
