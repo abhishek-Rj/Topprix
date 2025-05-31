@@ -80,6 +80,8 @@ export default function CouponPage() {
   }, []);
 
   useEffect(() => {
+    const element = document.getElementById("goto");
+    element?.scrollIntoView({ behavior: "smooth" });
     const sortBy = localStorage.getItem("sortBy") || "all";
     const storedCategories = localStorage.getItem("selectedCategories");
     const selectedCategory = localStorage.getItem("categories") || "all";
@@ -138,12 +140,12 @@ export default function CouponPage() {
     return () => unsubscribe();
   }, []);
 
-  const handleEdit = (coupon: Coupon) => {
+  const handleEdit = () => {
     // Placeholder for edit functionality
     toast.info("Edit functionality coming soon!");
   };
 
-  const handleDelete = (couponId: string) => {
+  const handleDelete = () => {
     // Placeholder for delete functionality
     toast.info("Delete functionality coming soon!");
   };
@@ -233,7 +235,7 @@ export default function CouponPage() {
                 </h1>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto">
                   Discover amazing deals and discounts from your favorite
-                  stores. Save more with our exclusive coupons!xl
+                  stores. Save more with our exclusive coupons!
                 </p>
               </motion.div>
 
@@ -265,7 +267,7 @@ export default function CouponPage() {
 
           <div className="pt-8">
             {/* Filters and Search */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div id="goto" className="bg-white rounded-xl shadow-lg p-6 mb-8">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="relative">
                   <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -341,6 +343,7 @@ export default function CouponPage() {
                 All Categories
               </motion.button>
               {categories
+                .slice(0, 6)
                 .filter((cat: any) => cat !== "all")
                 .map((category: any) => (
                   <motion.button

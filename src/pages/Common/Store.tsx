@@ -14,6 +14,7 @@ import { Calendar } from "@/components/ui/calendar";
 import useClickOutside from "@/hooks/useClickOutside";
 import CouponList from "@/components/CouponCard";
 import Footer from "@/components/Footer";
+import FlyerList from "@/components/FlyerCard";
 
 export default function StoreDetailPage() {
   const { id } = useParams();
@@ -23,16 +24,24 @@ export default function StoreDetailPage() {
   const [showDialog, setShowDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState<any>(null);
+  const [selectedFlyer, setSelectedFlyer] = useState<any>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [code, setCode] = useState("");
   const [discount, setDiscount] = useState("");
   const [coupons, setCoupons] = useState<any>(null);
+  const [flyers, setFlyers] = useState<any>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [barcodeFile, setBarcodeFile] = useState<File | null>(null);
   const [qrCodeFile, setQrCodeFile] = useState<File | null>(null);
   const [barcodePreview, setBarcodePreview] = useState<string | null>(null);
   const [qrCodePreview, setQrCodePreview] = useState<string | null>(null);
+  const [flyerImage, setFlyerImage] = useState<File | null>(null);
+  const [flyerImagePreview, setFlyerImagePreview] = useState<string | null>(
+    null
+  );
+  const [isPremium, setIsPremium] = useState(false);
+  const [isSponsored, setIsSponsored] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user, loading } = useAuthenticate();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -70,7 +79,23 @@ export default function StoreDetailPage() {
           toast.error("Something went wrong" + err);
         }
       })();
-    } else {
+    } else if (activeTab === "flyers") {
+      (async () => {
+        try {
+          const fetchFlyers = await fetch(
+            `${baseUrl}flyers?storeId=${id}&limit=${12}`
+          );
+          if (fetchFlyers.ok) {
+            const flyersData = await fetchFlyers.json();
+            setFlyers(flyersData.flyers);
+            setPagination(flyersData.pagination);
+          } else {
+            toast.error("could fetch flyers");
+          }
+        } catch (err) {
+          toast.error("Something went wrong" + err);
+        }
+      })();
     }
   }, [activeTab]);
 
@@ -106,6 +131,7 @@ export default function StoreDetailPage() {
   const handleCreate = () => {
     setIsEditing(false);
     setSelectedCoupon(null);
+    setSelectedFlyer(null);
     resetForm();
     setShowDialog(true);
   };
@@ -140,18 +166,35 @@ export default function StoreDetailPage() {
     navigate(`/retailer-stores/edit-store/${id}`);
   };
 
+  const handleEditFlyer = (flyer: any) => {
+    setIsEditing(true);
+    setSelectedFlyer(flyer);
+    setTitle(flyer.title);
+    setDescription(flyer.description);
+    setSelectedCategories(flyer.categories || []);
+    setFlyerImagePreview(flyer.imageUrl);
+    setIsPremium(flyer.isPremium);
+    setIsSponsored(flyer.isSponsored);
+    setStartDate(flyer.startDate ? new Date(flyer.startDate) : undefined);
+    setEndDate(flyer.endDate ? new Date(flyer.endDate) : undefined);
+    setShowDialog(true);
+  };
+
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: "barcode" | "qrcode"
+    type: "barcode" | "qrcode" | "flyer"
   ) => {
     const file = e.target.files?.[0];
     if (file && ["image/jpeg", "image/png"].includes(file.type)) {
       if (type === "barcode") {
         setBarcodeFile(file);
         setBarcodePreview(URL.createObjectURL(file));
-      } else {
+      } else if (type === "qrcode") {
         setQrCodeFile(file);
         setQrCodePreview(URL.createObjectURL(file));
+      } else if (type === "flyer") {
+        setFlyerImage(file);
+        setFlyerImagePreview(URL.createObjectURL(file));
       }
     } else {
       toast.error("Only JPG or PNG files are allowed.");
@@ -179,98 +222,176 @@ export default function StoreDetailPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (
-      !title ||
-      !code ||
-      !discount ||
-      selectedCategories.length === 0 ||
-      !startDate ||
-      !endDate
-    ) {
-      toast.error("Please fill in all required fields.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      let barcodeUrl = "";
-      let qrCodeUrl = "";
-
-      if (barcodeFile) {
-        const barcodeRef = ref(
-          storage,
-          `barcodes/${Date.now()}_${barcodeFile.name}`
-        );
-        await uploadBytes(barcodeRef, barcodeFile);
-        barcodeUrl = await getDownloadURL(barcodeRef);
+    if (activeTab === "flyers") {
+      if (
+        !title ||
+        selectedCategories.length === 0 ||
+        !startDate ||
+        !endDate ||
+        !flyerImage
+      ) {
+        toast.error("Please fill in all required fields for the flyer.");
+        setIsSubmitting(false);
+        return;
       }
 
-      if (qrCodeFile) {
-        const qrCodeRef = ref(
-          storage,
-          `qrcodes/${Date.now()}_${qrCodeFile.name}`
+      try {
+        let imageUrl = "";
+        if (flyerImage) {
+          const imageRef = ref(
+            storage,
+            `flyers/${Date.now()}_${flyerImage.name}`
+          );
+          await uploadBytes(imageRef, flyerImage);
+          imageUrl = await getDownloadURL(imageRef);
+        }
+
+        const flyerData = {
+          title,
+          description,
+          storeId: id,
+          categoryIds: selectedCategories,
+          imageUrl: imageUrl || (isEditing ? selectedFlyer.imageUrl : null),
+          startDate,
+          endDate,
+          isPremium,
+          isSponsored,
+        };
+
+        console.log(flyerData);
+
+        const url = isEditing
+          ? `${baseUrl}flyers/${selectedFlyer.id}`
+          : `${baseUrl}flyers`;
+
+        const response = await fetch(url, {
+          method: isEditing ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user?.email || "",
+          },
+          body: JSON.stringify(flyerData),
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            isEditing ? "Failed to update flyer" : "Failed to create flyer"
+          );
+        }
+
+        toast.success(
+          isEditing
+            ? "Flyer updated successfully"
+            : "Flyer created successfully"
         );
-        await uploadBytes(qrCodeRef, qrCodeFile);
-        qrCodeUrl = await getDownloadURL(qrCodeRef);
-      }
-
-      const couponData = {
-        title,
-        description,
-        code,
-        discount,
-        storeId: id,
-        categories: selectedCategories,
-        barcodeUrl:
-          barcodeUrl || (isEditing ? selectedCoupon.barcodeUrl : null),
-        qrCodeUrl: qrCodeUrl || (isEditing ? selectedCoupon.qrCodeUrl : null),
-        startDate,
-        endDate,
-      };
-
-      const url = isEditing
-        ? `${baseUrl}coupons/${selectedCoupon.id}`
-        : `${baseUrl}coupons`;
-
-      const response = await fetch(url, {
-        method: isEditing ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "user-email": user?.email || "",
-        },
-        body: JSON.stringify(couponData),
-      });
-
-      if (!response.ok) {
-        throw new Error(
-          isEditing ? "Failed to update coupon" : "Failed to create coupon"
-        );
-      }
-      if (isEditing) {
-        toast.success("Coupon updated successfully");
         setTimeout(() => {
           window.location.reload();
         }, 1000);
-      } else {
-        toast.success("Coupon created successfully");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+
+        setShowDialog(false);
+        resetForm();
+      } catch (error) {
+        console.error(
+          isEditing ? "Error updating flyer:" : "Error creating flyer:",
+          error
+        );
+        toast.error(
+          isEditing ? "Error updating flyer" : "Error creating flyer"
+        );
+      }
+    } else {
+      if (
+        !title ||
+        !code ||
+        !discount ||
+        selectedCategories.length === 0 ||
+        !startDate ||
+        !endDate
+      ) {
+        toast.error("Please fill in all required fields.");
+        setIsSubmitting(false);
+        return;
       }
 
-      setShowDialog(false);
-      resetForm();
-    } catch (error) {
-      console.error(
-        isEditing ? "Error updating coupon:" : "Error creating coupon:",
-        error
-      );
-      toast.error(
-        isEditing ? "Error updating coupon" : "Error creating coupon"
-      );
-    } finally {
-      setIsSubmitting(false);
+      try {
+        let barcodeUrl = "";
+        let qrCodeUrl = "";
+
+        if (barcodeFile) {
+          const barcodeRef = ref(
+            storage,
+            `barcodes/${Date.now()}_${barcodeFile.name}`
+          );
+          await uploadBytes(barcodeRef, barcodeFile);
+          barcodeUrl = await getDownloadURL(barcodeRef);
+        }
+
+        if (qrCodeFile) {
+          const qrCodeRef = ref(
+            storage,
+            `qrcodes/${Date.now()}_${qrCodeFile.name}`
+          );
+          await uploadBytes(qrCodeRef, qrCodeFile);
+          qrCodeUrl = await getDownloadURL(qrCodeRef);
+        }
+
+        const couponData = {
+          title,
+          description,
+          code,
+          discount,
+          storeId: id,
+          categoryIds: selectedCategories,
+          barcodeUrl:
+            barcodeUrl || (isEditing ? selectedCoupon.barcodeUrl : null),
+          qrCodeUrl: qrCodeUrl || (isEditing ? selectedCoupon.qrCodeUrl : null),
+          startDate,
+          endDate,
+        };
+
+        const url = isEditing
+          ? `${baseUrl}coupons/${selectedCoupon.id}`
+          : `${baseUrl}coupons`;
+
+        const response = await fetch(url, {
+          method: isEditing ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user?.email || "",
+          },
+          body: JSON.stringify(couponData),
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            isEditing ? "Failed to update coupon" : "Failed to create coupon"
+          );
+        }
+        if (isEditing) {
+          toast.success("Coupon updated successfully");
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        } else {
+          toast.success("Coupon created successfully");
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }
+
+        setShowDialog(false);
+        resetForm();
+      } catch (error) {
+        console.error(
+          isEditing ? "Error updating coupon:" : "Error creating coupon:",
+          error
+        );
+        toast.error(
+          isEditing ? "Error updating coupon" : "Error creating coupon"
+        );
+      }
     }
+    setIsSubmitting(false);
   };
 
   useEffect(() => {
@@ -283,6 +404,7 @@ export default function StoreDetailPage() {
 
   const resetForm = () => {
     setTitle("");
+    setDescription("");
     setCode("");
     setDiscount("");
     setSelectedCategories([]);
@@ -290,6 +412,12 @@ export default function StoreDetailPage() {
     setQrCodeFile(null);
     setBarcodePreview(null);
     setQrCodePreview(null);
+    setFlyerImage(null);
+    setFlyerImagePreview(null);
+    setIsPremium(false);
+    setIsSponsored(false);
+    setStartDate(undefined);
+    setEndDate(undefined);
   };
 
   if (!store) return null;
@@ -395,25 +523,33 @@ export default function StoreDetailPage() {
             {/* Tab Content Area */}
             <div className="min-h-[200px] sm:min-h-[300px] bg-yellow-50 rounded-xl p-4 sm:p-5 shadow-inner">
               {activeTab === "flyers" ? (
-                <div className="text-center text-gray-700">
-                  <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
-                    <HiNewspaper className="text-yellow-600" />
-                    Flyers
-                  </h2>
-                  <p className="text-sm sm:text-base">
-                    No flyers yet. Click "Create Flyer" to add one.
-                  </p>
-                </div>
-              ) : coupons ? (
-                <>
-                  <CouponList
+                flyers ? (
+                  <FlyerList
                     showLogo={false}
-                    coupons={coupons}
+                    flyers={flyers}
                     pagination={pagination}
                     onPageChange={onPagination}
-                    onEdit={handleEdit}
+                    onEdit={handleEditFlyer}
                   />
-                </>
+                ) : (
+                  <div className="text-center text-gray-700">
+                    <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
+                      <HiNewspaper className="text-yellow-600" />
+                      Flyers
+                    </h2>
+                    <p className="text-sm sm:text-base">
+                      No flyers yet. Click "Create Flyer" to add one.
+                    </p>
+                  </div>
+                )
+              ) : coupons ? (
+                <CouponList
+                  showLogo={false}
+                  coupons={coupons}
+                  pagination={pagination}
+                  onPageChange={onPagination}
+                  onEdit={handleEdit}
+                />
               ) : (
                 <div className="text-center text-gray-700">
                   <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
@@ -436,7 +572,8 @@ export default function StoreDetailPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto max-h-[90vh] overflow-y-auto p-4 sm:p-6 scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-transparent">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                Create {activeTab === "flyers" ? "Flyer" : "Coupon"}
+                {isEditing ? "Edit" : "Create"}{" "}
+                {activeTab === "flyers" ? "Flyer" : "Coupon"}
               </h2>
               <button
                 onClick={() => {
@@ -450,193 +587,346 @@ export default function StoreDetailPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Title <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Code <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Description
-                </label>
-                <input
-                  type="text"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Discount <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={discount}
-                    onChange={(e) => setDiscount(e.target.value)}
-                    placeholder="e.g., 20% off or $10 off"
-                    className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    required
-                  />
-                </div>
-                <div>
-                  <CategorySelector
-                    selected={selectedCategories}
-                    onChange={setSelectedCategories}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                {/* Start Date */}
-                <div ref={startRef} className="relative">
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Start Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={startDate ? startDate.toLocaleDateString() : ""}
-                    onFocus={() => setShowStartDateCalender(true)}
-                    readOnly
-                    placeholder="Select Start Date"
-                    className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    required
-                  />
-                  {showStartDateCalender && (
-                    <div className="absolute bottom-full left-0 z-50 bg-white/80 backdrop-blur-md border border-yellow-400 mt-1 rounded-xl shadow-2xl p-2">
-                      <Calendar
-                        mode="single"
-                        selected={startDate}
-                        onSelect={(date) => {
-                          setStartDate(date);
-                          setShowStartDateCalender(false);
-                        }}
+              {activeTab === "flyers" ? (
+                // Flyer Form
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        Title <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        required
                       />
                     </div>
-                  )}
-                </div>
-
-                {/* End Date */}
-                <div ref={endRef} className="relative">
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    End Date <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={endDate ? endDate.toLocaleDateString() : ""}
-                    onFocus={() => setShowEndDateCalender(true)}
-                    readOnly
-                    placeholder="Select End Date"
-                    className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    required
-                  />
-                  {showEndDateCalender && (
-                    <div className="absolute bottom-full left-0 z-50 bg-white/80 backdrop-blur-md border border-yellow-400 mt-1 rounded-xl shadow-2xl p-2">
-                      <Calendar
-                        mode="single"
-                        selected={endDate}
-                        onSelect={(date) => {
-                          setEndDate(date);
-                          setShowEndDateCalender(false);
-                        }}
+                    <div>
+                      <CategorySelector
+                        selected={selectedCategories}
+                        onChange={setSelectedCategories}
                       />
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                {/* Barcode Upload */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Barcode Image
-                  </label>
-                  <input
-                    type="file"
-                    ref={barcodeRef}
-                    accept="image/png, image/jpeg"
-                    onChange={(e) => handleFileChange(e, "barcode")}
-                    className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
-                  />
-                  {barcodePreview && (
-                    <div className="relative inline-block mt-2 h-16">
-                      <img
-                        src={barcodePreview}
-                        alt="Barcode Preview"
-                        className="h-full rounded shadow object-contain"
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div ref={startRef} className="relative">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        Start Date <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={startDate ? startDate.toLocaleDateString() : ""}
+                        onFocus={() => setShowStartDateCalender(true)}
+                        readOnly
+                        placeholder="Select Start Date"
+                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        required
                       />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBarcodePreview(null);
-                          setBarcodeFile(null);
-                          if (barcodeRef.current) barcodeRef.current.value = "";
-                        }}
-                        className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                      {showStartDateCalender && (
+                        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/80 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2">
+                          <Calendar
+                            mode="single"
+                            selected={startDate}
+                            onSelect={(date) => {
+                              setStartDate(date);
+                              setShowStartDateCalender(false);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div ref={endRef} className="relative">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        End Date <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={endDate ? endDate.toLocaleDateString() : ""}
+                        onFocus={() => setShowEndDateCalender(true)}
+                        readOnly
+                        placeholder="Select End Date"
+                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        required
+                      />
+                      {showEndDateCalender && (
+                        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/80 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2">
+                          <Calendar
+                            mode="single"
+                            selected={endDate}
+                            onSelect={(date) => {
+                              setEndDate(date);
+                              setShowEndDateCalender(false);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Flyer Image <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/png, image/jpeg"
+                      onChange={(e) => handleFileChange(e, "flyer")}
+                      className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
+                      required={!isEditing}
+                    />
+                    {flyerImagePreview && (
+                      <div className="relative inline-block mt-2">
+                        <img
+                          src={flyerImagePreview}
+                          alt="Flyer Preview"
+                          className="max-h-48 rounded shadow object-contain"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFlyerImagePreview(null);
+                            setFlyerImage(null);
+                          }}
+                          className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                        >
+                          <MdCancel className="text-lg" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="isPremium"
+                        checked={isPremium}
+                        onChange={(e) => setIsPremium(e.target.checked)}
+                        className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+                      />
+                      <label
+                        htmlFor="isPremium"
+                        className="text-sm font-medium text-gray-700"
                       >
-                        <MdCancel className="text-lg" />
-                      </button>
+                        Premium Flyer
+                      </label>
                     </div>
-                  )}
-                </div>
-
-                {/* QR Code Upload */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    QR Code Image
-                  </label>
-                  <input
-                    type="file"
-                    ref={qrCodeRef}
-                    accept="image/png, image/jpeg"
-                    onChange={(e) => handleFileChange(e, "qrcode")}
-                    className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
-                  />
-                  {qrCodePreview && (
-                    <div className="relative inline-block mt-2 h-16">
-                      <img
-                        src={qrCodePreview}
-                        alt="QR Code Preview"
-                        className="h-full rounded shadow object-contain"
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="isSponsored"
+                        checked={isSponsored}
+                        onChange={(e) => setIsSponsored(e.target.checked)}
+                        className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
                       />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setQrCodePreview(null);
-                          setQrCodeFile(null);
-                          if (qrCodeRef.current) qrCodeRef.current.value = "";
-                        }}
-                        className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                      <label
+                        htmlFor="isSponsored"
+                        className="text-sm font-medium text-gray-700"
                       >
-                        <MdCancel className="text-lg" />
-                      </button>
+                        Sponsored Flyer
+                      </label>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+                </>
+              ) : (
+                // Existing Coupon Form
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        Title <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        Code <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <input
+                      type="text"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        Discount <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={discount}
+                        onChange={(e) => setDiscount(e.target.value)}
+                        placeholder="e.g., 20% off or $10 off"
+                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <CategorySelector
+                        selected={selectedCategories}
+                        onChange={setSelectedCategories}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    {/* Start Date */}
+                    <div ref={startRef} className="relative">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        Start Date <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={startDate ? startDate.toLocaleDateString() : ""}
+                        onFocus={() => setShowStartDateCalender(true)}
+                        readOnly
+                        placeholder="Select Start Date"
+                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        required
+                      />
+                      {showStartDateCalender && (
+                        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/80 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2">
+                          <Calendar
+                            mode="single"
+                            selected={startDate}
+                            onSelect={(date) => {
+                              setStartDate(date);
+                              setShowStartDateCalender(false);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* End Date */}
+                    <div ref={endRef} className="relative">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        End Date <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={endDate ? endDate.toLocaleDateString() : ""}
+                        onFocus={() => setShowEndDateCalender(true)}
+                        readOnly
+                        placeholder="Select End Date"
+                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                        required
+                      />
+                      {showEndDateCalender && (
+                        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/80 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2">
+                          <Calendar
+                            mode="single"
+                            selected={endDate}
+                            onSelect={(date) => {
+                              setEndDate(date);
+                              setShowEndDateCalender(false);
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    {/* Barcode Upload */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        Barcode Image
+                      </label>
+                      <input
+                        type="file"
+                        ref={barcodeRef}
+                        accept="image/png, image/jpeg"
+                        onChange={(e) => handleFileChange(e, "barcode")}
+                        className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
+                      />
+                      {barcodePreview && (
+                        <div className="relative inline-block mt-2 h-16">
+                          <img
+                            src={barcodePreview}
+                            alt="Barcode Preview"
+                            className="h-full rounded shadow object-contain"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setBarcodePreview(null);
+                              setBarcodeFile(null);
+                              if (barcodeRef.current)
+                                barcodeRef.current.value = "";
+                            }}
+                            className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                          >
+                            <MdCancel className="text-lg" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* QR Code Upload */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        QR Code Image
+                      </label>
+                      <input
+                        type="file"
+                        ref={qrCodeRef}
+                        accept="image/png, image/jpeg"
+                        onChange={(e) => handleFileChange(e, "qrcode")}
+                        className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
+                      />
+                      {qrCodePreview && (
+                        <div className="relative inline-block mt-2 h-16">
+                          <img
+                            src={qrCodePreview}
+                            alt="QR Code Preview"
+                            className="h-full rounded shadow object-contain"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setQrCodePreview(null);
+                              setQrCodeFile(null);
+                              if (qrCodeRef.current)
+                                qrCodeRef.current.value = "";
+                            }}
+                            className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                          >
+                            <MdCancel className="text-lg" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
