@@ -5,7 +5,6 @@ import {
   HiFilter,
   HiSortAscending,
   HiUser,
-  HiHeart,
   HiShoppingCart,
 } from "react-icons/hi";
 import { FaStore } from "react-icons/fa";
@@ -19,6 +18,7 @@ import FlyerList from "@/components/FlyerCard";
 import Loader from "@/components/loading";
 import useAuthenticate from "@/hooks/authenticationt";
 
+//@ts-ignore
 interface Flyer {
   id: number;
   title: string;
@@ -35,10 +35,11 @@ export default function FlyerPage() {
   const [pagination, setPagination] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [sortBy, setSortBy] = useState<string>("all");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, userRole } = useAuthenticate();
+  const { user } = useAuthenticate();
 
   useEffect(() => {
     const fetchFlyers = async () => {
@@ -75,6 +76,27 @@ export default function FlyerPage() {
 
     fetchFlyers();
   }, [selectedCategory, sortBy]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${baseUrl}categories`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+        const data = await response.json();
+        setCategories(data.categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast.error("Failed to load categories");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handlePageChange = async (page: number) => {
     try {
@@ -145,20 +167,25 @@ export default function FlyerPage() {
       </div>
       <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white pt-16">
         {/* Add Floating Action Button */}
-        <motion.button
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="fixed bottom-8 right-8 z-50 bg-yellow-500 text-white p-4 rounded-full shadow-lg hover:bg-yellow-600 transition-colors duration-200 flex items-center justify-center"
-        >
-          <HiShoppingCart className="w-6 h-6" />
-        </motion.button>
+        {user != null ? (
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="fixed bottom-8 right-8 z-50 bg-yellow-500 text-white p-4 rounded-full shadow-lg hover:bg-yellow-600 transition-colors duration-200 flex items-center justify-center"
+          >
+            <HiShoppingCart className="w-6 h-6" />
+          </motion.button>
+        ) : (
+          <></>
+        )}
         <CartSidebar
           isOpen={isMobileMenuOpen}
           onClose={() => setIsMobileMenuOpen(false)}
         />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Hero Section - Only show on first page */}
           {pagination && pagination.currentPage === 1 && (
@@ -303,7 +330,11 @@ export default function FlyerPage() {
                       onChange={(e) => setSelectedCategory(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                     >
-                      {/* Add category options here */}
+                      {categories.map((category: any) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="relative">

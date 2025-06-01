@@ -60,6 +60,13 @@ const Navigation = () => {
     return <SkeletonNav />;
   }
 
+  if (userRole === null) {
+    navLinks = [
+      { name: t("navigation.coupon"), path: "/explore/coupons" },
+      { name: t("navigation.flyer"), path: "/explore/flyers" },
+    ];
+  }
+
   if (userRole === "USER") {
     navLinks = [
       { name: t("navigation.coupon"), path: "/explore/coupons" },

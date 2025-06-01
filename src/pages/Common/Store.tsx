@@ -136,12 +136,23 @@ export default function StoreDetailPage() {
     setShowDialog(true);
   };
 
-  let categories: Map<string, string[]> = new Map();
+  let categoriesForCoupon: Map<string, string[]> = new Map();
 
   coupons?.forEach((coupon: any) => {
     coupon.categories.forEach((category: any) => {
-      categories.set(coupon.id, [
-        ...(categories.get(coupon.id) || []),
+      categoriesForCoupon.set(coupon.id, [
+        ...(categoriesForCoupon.get(coupon.id) || []),
+        category.id,
+      ]);
+    });
+  });
+
+  let categoriesForFlyer: Map<string, string[]> = new Map();
+
+  flyers?.forEach((flyer: any) => {
+    flyer.categories.forEach((category: any) => {
+      categoriesForFlyer.set(flyer.id, [
+        ...(categoriesForFlyer.get(flyer.id) || []),
         category.id,
       ]);
     });
@@ -154,7 +165,7 @@ export default function StoreDetailPage() {
     setDescription(coupon.description);
     setCode(coupon.code);
     setDiscount(coupon.discount);
-    setSelectedCategories(categories.get(coupon.id) || []);
+    setSelectedCategories(categoriesForCoupon.get(coupon.id) || []);
     setBarcodePreview(coupon.barcodeUrl);
     setQrCodePreview(coupon.qrCodeUrl);
     setStartDate(coupon.startDate ? new Date(coupon.startDate) : undefined);
@@ -171,7 +182,7 @@ export default function StoreDetailPage() {
     setSelectedFlyer(flyer);
     setTitle(flyer.title);
     setDescription(flyer.description);
-    setSelectedCategories(flyer.categories || []);
+    setSelectedCategories(categoriesForFlyer.get(flyer.id) || []);
     setFlyerImagePreview(flyer.imageUrl);
     setIsPremium(flyer.isPremium);
     setIsSponsored(flyer.isSponsored);

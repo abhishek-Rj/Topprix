@@ -2,7 +2,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { HiX, HiPencil, HiTrash } from "react-icons/hi";
-import clsx from "clsx";
 import baseUrl from "@/hooks/baseurl";
 import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
