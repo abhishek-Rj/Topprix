@@ -192,7 +192,7 @@ export default function Home() {
                   className={`flex items-center gap-2 px-4 py-2 ${loginButtonClassName} rounded-full hover:bg-yellow-300 transition`}
                 >
                   {userName ? (
-                    <>{userName.charAt(0).toUpperCase()}</>
+                    <>{userName.split(" ")[0]}</>
                   ) : (
                     <>
                       <HiUser />
