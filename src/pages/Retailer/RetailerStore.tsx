@@ -11,6 +11,7 @@ import { HiDotsVertical, HiPencil, HiTrash } from "react-icons/hi";
 import { MdCancel } from "react-icons/md";
 
 import useClickOutside from "@/hooks/useClickOutside";
+import Footer from "@/components/Footer";
 
 export default function RetailerStores() {
   const { user, userRole, loading } = useAuthenticate();
@@ -273,6 +274,7 @@ export default function RetailerStores() {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 }
