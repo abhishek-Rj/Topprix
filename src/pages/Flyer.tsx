@@ -17,6 +17,7 @@ import { toast } from "react-toastify";
 import FlyerList from "@/components/FlyerCard";
 import Loader from "@/components/loading";
 import useAuthenticate from "@/hooks/authenticationt";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 //@ts-ignore
 interface Flyer {
@@ -31,15 +32,21 @@ interface Flyer {
 }
 
 export default function FlyerPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [flyers, setFlyers] = useState<any[]>([]);
   const [pagination, setPagination] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<string>("all");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useAuthenticate();
+
+  useEffect(() => {
+    const category = searchParams.get("category") || "all";
+    setSelectedCategory(category);
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchFlyers = async () => {
@@ -48,7 +55,7 @@ export default function FlyerPage() {
         let url = `${baseUrl}flyers?limit=12`;
 
         // Add category filter if selected
-        if (selectedCategory) {
+        if (selectedCategory !== "all") {
           url += `&categoryId=${selectedCategory}`;
         }
 
@@ -98,12 +105,17 @@ export default function FlyerPage() {
     fetchCategories();
   }, []);
 
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    setSearchParams({ category });
+  };
+
   const handlePageChange = async (page: number) => {
     try {
       setLoading(true);
       let url = `${baseUrl}flyers?page=${page}&limit=12`;
 
-      if (selectedCategory) {
+      if (selectedCategory !== "all") {
         url += `&categoryId=${selectedCategory}`;
       }
 
@@ -259,8 +271,30 @@ export default function FlyerPage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Popular Categories
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {/* Add category buttons here */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                <button
+                  onClick={() => handleCategorySelect("all")}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                    selectedCategory === "all"
+                      ? "bg-yellow-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  All
+                </button>
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => handleCategorySelect(category.id)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                      selectedCategory === category.id
+                        ? "bg-yellow-500 text-white"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {category.name}
+                  </button>
+                ))}
               </div>
             </div>
           )}

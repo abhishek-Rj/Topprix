@@ -8,13 +8,14 @@ import { auth, db } from "../context/firebaseProvider";
 import { getDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
+import useAuthenticate from "@/hooks/authenticationt";
 
 export default function Home() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUsername] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
   const [loginButtonClassName, setLoginButtonClassName] = useState<string>("");
+  const { userRole } = useAuthenticate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -24,7 +25,6 @@ export default function Home() {
         if (docSnap.exists()) {
           const userData = docSnap.data();
           setUsername(userData.name);
-          setUserRole(userData.role);
           setLoginButtonClassName("text-yellow-800 font-bold bg-yellow-200");
         } else {
           toast.info("You are not signed in");
@@ -356,8 +356,11 @@ export default function Home() {
           </p>
           <button
             onClick={() => {
-              if (userRole === "ADMIN" || "RETAILER") {
+              if (userRole === "ADMIN" || userRole === "RETAILER") {
                 navigate("retailer-stores/create-new-store");
+              } else if (userRole === "USER") {
+                navigate("/signup");
+                toast.info("You need to SignIn as a Retailer");
               } else {
                 navigate("/signup");
                 toast.info("You need to SignIn as a Retailer");

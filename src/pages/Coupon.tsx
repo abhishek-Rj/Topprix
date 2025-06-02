@@ -8,7 +8,7 @@ import {
   HiShoppingCart,
 } from "react-icons/hi";
 import Footer from "../components/Footer";
-import { FaStore } from "react-icons/fa";
+import { FaStore, FaAngleDown } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Navigation from "../components/navigation";
 import CartSidebar from "../components/CartSidebar";
@@ -18,6 +18,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
 import baseUrl from "../hooks/baseurl";
 import CouponList from "../components/CouponCard";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 interface Coupon {
   id: string;
@@ -43,12 +44,12 @@ interface Coupon {
 }
 
 export default function CouponPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [categories, setCategories] = useState<any>(["all"]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [sortBy, setSortBy] = useState("all");
   const [userData, setUserData] = useState<any>({
     name: "",
@@ -57,6 +58,9 @@ export default function CouponPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [pagination, setPagination] = useState<any>(null);
   const itemsPerPage = 12;
+  const [activeTab, setActiveTab] = useState<"coupons" | "stores">("coupons");
+  const [stores, setStores] = useState<any[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     localStorage.setItem("sortBy", "all");
@@ -65,9 +69,7 @@ export default function CouponPage() {
         const response = await fetch(`${baseUrl}categories`);
         if (response.ok) {
           const data = await response.json();
-          data.categories.map((category: any) => {
-            setCategories((prev: any) => [...prev, category.name]);
-          });
+          setCategories(data.categories);
         } else {
           toast.error("Failed to fetch categories");
         }
@@ -80,49 +82,66 @@ export default function CouponPage() {
   }, []);
 
   useEffect(() => {
-    if (currentPage !== 1) {
-      setTimeout(() => {
-        const element = document.getElementById("goto");
-        element?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    }
-    const sortBy = localStorage.getItem("sortBy") || "all";
-    const storedCategories = localStorage.getItem("selectedCategories");
-    const selectedCategory = localStorage.getItem("categories") || "all";
+    const category = searchParams.get("category") || "all";
+    setSelectedCategory(category);
+  }, [searchParams]);
 
-    if (storedCategories) {
-      setSelectedCategories(JSON.parse(storedCategories));
-    }
-
-    let url = `${baseUrl}coupons?page=${currentPage}&limit=${itemsPerPage}`;
-
-    if (sortBy === "inactive") {
-      url += "&active=false";
-    } else if (sortBy === "active") {
-      url += "&active=true";
-    }
-
-    if (selectedCategory !== "all") {
-      url += `&category=${selectedCategory}`;
-    }
-
-    const fetchCoupons = async () => {
-      try {
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json();
-          setCoupons(data.coupons);
-          setPagination(data.pagination);
-        } else {
-          toast.error("Failed to fetch coupons");
-        }
-      } catch (error) {
-        toast.error("Error loading coupons");
+  useEffect(() => {
+    if (activeTab === "coupons") {
+      if (currentPage !== 1) {
+        setTimeout(() => {
+          const element = document.getElementById("goto");
+          element?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
       }
-    };
+      const sortBy = localStorage.getItem("sortBy") || "all";
 
-    fetchCoupons();
-  }, [currentPage, sortBy, selectedCategory]);
+      let url = `${baseUrl}coupons?page=${currentPage}&limit=${itemsPerPage}`;
+
+      if (sortBy === "inactive") {
+        url += "&active=false";
+      } else if (sortBy === "active") {
+        url += "&active=true";
+      }
+
+      if (selectedCategory !== "all") {
+        url += `&categoryId=${selectedCategory}`;
+      }
+
+      const fetchCoupons = async () => {
+        try {
+          const response = await fetch(url);
+          if (response.ok) {
+            const data = await response.json();
+            setCoupons(data.coupons);
+            setPagination(data.pagination);
+          } else {
+            toast.error("Failed to fetch coupons");
+          }
+        } catch (error) {
+          toast.error("Error loading coupons");
+        }
+      };
+
+      fetchCoupons();
+    } else if (activeTab === "stores") {
+      const fetchStores = async () => {
+        try {
+          const response = await fetch(`${baseUrl}stores`);
+          if (response.ok) {
+            const data = await response.json();
+            setStores(data.stores);
+          } else {
+            toast.error("Failed to fetch stores");
+          }
+        } catch (error) {
+          toast.error("Error loading stores");
+        }
+      };
+
+      fetchStores();
+    }
+  }, [currentPage, sortBy, selectedCategory, activeTab]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -155,25 +174,8 @@ export default function CouponPage() {
   };
 
   const handleCategorySelect = (category: string) => {
-    if (category === "all") {
-      setSelectedCategories([]);
-      setSelectedCategory("all");
-      localStorage.setItem("categories", "all");
-      localStorage.setItem("selectedCategories", JSON.stringify([]));
-      return;
-    }
-
-    const newSelectedCategories = selectedCategories.includes(category)
-      ? selectedCategories.filter((cat) => cat !== category)
-      : [...selectedCategories, category];
-
-    setSelectedCategories(newSelectedCategories);
     setSelectedCategory(category);
-    localStorage.setItem("categories", category);
-    localStorage.setItem(
-      "selectedCategories",
-      JSON.stringify(newSelectedCategories)
-    );
+    setSearchParams({ category });
   };
 
   const filteredCoupons = (coupons || []).filter((coupon) => {
@@ -184,8 +186,8 @@ export default function CouponPage() {
         searchQuery.toLowerCase()
       );
     const matchesCategories =
-      selectedCategories.length === 0 ||
-      coupon.categories.some((cat) => selectedCategories.includes(cat.name));
+      selectedCategory === "all" ||
+      coupon.categories.some((cat) => selectedCategory === cat.id);
     return matchesSearch && matchesCategories;
   });
 
@@ -284,21 +286,20 @@ export default function CouponPage() {
                 </div>
                 <div className="relative">
                   <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => {
-                      const newCategory = e.target.value;
-                      setSelectedCategory(newCategory);
-                      localStorage.setItem("categories", newCategory);
-                    }}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  >
-                    {categories.map((category: any) => (
-                      <option key={category} value={category}>
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => handleCategorySelect(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    >
+                      <option value="all">All Categories</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 <div className="relative">
                   <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -311,9 +312,9 @@ export default function CouponPage() {
                     }}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   >
-                    <option value="all">All Coupons</option>
-                    <option value="active">Active Coupons</option>
-                    <option value="inactive">Inactive Coupons</option>
+                    <option value="all">All</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
                   </select>
                 </div>
                 <div className="text-right">
@@ -326,60 +327,125 @@ export default function CouponPage() {
             </div>
           </div>
 
-          {/* Popular Categories */}
           <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Popular Categories
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <motion.button
-                key="all"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleCategorySelect("all")}
-                className={`p-2 rounded-xl text-center border transition ${
-                  selectedCategories.length === 0
-                    ? "bg-yellow-500 text-white shadow-lg"
-                    : "bg-white text-gray-700 hover:bg-yellow-100 shadow-sm"
+            <div className="flex justify-center w-full sm:w-auto">
+              <button
+                onClick={() => {
+                  setActiveTab("stores");
+                  localStorage.setItem("lastVisited", "stores");
+                }}
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-l-full border border-yellow-500 font-medium transition-all ${
+                  activeTab === "stores"
+                    ? "bg-yellow-500 text-white"
+                    : "bg-white text-yellow-600 hover:bg-yellow-100"
                 }`}
               >
-                All Categories
-              </motion.button>
-              {categories
-                .slice(0, 6)
-                .filter((cat: any) => cat !== "all")
-                .map((category: any) => (
-                  <motion.button
-                    key={category}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleCategorySelect(category)}
-                    className={`p-2 rounded-xl text-center border transition ${
-                      selectedCategories.includes(category)
-                        ? "bg-yellow-500 text-white shadow-lg"
-                        : "bg-white text-gray-700 hover:bg-yellow-100 shadow-sm"
-                    }`}
-                  >
-                    {category}
-                  </motion.button>
-                ))}
+                <FaStore />
+                <span className="hidden sm:inline">Stores</span>
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab("coupons");
+                  localStorage.setItem("lastVisited", "coupons");
+                }}
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-r-full border border-yellow-500 font-medium transition-all ${
+                  activeTab === "coupons"
+                    ? "bg-yellow-500 text-white"
+                    : "bg-white text-yellow-600 hover:bg-yellow-100"
+                }`}
+              >
+                <HiTag />
+                <span className="hidden sm:inline">Coupons</span>
+              </button>
             </div>
           </div>
 
           {/* Coupon Grid */}
-          {coupons.length > 0 ? (
-            <CouponList
-              coupons={sortedCoupons}
-              pagination={pagination}
-              onPageChange={setCurrentPage}
-              showLogo={true}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
+          {activeTab === "coupons" ? (
+            coupons.length > 0 ? (
+              <CouponList
+                coupons={sortedCoupons}
+                pagination={pagination}
+                onPageChange={setCurrentPage}
+                showLogo={true}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-600">
+                  No coupons found matching your criteria.
+                </p>
+              </div>
+            )
+          ) : stores.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {stores.map((store) => (
+                <div
+                  key={store.id}
+                  className="relative aspect-square bg-white rounded-xl sm:rounded-2xl shadow-lg group overflow-hidden hover:scale-[1.02] transition-all duration-300 hover:ring-2 hover:ring-yellow-400"
+                >
+                  {/* Card Content */}
+                  <div
+                    className="cursor-pointer h-full flex flex-col"
+                    onClick={() =>
+                      navigate(`/retailer-stores/store/${store.id}`)
+                    }
+                  >
+                    {/* Logo/Image Section */}
+                    <div
+                      className="h-1/2 relative bg-gradient-to-br from-yellow-100 to-yellow-200"
+                      style={{
+                        backgroundImage: store.logo
+                          ? `url(${store.logo})`
+                          : "none",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    >
+                      {!store.logo && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-3xl sm:text-4xl text-yellow-600/50">
+                            {store.name.charAt(0).toUpperCase()}
+                          </span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between bg-yellow-50">
+                      <div>
+                        <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2 line-clamp-1">
+                          {store.name}
+                        </h2>
+                        <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 line-clamp-2">
+                          {store.description || "No description available."}
+                        </p>
+                      </div>
+
+                      {/* Category Tags */}
+                      <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                        {(store.categories || []).map(
+                          (cat: any, idx: number) => (
+                            <span
+                              key={cat.id || idx}
+                              className="bg-yellow-100 text-yellow-800 px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium"
+                            >
+                              #{cat.name}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-600">
-                No coupons found matching your criteria.
+                No stores found matching your criteria.
               </p>
             </div>
           )}
