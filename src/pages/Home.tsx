@@ -358,9 +358,10 @@ export default function Home() {
             onClick={() => {
               if (userRole === "ADMIN" || "RETAILER") {
                 navigate("retailer-stores/create-new-store");
+              } else {
+                navigate("/signup");
+                toast.info("You need to SignIn as a Retailer");
               }
-              toast.info("You need to SignIn as a Retailer");
-              navigate("/signup");
             }}
             className="flex items-center gap-2 px-8 py-3 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition shadow-lg hover:shadow-xl mx-auto"
           >

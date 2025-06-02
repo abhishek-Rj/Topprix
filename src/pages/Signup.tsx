@@ -222,7 +222,6 @@ export default function Signup() {
                                 <option value="RETAILER">
                                     {t("retailer")}
                                 </option>
-                                <option value="ADMIN">{t("admin")}</option>
                             </select>
                         </div>
 

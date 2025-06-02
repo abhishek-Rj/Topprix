@@ -80,8 +80,12 @@ export default function CouponPage() {
   }, []);
 
   useEffect(() => {
-    const element = document.getElementById("goto");
-    element?.scrollIntoView({ behavior: "smooth" });
+    if (currentPage !== 1) {
+      setTimeout(() => {
+        const element = document.getElementById("goto");
+        element?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
     const sortBy = localStorage.getItem("sortBy") || "all";
     const storedCategories = localStorage.getItem("selectedCategories");
     const selectedCategory = localStorage.getItem("categories") || "all";
@@ -219,8 +223,7 @@ export default function CouponPage() {
           />
         </>
       )}
-
-      <main className="pt-20 pb-10 bg-yellow-50">
+      <main id="goto" className="pt-20 pb-10 bg-yellow-50">
         <div className="max-w-7xl mx-auto px-4">
           {currentPage === 1 ? (
             <>
@@ -267,7 +270,7 @@ export default function CouponPage() {
 
           <div className="pt-8">
             {/* Filters and Search */}
-            <div id="goto" className="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="relative">
                   <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />

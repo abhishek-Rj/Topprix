@@ -141,30 +141,6 @@ const Navigation = () => {
             </nav>
 
             <div className="hidden md:flex items-center space-x-6">
-              <div className="relative">
-                <button
-                  onClick={() => setSearchOpen(!searchOpen)}
-                  className="text-gray-600 hover:text-yellow-600 transition-colors"
-                >
-                  <FiSearch size={20} />
-                </button>
-                {searchOpen && (
-                  <div className="absolute right-0 top-10 w-72 bg-white rounded-lg shadow-lg p-3 border border-gray-200">
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder={t("navigation.search")}
-                        className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                      />
-                      <FiSearch
-                        className="absolute left-2 top-3 text-gray-400"
-                        size={16}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
               {/* Language Selector */}
               <div className="relative group">
                 <button className="text-gray-600 hover:text-yellow-600 font-medium text-sm">
