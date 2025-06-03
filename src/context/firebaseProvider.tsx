@@ -25,6 +25,7 @@ type FirebaseContextType = {
   signUpUserWithEmailAndPassword: (
     name: string,
     email: string,
+    phone: string,
     password: string,
     role: string
   ) => Promise<any>;
@@ -86,6 +87,7 @@ export const FirebaseProvider = ({
   const signUpUserWithEmailAndPassword = async (
     name: string,
     email: string,
+    phone: string,
     password: string,
     role: string
   ) => {
@@ -104,9 +106,10 @@ export const FirebaseProvider = ({
       await setDoc(doc(db, "users", user.uid), {
         name,
         email,
+        phone,
         role,
       });
-      return user;
+      return userCredential;
     } catch (error) {
       console.error("Error signing up: ", error);
       throw error;

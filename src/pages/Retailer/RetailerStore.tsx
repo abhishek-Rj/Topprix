@@ -94,7 +94,7 @@ export default function RetailerStores() {
   };
 
   const handleEdit = (storeId: string) => {
-    navigate(`/retailer-stores/edit-store/${storeId}`);
+    navigate(`/stores/edit-store/${storeId}`);
   };
 
   return loading ? (
@@ -119,9 +119,7 @@ export default function RetailerStores() {
                 </h1>
                 {(userRole === "RETAILER" || userRole === "ADMIN") && (
                   <button
-                    onClick={() =>
-                      navigate("/retailer-stores/create-new-store")
-                    }
+                    onClick={() => navigate("/stores/create-new-store")}
                     className="w-full sm:w-auto px-5 py-2 bg-yellow-500 hover:scale-105 text-white rounded-md hover:bg-yellow-700 transition"
                   >
                     + Create New Store
@@ -180,9 +178,7 @@ export default function RetailerStores() {
                       {/* Card Content */}
                       <div
                         className="cursor-pointer h-full flex flex-col"
-                        onClick={() =>
-                          navigate(`/retailer-stores/store/${store.id}`)
-                        }
+                        onClick={() => navigate(`/stores/store/${store.id}`)}
                       >
                         {/* Logo/Image Section */}
                         <div

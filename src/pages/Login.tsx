@@ -9,6 +9,7 @@ import FacebookAuthButton from "../components/facebookAuthButton";
 import Input from "../components/Input";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "../context/firebaseProvider";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("");
@@ -48,16 +49,29 @@ export default function Login() {
 
     try {
       const userCredential = await logInWithEmailandPassword(email, password);
+      let verifiedEmail = true;
+      if (!userCredential.emailVerified) {
+        verifiedEmail = false;
+      }
       if (userCredential.uid) {
         console.log(userCredential);
         const userDoc = await getDoc(doc(db, "users", userCredential.uid));
         const userData = userDoc.data();
         if (userData) {
           if (userData?.role === "USER") {
+            if (!verifiedEmail) {
+              toast.info("Please verify your email");
+            }
             navigate("/explore/coupons");
           } else if (userData?.role === "RETAILER") {
+            if (!verifiedEmail) {
+              toast.info("Please verify your email");
+            }
             navigate("/retailer-dashboard");
           } else if (userData?.role === "ADMIN") {
+            if (!verifiedEmail) {
+              toast.info("Please verify your email");
+            }
             navigate("/admin-dashboard");
           }
         } else {

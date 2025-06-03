@@ -14,6 +14,7 @@ import StoreDetailPage from "./pages/Common/Store";
 import CouponPage from "./pages/Coupon";
 import FlyerPage from "./pages/Flyer";
 import FavoritesPage from "./pages/Favorites";
+import EmailVerification from "./pages/EmailVerification";
 
 function App() {
   return (
@@ -25,18 +26,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/stores" element={<RetailerStores />} />
-          <Route
-            path="retailer-stores/create-new-store"
-            element={<CreateNewStore />}
-          />
-          <Route
-            path="/retailer-stores/edit-store/:id"
-            element={<EditStore />}
-          />
-          <Route
-            path="/retailer-stores/store/:id"
-            element={<StoreDetailPage />}
-          />
+          <Route path="/stores/create-new-store" element={<CreateNewStore />} />
+          <Route path="/stores/edit-store/:id" element={<EditStore />} />
+          <Route path="/stores/store/:id" element={<StoreDetailPage />} />
           <Route path="/explore/coupons" element={<CouponPage />} />
           <Route path="/explore/flyers" element={<FlyerPage />} />
           <Route path="/favourite" element={<FavoritesPage />} />
@@ -44,6 +36,7 @@ function App() {
           <Route path="/deals" element={<Deals />} />
           <Route path="/not-found" element={<NotFound />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
+          <Route path="/verify-email" element={<EmailVerification />} />
         </Routes>
       </BrowserRouter>
     </>

@@ -113,7 +113,7 @@ export default function StoreDetailPage() {
         const res = await fetch(`${baseUrl}store/${id}`);
         if (!res.ok) {
           toast.error("Store not found");
-          navigate("/retailer-stores");
+          navigate("/stores");
           return;
         }
         const data = await res.json();
@@ -174,7 +174,7 @@ export default function StoreDetailPage() {
   };
 
   const handleEditStore = () => {
-    navigate(`/retailer-stores/edit-store/${id}`);
+    navigate(`/stores/edit-store/${id}`);
   };
 
   const handleEditFlyer = (flyer: any) => {

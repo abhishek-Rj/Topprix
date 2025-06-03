@@ -77,11 +77,11 @@ export default function EditStore() {
           setLogoPreview(data.logo || null);
         } else {
           toast.error("Store not found");
-          navigate("/retailer-stores");
+          navigate("/stores");
         }
       } catch (error) {
         toast.error("Error fetching store details");
-        navigate("/retailer-stores");
+        navigate("/stores");
       }
     };
     if (id && user) fetchStore();
@@ -208,7 +208,7 @@ export default function EditStore() {
       const data = await response.json();
       if (data.store) {
         toast.success("Store updated successfully");
-        navigate("/retailer-stores");
+        navigate("/stores");
       } else {
         throw new Error("Failed to update store");
       }

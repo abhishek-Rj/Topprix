@@ -113,14 +113,14 @@ export default function Home() {
                 className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-yellow-600 transition"
               >
                 <HiTag />
-                Explore Coupons
+                Explore Flyers
               </button>
               <button
                 onClick={() => navigate("/explore/flyers")}
                 className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-yellow-600 transition"
               >
                 <HiNewspaper />
-                Explore Flyers
+                Explore Coupons
               </button>
               <button
                 onClick={() => {
@@ -163,23 +163,23 @@ export default function Home() {
               <div className="px-2 pt-2 pb-3 space-y-1">
                 <button
                   onClick={() => {
-                    navigate("/explore/coupons");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition"
-                >
-                  <HiTag />
-                  Explore Coupons
-                </button>
-                <button
-                  onClick={() => {
                     navigate("/explore/flyers");
                     setIsMobileMenuOpen(false);
                   }}
                   className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition"
                 >
-                  <HiNewspaper />
+                  <HiTag />
                   Explore Flyers
+                </button>
+                <button
+                  onClick={() => {
+                    navigate("/explore/coupons");
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-gray-700 hover:text-yellow-600 hover:bg-yellow-50 rounded-md transition"
+                >
+                  <HiNewspaper />
+                  Explore Coupons
                 </button>
                 <button
                   onClick={() => {
@@ -235,18 +235,18 @@ export default function Home() {
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
               <button
-                onClick={() => navigate("/explore/coupons")}
+                onClick={() => navigate("/explore/flyers")}
                 className="flex items-center gap-2 px-8 py-3 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition shadow-lg hover:shadow-xl"
               >
                 <HiTag />
-                Browse Coupons
+                Browse Flyers
               </button>
               <button
-                onClick={() => navigate("/explore/flyers")}
+                onClick={() => navigate("/explore/coupons")}
                 className="flex items-center gap-2 px-8 py-3 bg-white text-yellow-600 rounded-full hover:bg-yellow-50 transition shadow-lg hover:shadow-xl border-2 border-yellow-500"
               >
                 <HiNewspaper />
-                View Flyers
+                View Coupons
               </button>
             </motion.div>
           </div>
@@ -357,7 +357,7 @@ export default function Home() {
           <button
             onClick={() => {
               if (userRole === "ADMIN" || userRole === "RETAILER") {
-                navigate("retailer-stores/create-new-store");
+                navigate("stores/create-new-store");
               } else if (userRole === "USER") {
                 navigate("/signup");
                 toast.info("You need to SignIn as a Retailer");
