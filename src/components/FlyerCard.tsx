@@ -7,13 +7,6 @@ import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
 import ConfirmDeleteDialog from "./confirmDeleteOption";
 
-const DetailRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex justify-between items-center text-xs sm:text-sm">
-    <span className="text-gray-600 font-medium">{label}</span>
-    <span className="text-gray-800 text-right">{value}</span>
-  </div>
-);
-
 const FlyerCard = ({
   flyer,
   showlogo,
@@ -45,6 +38,14 @@ const FlyerCard = ({
       fetchStore();
     }
   }, [flyer?.storeId]);
+
+  const calculateDaysLeft = () => {
+    const endDate = new Date(flyer.endDate);
+    const today = new Date();
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -124,35 +125,6 @@ const FlyerCard = ({
         )}
 
         <CardContent className="p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">
-                {flyer.title}
-              </h2>
-              <p className="text-sm text-gray-600">{flyer.description}</p>
-            </div>
-            {showlogo && store?.logo && (
-              <img
-                src={store.logo}
-                alt={store.name}
-                width={20}
-                height={20}
-                className="w-12 h-12 border-2 border-yellow-800 object-contain rounded-full shadow"
-              />
-            )}
-          </div>
-
-          <div className="flex gap-2 text-sm">
-            {flyer.categories.map((cat: any) => (
-              <span
-                key={cat.id}
-                className="px-2 py-1 rounded bg-yellow-100 text-yellow-700"
-              >
-                {cat.name}
-              </span>
-            ))}
-          </div>
-
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
             <img
               src={flyer.imageUrl}
@@ -161,22 +133,15 @@ const FlyerCard = ({
             />
           </div>
 
-          <div className="text-xs text-gray-500">
-            Valid from {new Date(flyer.startDate).toLocaleDateString()} to{" "}
-            {new Date(flyer.endDate).toLocaleDateString()}
-          </div>
-
-          <div className="flex gap-2 text-xs">
-            {flyer.isPremium && (
-              <span className="px-2 py-1 rounded-full bg-purple-100 text-purple-700">
-                Premium
-              </span>
-            )}
-            {flyer.isSponsored && (
-              <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700">
-                Sponsored
-              </span>
-            )}
+          <div className="flex items-center flex-col justify-between">
+            <h2 className="text-lg font-semibold text-gray-800 truncate">
+              {flyer.title}
+            </h2>
+            <span className="text-sm font-medium text-yellow-600">
+              {calculateDaysLeft() === 0
+                ? "Last day"
+                : calculateDaysLeft() + " days left"}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -240,18 +205,30 @@ const FlyerCard = ({
                       Flyer Details
                     </h3>
                     <div className="bg-yellow-50/70 rounded-2xl p-5 sm:p-6 shadow-inner space-y-4">
-                      <DetailRow
-                        label="Valid From:"
-                        value={new Date(flyer.startDate).toLocaleDateString()}
-                      />
-                      <DetailRow
-                        label="Valid Until:"
-                        value={new Date(flyer.endDate).toLocaleDateString()}
-                      />
-                      <DetailRow
-                        label="Status:"
-                        value={flyer.isPremium ? "Premium" : "Standard"}
-                      />
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600 font-medium">
+                          Valid From:
+                        </span>
+                        <span className="text-gray-800">
+                          {new Date(flyer.startDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600 font-medium">
+                          Valid Until:
+                        </span>
+                        <span className="text-gray-800">
+                          {new Date(flyer.endDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600 font-medium">
+                          Status:
+                        </span>
+                        <span className="text-gray-800">
+                          {flyer.isPremium ? "Premium" : "Standard"}
+                        </span>
+                      </div>
                     </div>
                   </section>
 
@@ -270,53 +247,6 @@ const FlyerCard = ({
                       ))}
                     </div>
                   </section>
-
-                  <section>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      Status
-                    </h3>
-                    <div className="flex flex-wrap gap-3">
-                      {flyer.isPremium && (
-                        <span className="px-3 py-1 rounded-full bg-purple-100 text-purple-700 text-sm">
-                          Premium
-                        </span>
-                      )}
-                      {flyer.isSponsored && (
-                        <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm">
-                          Sponsored
-                        </span>
-                      )}
-                    </div>
-                  </section>
-
-                  {/* 🗺️ Google Map Preview */}
-                  {store.latitude && store.longitude && (
-                    <section>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Store Location
-                      </h3>
-                      <div className="space-y-3">
-                        <iframe
-                          width="100%"
-                          height="200"
-                          className="rounded-lg shadow"
-                          loading="lazy"
-                          allowFullScreen
-                          src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${store.latitude},${store.longitude}`}
-                        />
-                        <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
-                          <p>
-                            <span className="font-medium">Address:</span>{" "}
-                            {store.address || "Not available"}
-                          </p>
-                          <p>
-                            <span className="font-medium">Coordinates:</span>{" "}
-                            {store.latitude}, {store.longitude}
-                          </p>
-                        </div>
-                      </div>
-                    </section>
-                  )}
 
                   {flyer.description && (
                     <section>
@@ -353,18 +283,30 @@ const FlyerCard = ({
                           </p>
                         </div>
                       </div>
-                      <DetailRow
-                        label="Store Type:"
-                        value={store.type || "Retail"}
-                      />
-                      <DetailRow
-                        label="Contact:"
-                        value={store.phone || "Not available"}
-                      />
-                      <DetailRow
-                        label="Email:"
-                        value={store.email || "Not available"}
-                      />
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600 font-medium">
+                          Store Type:
+                        </span>
+                        <span className="text-gray-800">
+                          {store.type || "Retail"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600 font-medium">
+                          Contact:
+                        </span>
+                        <span className="text-gray-800">
+                          {store.phone || "Not available"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm">
+                        <span className="text-gray-600 font-medium">
+                          Email:
+                        </span>
+                        <span className="text-gray-800">
+                          {store.email || "Not available"}
+                        </span>
+                      </div>
                     </div>
                   </section>
 
