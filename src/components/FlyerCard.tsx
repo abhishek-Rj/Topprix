@@ -8,7 +8,7 @@ import useAuthenticate from "@/hooks/authenticationt";
 import ConfirmDeleteDialog from "./confirmDeleteOption";
 
 const DetailRow = ({ label, value }: { label: string; value: string }) => (
-  <div className="flex justify-between items-center text-sm sm:text-sm">
+  <div className="flex justify-between items-center text-xs sm:text-sm">
     <span className="text-gray-600 font-medium">{label}</span>
     <span className="text-gray-800 text-right">{value}</span>
   </div>
@@ -99,7 +99,7 @@ const FlyerCard = ({
   return (
     <>
       <Card
-        className="w-full hover:translate-y-2 max-w-md rounded-2xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-all relative group"
+        className="w-full hover:translate-y-1 max-w-sm rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all relative group"
         onClick={() => setShowPreview(true)}
       >
         {/* Action Buttons */}
@@ -107,7 +107,7 @@ const FlyerCard = ({
           <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={handleEdit}
-              className="p-2 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition-colors"
+              className="p-1.5 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition-colors"
               title="Edit Flyer"
             >
               <HiPencil className="w-4 h-4" />
@@ -115,7 +115,7 @@ const FlyerCard = ({
             <button
               onClick={handleDeleteClick}
               disabled={isDeleting}
-              className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50"
+              className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50"
               title="Delete Flyer"
             >
               <HiTrash className="w-4 h-4" />
@@ -123,7 +123,7 @@ const FlyerCard = ({
           </div>
         )}
 
-        <CardContent className="p-2 space-y-3">
+        <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-800">
@@ -421,7 +421,7 @@ const FlyerList = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {flyers.map((flyer: any) => (
           <FlyerCard
             showlogo={showLogo}
