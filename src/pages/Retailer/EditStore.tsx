@@ -423,9 +423,6 @@ export default function EditStore() {
 
               {/* Categories */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Store Categories <span className="text-red-500">*</span>
-                </label>
                 <CategorySelector
                   selected={selectedCategories}
                   onChange={setSelectedCategories}

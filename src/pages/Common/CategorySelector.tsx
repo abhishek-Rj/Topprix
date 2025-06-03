@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "../../context/firebaseProvider";
 import baseUrl from "../../hooks/baseurl";
 import AddCategoryDialog from "../../components/AddCategory";
+import useAuthenticate from "@/hooks/authenticationt";
+import { toast } from "react-toastify";
 
 type Category = {
   id: string;
@@ -19,6 +19,7 @@ export default function CategorySelector({ selected, onChange }: Props) {
   const [newCat, setNewCat] = useState("");
   const [adding, setAdding] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { user } = useAuthenticate();
 
   useEffect(() => {
     if (dialogOpen) {
@@ -59,15 +60,26 @@ export default function CategorySelector({ selected, onChange }: Props) {
   };
 
   const handleAddNew = async () => {
-    if (!newCat.trim()) return;
-    const docRef = await addDoc(collection(db, "categories"), {
-      name: newCat.trim(),
-    });
-    const newCategory: Category = { id: docRef.id, name: newCat.trim() };
-    setCategories([...categories, newCategory]);
-    onChange([...selected, docRef.id]);
-    setNewCat("");
-    setAdding(false);
+    try {
+      const addNewCategory = await fetch(`${baseUrl}categories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "user-email" : `${user?.email}`,
+        },
+        body: JSON.stringify({ name: newCat }),
+      });
+      const data = await addNewCategory.json();
+      if (data.category) {
+        setCategories((prev) => [...prev, data.category]);
+        onChange([...selected, data.category.id]);
+        setNewCat("");
+        setAdding(false);
+        toast.success("Category added successfully!");
+      }
+    } catch (error) {
+      toast.error("Error adding new category. Please try again.");
+    }
   };
 
   return (

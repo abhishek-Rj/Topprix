@@ -9,7 +9,6 @@ import ConfirmDeleteDialog from "./confirmDeleteOption";
 
 const FlyerCard = ({
   flyer,
-  showlogo,
   onEdit,
   onDelete,
 }: {
@@ -103,29 +102,8 @@ const FlyerCard = ({
         className="w-full hover:translate-y-1 max-w-sm rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all relative group"
         onClick={() => setShowPreview(true)}
       >
-        {/* Action Buttons */}
-        {isAuthorized && (
-          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={handleEdit}
-              className="p-1.5 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition-colors"
-              title="Edit Flyer"
-            >
-              <HiPencil className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleDeleteClick}
-              disabled={isDeleting}
-              className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50"
-              title="Delete Flyer"
-            >
-              <HiTrash className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
         <CardContent className="p-4 space-y-3">
-          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg">
+          <div className="relative aspect-[4/3] z-10 w-full overflow-hidden rounded-lg">
             <img
               src={flyer.imageUrl}
               alt={flyer.title}
