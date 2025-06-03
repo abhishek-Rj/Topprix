@@ -60,17 +60,11 @@ const Navigation = () => {
     return <SkeletonNav />;
   }
 
-  if (userRole === null) {
+  if (userRole === "USER" || userRole === null) {
     navLinks = [
       { name: t("navigation.coupon"), path: "/explore/coupons" },
       { name: t("navigation.flyer"), path: "/explore/flyers" },
-    ];
-  }
-
-  if (userRole === "USER") {
-    navLinks = [
-      { name: t("navigation.coupon"), path: "/explore/coupons" },
-      { name: t("navigation.flyer"), path: "/explore/flyers" },
+      { name: t("navigation.stores"), path: "/stores" },
       { name: t("navigation.favourite"), path: "/favourite" },
       { name: t("navigation.wishlist"), path: "/wishlist" },
       { name: t("navigation.profile"), path: "/profile" },

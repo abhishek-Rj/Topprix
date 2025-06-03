@@ -113,14 +113,20 @@ export default function RetailerStores() {
             <div className="bg-white rounded-2xl shadow-xl hover:shadow-yellow-200 p-6 sm:p-8 border border-yellow-100">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 bg-yellow-100 border border-yellow-100 rounded-xl px-4 py-3 shadow-inner">
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  Your Stores
+                  {userRole === "USER" || userRole === null
+                    ? "All Stores"
+                    : "Your Stores"}
                 </h1>
-                <button
-                  onClick={() => navigate("/retailer-stores/create-new-store")}
-                  className="w-full sm:w-auto px-5 py-2 bg-yellow-500 hover:scale-105 text-white rounded-md hover:bg-yellow-700 transition"
-                >
-                  + Create New Store
-                </button>
+                {(userRole === "RETAILER" || userRole === "ADMIN") && (
+                  <button
+                    onClick={() =>
+                      navigate("/retailer-stores/create-new-store")
+                    }
+                    className="w-full sm:w-auto px-5 py-2 bg-yellow-500 hover:scale-105 text-white rounded-md hover:bg-yellow-700 transition"
+                  >
+                    + Create New Store
+                  </button>
+                )}
               </div>
 
               {stores.length > 0 ? (
@@ -131,43 +137,45 @@ export default function RetailerStores() {
                       className="relative aspect-square bg-white rounded-xl sm:rounded-2xl shadow-lg group overflow-hidden hover:scale-[1.02] transition-all duration-300 hover:ring-2 hover:ring-yellow-400"
                     >
                       {/* Dropdown Menu */}
-                      <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20">
-                        <button
-                          className="text-gray-500 hover:text-gray-700 bg-white/80 p-1 rounded-full backdrop-blur-sm"
-                          onClick={() => {
-                            setMenuOpenId(
-                              menuOpenId === store.id ? null : store.id
-                            );
-                          }}
-                        >
-                          {menuOpenId === store.id ? (
-                            <MdCancel className="text-red-600" size={20} />
-                          ) : (
-                            <HiDotsVertical size={20} />
-                          )}
-                        </button>
-
-                        {menuOpenId === store.id && (
-                          <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-50">
-                            <button
-                              onClick={() => handleEdit(store.id)}
-                              className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              <HiPencil className="text-yellow-600" />
-                              Edit Details
-                            </button>
-                            {userRole === "ADMIN" && (
-                              <button
-                                onClick={() => handleDeletePrompt(store)}
-                                className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
-                              >
-                                <HiTrash className="text-red-500" />
-                                Delete
-                              </button>
+                      {(userRole === "RETAILER" || userRole === "ADMIN") && (
+                        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20">
+                          <button
+                            className="text-gray-500 hover:text-gray-700 bg-white/80 p-1 rounded-full backdrop-blur-sm"
+                            onClick={() => {
+                              setMenuOpenId(
+                                menuOpenId === store.id ? null : store.id
+                              );
+                            }}
+                          >
+                            {menuOpenId === store.id ? (
+                              <MdCancel className="text-red-600" size={20} />
+                            ) : (
+                              <HiDotsVertical size={20} />
                             )}
-                          </div>
-                        )}
-                      </div>
+                          </button>
+
+                          {menuOpenId === store.id && (
+                            <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-50">
+                              <button
+                                onClick={() => handleEdit(store.id)}
+                                className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                <HiPencil className="text-yellow-600" />
+                                Edit Details
+                              </button>
+                              {userRole === "ADMIN" && (
+                                <button
+                                  onClick={() => handleDeletePrompt(store)}
+                                  className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
+                                >
+                                  <HiTrash className="text-red-500" />
+                                  Delete
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                       {/* Card Content */}
                       <div

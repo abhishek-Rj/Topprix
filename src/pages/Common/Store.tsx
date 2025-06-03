@@ -43,7 +43,7 @@ export default function StoreDetailPage() {
   const [isPremium, setIsPremium] = useState(false);
   const [isSponsored, setIsSponsored] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { user, loading } = useAuthenticate();
+  const { user, loading, userRole } = useAuthenticate();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [pagination, setPagination] = useState<any>(null);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -472,13 +472,15 @@ export default function StoreDetailPage() {
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                       {store.name}
                     </h1>
-                    <button
-                      onClick={handleEditStore}
-                      className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
-                    >
-                      <HiPencil />
-                      Edit Store
-                    </button>
+                    {(userRole === "ADMIN" || userRole === "RETAILER") && (
+                      <button
+                        onClick={handleEditStore}
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
+                      >
+                        <HiPencil />
+                        Edit Store
+                      </button>
+                    )}
                   </div>
 
                   {/* Store Description */}
@@ -522,13 +524,15 @@ export default function StoreDetailPage() {
                 </button>
               </div>
 
-              <button
-                onClick={handleCreate}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-yellow-500 text-white font-semibold px-5 py-2 rounded-md hover:bg-yellow-600 transition"
-              >
-                <HiPlus />
-                {activeTab === "flyers" ? "Create Flyer" : "Create Coupon"}
-              </button>
+              {(userRole === "ADMIN" || userRole === "RETAILER") && (
+                <button
+                  onClick={handleCreate}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-yellow-500 text-white font-semibold px-5 py-2 rounded-md hover:bg-yellow-600 transition"
+                >
+                  <HiPlus />
+                  {activeTab === "flyers" ? "Create Flyer" : "Create Coupon"}
+                </button>
+              )}
             </div>
 
             {/* Tab Content Area */}
