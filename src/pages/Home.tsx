@@ -9,13 +9,52 @@ import { getDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
+import  { CouponCard } from "@/components/CouponCard";
+import { FlyerCard } from "@/components/FlyerCard";
+import baseUrl from "@/hooks/baseurl";
 
 export default function Home() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUsername] = useState<string | null>(null);
   const [loginButtonClassName, setLoginButtonClassName] = useState<string>("");
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [flyers, setFlyers] = useState<any[]>([]);
   const { userRole } = useAuthenticate();
+
+  useEffect(() => {
+    try {
+      (async () => {
+        const fetchCoupons = await fetch(`${baseUrl}coupons?limit=3`);
+        if (!fetchCoupons.ok) {
+          toast.error("Something went wrong");
+          throw new Error("Didn't fetched coupons")
+        }
+        setCoupons((await fetchCoupons.json()).coupons);
+      })()
+      
+    }catch (error) {
+      console.error("Error fetching coupons:", error);
+      toast.error("Failed to fetch coupons");
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      (async () => {
+        const fetchFlyers = await fetch(`${baseUrl}flyers?limit=3`);
+        if (!fetchFlyers.ok) {
+          toast.error("Something went wrong");
+          throw new Error("Didn't fetched flyers")
+        }
+        setFlyers((await fetchFlyers.json()).flyers);
+      })()
+      
+    }catch (error) {
+      console.error("Error fetching flyers:", error);
+      toast.error("Failed to fetch flyers");
+    }
+  }, [])
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -59,33 +98,6 @@ export default function Home() {
       store: "Food Court",
       discount: "30% OFF",
       code: "FOOD30",
-      image:
-        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    },
-  ];
-
-  const featuredFlyers = [
-    {
-      id: 1,
-      title: "Mega Sale",
-      store: "Shopping Mall",
-      description: "Huge discounts on all items",
-      image:
-        "https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    },
-    {
-      id: 2,
-      title: "Tech Expo",
-      store: "Tech Store",
-      description: "Latest gadgets and deals",
-      image:
-        "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    },
-    {
-      id: 3,
-      title: "Food Festival",
-      store: "Food Court",
-      description: "Taste the world",
       image:
         "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
     },
@@ -253,7 +265,32 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Coupons Section */}
+      {/* Featured Flyers Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900">Popular Flyers</h2>
+            <button
+              onClick={() => navigate("/explore/flyers")}
+              className="text-yellow-600 hover:text-yellow-700 font-medium"
+            >
+              View All
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {
+              flyers.map((flyer) => 
+                <FlyerCard
+                  key={flyer.id}
+                  flyer={flyer}
+                  showlogo={false}
+                />
+              )
+            } 
+          </div>
+        </div>
+      </section>
+      {/* Featured Coupon List */}
       <section className="py-16 px-4 bg-yellow-50">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-8">
@@ -268,77 +305,12 @@ export default function Home() {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredCoupons.map((coupon) => (
-              <motion.div
+            {coupons.map((coupon) => (
+              <CouponCard
                 key={coupon.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition"
-              >
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={coupon.image}
-                    alt={coupon.title}
-                    className="w-full h-full object-cover hover:scale-110 transition duration-300"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {coupon.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4">{coupon.store}</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-yellow-600">
-                      {coupon.discount}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      Code: {coupon.code}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Flyers Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Popular Flyers</h2>
-            <button
-              onClick={() => navigate("/explore/flyers")}
-              className="text-yellow-600 hover:text-yellow-700 font-medium"
-            >
-              View All
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featuredFlyers.map((flyer) => (
-              <motion.div
-                key={flyer.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition"
-              >
-                <div className="h-48 overflow-hidden">
-                  <img
-                    src={flyer.image}
-                    alt={flyer.title}
-                    className="w-full h-full object-cover hover:scale-110 transition duration-300"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {flyer.title}
-                  </h3>
-                  <p className="text-gray-600 mb-2">{flyer.store}</p>
-                  <p className="text-gray-500">{flyer.description}</p>
-                </div>
-              </motion.div>
+                coupon={coupon}
+                showlogo={false}
+              />
             ))}
           </div>
         </div>

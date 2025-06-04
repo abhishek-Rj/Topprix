@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
 import ConfirmDeleteDialog from "./confirmDeleteOption";
 
-const FlyerCard = ({
+export const FlyerCard = ({
   flyer,
   onEdit,
   onDelete,
@@ -232,6 +232,34 @@ const FlyerCard = ({
                         Description
                       </h3>
                       <p className="text-gray-600">{flyer.description}</p>
+                    </section>
+                  )}
+
+                  {store.latitude && store.longitude && (
+                    <section>
+                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                        Store Location
+                      </h3>
+                      <div className="space-y-3">
+                        <iframe
+                          width="100%"
+                          height="200"
+                          className="rounded-lg shadow"
+                          loading="lazy"
+                          allowFullScreen
+                          src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${store.latitude},${store.longitude}`}
+                        />
+                        <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
+                          <p>
+                            <span className="font-medium">Address:</span>{" "}
+                            {store.address || "Not available"}
+                          </p>
+                          <p>
+                            <span className="font-medium">Coordinates:</span>{" "}
+                            {store.latitude}, {store.longitude}
+                          </p>
+                        </div>
+                      </div>
                     </section>
                   )}
                 </div>
