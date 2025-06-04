@@ -116,10 +116,10 @@ const FlyerCard = ({
               {flyer.title}
             </h2>
             <span className="text-sm font-medium text-yellow-600">
-              {calculateDaysLeft() === 0
-                ? "Last day"
-                : calculateDaysLeft() + " days left"}
-            </span>
+        {calculateDaysLeft() === 0
+                ? "Last day" 
+                : (calculateDaysLeft() < 0) ? "Expired" :  calculateDaysLeft() + " days left"}
+        </span>
           </div>
         </CardContent>
       </Card>

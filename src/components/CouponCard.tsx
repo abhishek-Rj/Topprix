@@ -54,6 +54,14 @@ const CouponCard = ({
 
   const isAuthorized = userRole === "ADMIN" || userRole === "RETAILER";
 
+  const calculateDaysLeft = () => {
+    const endDate = new Date(coupon.endDate);
+    const today = new Date();
+    const diffTime = endDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
   useEffect(() => {
     const fetchStore = async () => {
       const res = await fetch(`${baseUrl}store/${coupon.storeId}`);
@@ -122,102 +130,40 @@ const CouponCard = ({
         className="w-full hover:translate-y-1 max-w-sm rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all relative group"
         onClick={() => setShowPreview(true)}
       >
-        {/* Action Buttons - Only visible on hover for authorized users */}
-        {isAuthorized && (
-          <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={handleEdit}
-              className="p-1.5 bg-yellow-500 text-white rounded-full hover:bg-yellow-600 transition-colors"
-              title="Edit Coupon"
-            >
-              <HiPencil className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handleDeleteClick}
-              disabled={isDeleting}
-              className="p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50"
-              title="Delete Coupon"
-            >
-              <HiTrash className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
         <CardContent className="p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800">
-                {coupon.title}
-              </h2>
-              <p className="text-sm text-gray-600">{coupon.code}</p>
-            </div>
-            {showlogo && coupon.store.logo && (
-              <img
-                src={coupon.store.logo}
-                alt={coupon.store.name}
-                width={20}
-                height={20}
-                className="w-12 h-12 border-2 border-yellow-800 object-contain rounded-full shadow"
-              />
-            )}
-          </div>
+        <div className="w-full max-w-sm rounded-lg shadow-sm overflow-hidden bg-white p-4">
+      <div className="flex flex-col items-center space-y-3">
+        {/* Title */}
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {coupon.title}
+        </h2>
 
-          <p className="text-gray-700 text-sm">
-            <span className="font-semibold text-yellow-500">
-              {coupon.discount}
-            </span>
-          </p>
+        {/* Images */}
+        <div className="flex gap-4 justify-center">
+          {coupon.barcodeUrl && (
+            <img
+              src={coupon.barcodeUrl}
+              alt="Barcode"
+              className="w-24 h-24 object-contain rounded-md shadow"
+            />
+          )}
+          {coupon.qrCodeUrl && (
+            <img
+              src={coupon.qrCodeUrl}
+              alt="QR Code"
+              className="w-24 h-24 object-contain rounded-md shadow"
+            />
+          )}
+        </div>
 
-          <div className="flex gap-2 text-sm">
-            {coupon.categories.map((cat: any) => (
-              <span
-                key={cat.id}
-                className="px-2 py-1 rounded bg-yellow-100 text-yellow-700"
-              >
-                {cat.name}
-              </span>
-            ))}
-          </div>
-
-          <div className="flex gap-4 justify-center">
-            {coupon.barcodeUrl && (
-              <img
-                src={coupon.barcodeUrl}
-                alt="Barcode"
-                width={80}
-                height={40}
-                className="w-24 h-24 object-contain rounded-md shadow"
-              />
-            )}
-            {coupon.qrCodeUrl && (
-              <img
-                src={coupon.qrCodeUrl}
-                alt="QR Code"
-                width={80}
-                height={40}
-                className="w-24 h-24 object-contain rounded-md shadow"
-              />
-            )}
-          </div>
-
-          <div className="text-xs text-gray-500">
-            Valid from {new Date(coupon.startDate).toLocaleDateString()} to{" "}
-            {new Date(coupon.endDate).toLocaleDateString()}
-          </div>
-
-          <div className="flex gap-2 text-xs">
-            {coupon.isOnline ? (
-              <span className="text-green-600">Online</span>
-            ) : (
-              <span className="text-red-600">Offline</span>
-            )}
-            {coupon.isInStore ? (
-              <span className="text-blue-600">In-Store</span>
-            ) : (
-              <span className="text-red-600">Stock Out</span>
-            )}
-            {coupon.isPremium && <span className="text-red-600">Premium</span>}
-          </div>
+        {/* Valid Until */}
+        <span className="text-sm font-medium text-yellow-600">
+        {calculateDaysLeft() === 0
+                ? "Last day" 
+                : (calculateDaysLeft() < 0) ? "Expired" :  calculateDaysLeft() + " days left"}
+        </span>
+      </div>
+    </div>
         </CardContent>
       </Card>
 

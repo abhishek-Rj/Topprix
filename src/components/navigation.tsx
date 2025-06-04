@@ -62,8 +62,8 @@ const Navigation = () => {
 
   if (userRole === "USER" || userRole === null) {
     navLinks = [
-      { name: t("navigation.coupon"), path: "/explore/coupons" },
       { name: t("navigation.flyer"), path: "/explore/flyers" },
+      { name: t("navigation.coupon"), path: "/explore/coupons" },
       { name: t("navigation.stores"), path: "/stores" },
       { name: t("navigation.favourite"), path: "/favourite" },
       { name: t("navigation.wishlist"), path: "/wishlist" },
@@ -75,8 +75,8 @@ const Navigation = () => {
     navLinks = [
       { name: t("navigation.dashboard"), path: "/retailer-dashboard" },
       { name: t("navigation.yourStores"), path: "/stores" },
-      { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
       { name: t("navigation.yourFlyers"), path: "/explore/flyers" },
+      { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
       { name: t("navigation.profile"), path: "/profile" },
     ];
   }
@@ -85,8 +85,8 @@ const Navigation = () => {
     navLinks = [
       { name: t("navigation.dashboard"), path: "/admin-dashboard" },
       { name: t("navigation.yourStores"), path: "/stores" },
-      { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
       { name: t("navigation.yourFlyers"), path: "/explore/flyers" },
+      { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
       { name: t("navigation.profile"), path: "/profile" },
     ];
   }
