@@ -318,6 +318,8 @@ export default function StoreDetailPage() {
         selectedCategories.length === 0 ||
         !startDate ||
         !endDate
+        || !barcodeFile
+        || !qrCodeFile
       ) {
         toast.error("Please fill in all required fields.");
         setIsSubmitting(false);
@@ -872,7 +874,7 @@ export default function StoreDetailPage() {
                     {/* Barcode Upload */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Barcode Image
+                        Barcode Image <span className="text-red-600">*</span>
                       </label>
                       <input
                         type="file"
@@ -880,6 +882,7 @@ export default function StoreDetailPage() {
                         accept="image/png, image/jpeg"
                         onChange={(e) => handleFileChange(e, "barcode")}
                         className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
+                        required
                       />
                       {barcodePreview && (
                         <div className="relative inline-block mt-2 h-16">
@@ -907,7 +910,7 @@ export default function StoreDetailPage() {
                     {/* QR Code Upload */}
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        QR Code Image
+                        QR Code Image <span className="text-red-600">*</span>
                       </label>
                       <input
                         type="file"
@@ -915,6 +918,7 @@ export default function StoreDetailPage() {
                         accept="image/png, image/jpeg"
                         onChange={(e) => handleFileChange(e, "qrcode")}
                         className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
+                        required
                       />
                       {qrCodePreview && (
                         <div className="relative inline-block mt-2 h-16">
