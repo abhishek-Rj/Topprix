@@ -34,7 +34,7 @@ const DetailRow = ({
   </div>
 );
 
-const CouponCard = ({
+export const CouponCard = ({
   coupon,
   showlogo,
   onEdit,
