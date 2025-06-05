@@ -6,6 +6,7 @@ import baseUrl from "@/hooks/baseurl";
 import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
 import ConfirmDeleteDialog from "./confirmDeleteOption";
+import { FiImage } from "react-icons/fi";
 
 const FlyerCard = ({
   flyer,
@@ -104,11 +105,17 @@ const FlyerCard = ({
       >
         <CardContent className="p-4 space-y-3">
           <div className="relative aspect-[4/3] z-10 w-full overflow-hidden rounded-lg">
-            <img
-              src={flyer.imageUrl}
-              alt={flyer.title}
-              className="w-full h-full object-cover"
-            />
+            {flyer.imageUrl ? (
+              <img
+                src={flyer.imageUrl}
+                alt={flyer.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <FiImage className="w-12 h-12 text-gray-400" />
+              </div>
+            )}
           </div>
 
           <div className="flex items-center flex-col justify-between">
@@ -116,10 +123,12 @@ const FlyerCard = ({
               {flyer.title}
             </h2>
             <span className="text-sm font-medium text-yellow-600">
-        {calculateDaysLeft() === 0
-                ? "Last day" 
-                : (calculateDaysLeft() < 0) ? "Expired" :  calculateDaysLeft() + " days left"}
-        </span>
+              {calculateDaysLeft() === 0
+                ? "Last day"
+                : calculateDaysLeft() < 0
+                ? "Expired"
+                : calculateDaysLeft() + " days left"}
+            </span>
           </div>
         </CardContent>
       </Card>
