@@ -69,7 +69,7 @@ export default function Login() {
               await auth.signOut();
               navigate("/login");
             } else {
-              navigate("/retailer-dashboard");
+              navigate("/");
             }
           } else if (userData?.role === "ADMIN") {
             if (!verifiedEmail) {
@@ -77,7 +77,7 @@ export default function Login() {
               await auth.signOut();
               navigate("/login");
             } else {
-              navigate("/admin-dashboard");
+              navigate("/");
             }
           }
         } else {
