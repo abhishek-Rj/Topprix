@@ -9,7 +9,7 @@ import { getDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
-import  { CouponCard } from "@/components/CouponCard";
+import { CouponCard } from "@/components/CouponCard";
 import { FlyerCard } from "@/components/FlyerCard";
 import baseUrl from "@/hooks/baseurl";
 
@@ -28,16 +28,15 @@ export default function Home() {
         const fetchCoupons = await fetch(`${baseUrl}coupons?limit=3`);
         if (!fetchCoupons.ok) {
           toast.error("Something went wrong");
-          throw new Error("Didn't fetched coupons")
+          throw new Error("Didn't fetched coupons");
         }
         setCoupons((await fetchCoupons.json()).coupons);
-      })()
-      
-    }catch (error) {
+      })();
+    } catch (error) {
       console.error("Error fetching coupons:", error);
       toast.error("Failed to fetch coupons");
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     try {
@@ -45,16 +44,15 @@ export default function Home() {
         const fetchFlyers = await fetch(`${baseUrl}flyers?limit=3`);
         if (!fetchFlyers.ok) {
           toast.error("Something went wrong");
-          throw new Error("Didn't fetched flyers")
+          throw new Error("Didn't fetched flyers");
         }
         setFlyers((await fetchFlyers.json()).flyers);
-      })()
-      
-    }catch (error) {
+      })();
+    } catch (error) {
       console.error("Error fetching flyers:", error);
       toast.error("Failed to fetch flyers");
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -277,19 +275,27 @@ export default function Home() {
               View All
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {
-              flyers.map((flyer) => 
-                <FlyerCard
-                  key={flyer.id}
-                  flyer={flyer}
-                  showlogo={false}
-                />
-              )
-            } 
-          </div>
+          {flyers.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {flyers.map((flyer) => (
+                <FlyerCard key={flyer.id} flyer={flyer} showlogo={false} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">😔</div>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                Bad luck today!
+              </h3>
+              <p className="text-gray-500">
+                No flyers available at the moment. Check back later for amazing
+                deals!
+              </p>
+            </div>
+          )}
         </div>
       </section>
+
       {/* Featured Coupon List */}
       <section className="py-16 px-4 bg-yellow-50">
         <div className="max-w-7xl mx-auto">
@@ -304,15 +310,24 @@ export default function Home() {
               View All
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {coupons.map((coupon) => (
-              <CouponCard
-                key={coupon.id}
-                coupon={coupon}
-                showlogo={false}
-              />
-            ))}
-          </div>
+          {coupons.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {coupons.map((coupon) => (
+                <CouponCard key={coupon.id} coupon={coupon} showlogo={false} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">🎫</div>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                No coupons today!
+              </h3>
+              <p className="text-gray-500">
+                Looks like all the good deals are taking a break. Come back
+                soon!
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
