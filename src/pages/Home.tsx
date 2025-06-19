@@ -71,36 +71,6 @@ export default function Home() {
     return () => unsubscribe();
   }, []);
 
-  const featuredCoupons = [
-    {
-      id: 1,
-      title: "Summer Sale",
-      store: "Fashion Store",
-      discount: "50% OFF",
-      code: "SUMMER50",
-      image:
-        "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    },
-    {
-      id: 2,
-      title: "Weekend Special",
-      store: "Electronics Hub",
-      discount: "$100 OFF",
-      code: "WEEKEND100",
-      image:
-        "https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    },
-    {
-      id: 3,
-      title: "Food Festival",
-      store: "Food Court",
-      discount: "30% OFF",
-      code: "FOOD30",
-      image:
-        "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white">
       {/* Navbar */}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useFirebase } from "../context/firebaseProvider";
+import { auth, useFirebase } from "../context/firebaseProvider";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock } from "react-icons/fi";
 import { ReactTyped } from "react-typed";
@@ -60,19 +60,25 @@ export default function Login() {
         if (userData) {
           if (userData?.role === "USER") {
             if (!verifiedEmail) {
-              toast.info("Please verify your email");
+              toast.info("Please verify your email to continue");
             }
             navigate("/explore/coupons");
           } else if (userData?.role === "RETAILER") {
             if (!verifiedEmail) {
-              toast.info("Please verify your email");
+              toast.info("Please verify your email to continue");
+              await auth.signOut();
+              navigate("/login");
+            } else {
+              navigate("/retailer-dashboard");
             }
-            navigate("/retailer-dashboard");
           } else if (userData?.role === "ADMIN") {
             if (!verifiedEmail) {
-              toast.info("Please verify your email");
+              toast.info("Please verify your email to continue");
+              await auth.signOut();
+              navigate("/login");
+            } else {
+              navigate("/admin-dashboard");
             }
-            navigate("/admin-dashboard");
           }
         } else {
           setError(t("Could not find user data"));
