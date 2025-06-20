@@ -205,7 +205,7 @@ export default function CreateNewStore() {
       toast.success("Store created successfully");
       navigate("/stores");
     } catch (error: any) {
-      toast.error(error.message || "Error creating store");
+      toast.error("Could not create store. Please try again.");
     } finally {
       setIsLoading(false);
     }

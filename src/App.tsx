@@ -15,6 +15,7 @@ import CouponPage from "./pages/Coupon";
 import FlyerPage from "./pages/Flyer";
 import FavoritesPage from "./pages/Favorites";
 import EmailVerification from "./pages/EmailVerification";
+import RetailerDashboard from "./pages/Retailer/RetailerDashboard";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/not-found" element={<NotFound />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
           <Route path="/verify-email" element={<EmailVerification />} />
+          <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
         </Routes>
       </BrowserRouter>
     </>
