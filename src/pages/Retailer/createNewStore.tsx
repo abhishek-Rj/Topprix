@@ -135,7 +135,7 @@ export default function CreateNewStore() {
   const getCoordinates = async (zip: string, countryCode: string) => {
     try {
       const response = await fetch(
-        `http://api.openweathermap.org/geo/1.0/zip?zip=${zip},${countryCode}&appid=663dbc9ffe2e08f3f82073649c5a6373`
+        `https://api.openweathermap.org/geo/1.0/zip?zip=${zip},${countryCode}&appid=663dbc9ffe2e08f3f82073649c5a6373`
       );
       const data = await response.json();
       if (data.cod === "404") {
