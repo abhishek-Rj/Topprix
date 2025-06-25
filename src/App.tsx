@@ -3,6 +3,7 @@ import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import PricingPlans from "./pages/Admin/PricingPlans";
 import UserDashboard from "./pages/Dashboard";
 import Deals from "./pages/Deals";
 import Profile from "./pages/Profile";
@@ -34,6 +35,7 @@ function App() {
           <Route path="/explore/flyers" element={<FlyerPage />} />
           <Route path="/favourite" element={<FavoritesPage />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/pricing-plans" element={<PricingPlans />} />
           <Route path="/deals" element={<Deals />} />
           <Route path="/not-found" element={<NotFound />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import {
   FiShield,
   FiUsers,
@@ -6,6 +7,7 @@ import {
   FiBarChart,
   FiDatabase,
   FiActivity,
+  FiDollarSign,
 } from "react-icons/fi";
 import Navigation from "../../components/navigation";
 
@@ -68,6 +70,24 @@ export default function AdminDashboard() {
                 control and oversight.
               </p>
             </motion.div>
+
+            {/* Pricing Plans */}
+            <Link to="/admin/pricing-plans">
+              <motion.div
+                whileHover={{ scale: 1.05, y: -5 }}
+                className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-blue-100 cursor-pointer"
+              >
+                <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-xl mb-4">
+                  <FiDollarSign className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Pricing Plans
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Create and manage subscription plans and pricing tiers for retailers.
+                </p>
+              </motion.div>
+            </Link>
 
             {/* Analytics & Reports */}
             <motion.div

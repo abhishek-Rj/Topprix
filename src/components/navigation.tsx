@@ -84,6 +84,7 @@ const Navigation = () => {
   if (userRole === "ADMIN") {
     navLinks = [
       { name: t("navigation.dashboard"), path: "/admin-dashboard" },
+      { name: "Pricing Plans", path: "/admin/pricing-plans" },
       { name: t("navigation.yourStores"), path: "/stores" },
       { name: t("navigation.yourFlyers"), path: "/explore/flyers" },
       { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
@@ -95,7 +96,11 @@ const Navigation = () => {
     <>
       <header
         className={`fixed w-full z-50 transition-all duration-300 ${
-          isScrolled ? "bg-white shadow-md py-2" : "bg-yellow-50 py-4"
+          isScrolled 
+            ? "bg-white shadow-md py-2" 
+            : userRole === "ADMIN" 
+              ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-4" 
+              : "bg-yellow-50 py-4"
         }`}
       >
         <div className="container mx-auto px-4">
@@ -109,7 +114,11 @@ const Navigation = () => {
               />
               <span
                 className={`text-2xl font-bold ${
-                  isScrolled ? "text-yellow-600" : "text-yellow-600"
+                  isScrolled 
+                    ? "text-yellow-600" 
+                    : userRole === "ADMIN"
+                      ? "text-white"
+                      : "text-yellow-600"
                 }`}
               >
                 Topprix
@@ -121,12 +130,16 @@ const Navigation = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-sm hover:scale-105 transition-transform font-medium  hover:text-yellow-600 ${
+                  className={`text-sm hover:scale-105 transition-transform font-medium ${
                     location.pathname === link.path
-                      ? "text-yellow-600 border-b-2 border-yellow-600 pb-1"
+                      ? userRole === "ADMIN"
+                        ? "text-white border-b-2 border-white pb-1"
+                        : "text-yellow-600 border-b-2 border-yellow-600 pb-1"
                       : isScrolled
-                      ? "text-gray-800"
-                      : "text-gray-800"
+                        ? "text-gray-800 hover:text-yellow-600"
+                        : userRole === "ADMIN"
+                          ? "text-blue-100 hover:text-white"
+                          : "text-gray-800 hover:text-yellow-600"
                   }`}
                 >
                   {link.name}
@@ -137,7 +150,13 @@ const Navigation = () => {
             <div className="hidden md:flex items-center space-x-6">
               {/* Language Selector */}
               <div className="relative group">
-                <button className="text-gray-600 hover:text-yellow-600 font-medium text-sm">
+                <button className={`font-medium text-sm ${
+                  isScrolled 
+                    ? "text-gray-600 hover:text-yellow-600" 
+                    : userRole === "ADMIN"
+                      ? "text-blue-100 hover:text-white"
+                      : "text-gray-600 hover:text-yellow-600"
+                }`}>
                   {i18n.language === "en" ? "EN" : i18n.language.toUpperCase()}
                 </button>
                 <div className="absolute right-0 mt-2 w-28 bg-white rounded-lg shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
@@ -166,8 +185,18 @@ const Navigation = () => {
 
               {user ? (
                 <div className="relative group">
-                  <button className="flex items-center space-x-1 text-gray-600 hover:text-yellow-600">
-                    <div className="w-8 h-8 rounded-full bg-yellow-200 flex items-center justify-center text-yellow-800 font-semibold">
+                  <button className={`flex items-center space-x-1 ${
+                    isScrolled 
+                      ? "text-gray-600 hover:text-yellow-600" 
+                      : userRole === "ADMIN"
+                        ? "text-blue-100 hover:text-white"
+                        : "text-gray-600 hover:text-yellow-600"
+                  }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+                      userRole === "ADMIN"
+                        ? "bg-white text-blue-600"
+                        : "bg-yellow-200 text-yellow-800"
+                    }`}>
                       {user.displayName
                         ? user.displayName.charAt(0).toUpperCase()
                         : user.email.charAt(0).toUpperCase()}
@@ -214,7 +243,13 @@ const Navigation = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="flex items-center text-sm font-medium text-gray-600 hover:text-yellow-600"
+                  className={`flex items-center text-sm font-medium ${
+                    isScrolled 
+                      ? "text-gray-600 hover:text-yellow-600" 
+                      : userRole === "ADMIN"
+                        ? "text-blue-100 hover:text-white"
+                        : "text-gray-600 hover:text-yellow-600"
+                  }`}
                 >
                   <FiUser className="mr-1" size={18} />
                   {t("signIn")}
@@ -224,7 +259,13 @@ const Navigation = () => {
 
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-gray-600 hover:text-yellow-600 focus:outline-none"
+              className={`md:hidden focus:outline-none ${
+                isScrolled 
+                  ? "text-gray-600 hover:text-yellow-600" 
+                  : userRole === "ADMIN"
+                    ? "text-blue-100 hover:text-white"
+                    : "text-gray-600 hover:text-yellow-600"
+              }`}
             >
               {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
             </button>
