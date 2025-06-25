@@ -74,6 +74,7 @@ const Navigation = () => {
   if (userRole === "RETAILER") {
     navLinks = [
       { name: t("navigation.dashboard"), path: "/retailer-dashboard" },
+      { name: "Subscriptions", path: "/subscriptions" },
       { name: t("navigation.yourStores"), path: "/stores" },
       { name: t("navigation.yourFlyers"), path: "/explore/flyers" },
       { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
