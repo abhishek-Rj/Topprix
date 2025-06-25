@@ -162,7 +162,7 @@ export default function Profile() {
 
   if (loader) {
     return (
-      <div className="min-h-screen w-full bg-yellow-50">
+      <div className={`min-h-screen w-full ${user?.role === "ADMIN" ? "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50" : "bg-yellow-50"}`}>
         <Navigation />
         <Loader />
       </div>
@@ -170,14 +170,20 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-yellow-50">
+    <div className={`min-h-screen ${user?.role === "ADMIN" ? "bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50" : "bg-yellow-50"}`}>
       <Navigation />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         {/* Profile Header */}
-        <div className="bg-gradient-to-r from-yellow-600 to-amber-500 rounded-t-xl py-8 px-6 sm:px-10 text-white shadow-md">
+        <div className={`rounded-t-xl py-8 px-6 sm:px-10 text-white shadow-md ${
+          user?.role === "ADMIN" 
+            ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600" 
+            : "bg-gradient-to-r from-yellow-600 to-amber-500"
+        }`}>
           <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
             <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
-              <span className="text-yellow-600 text-4xl font-bold">
+              <span className={`text-4xl font-bold ${
+                user?.role === "ADMIN" ? "text-blue-600" : "text-yellow-600"
+              }`}>
                 {user?.name?.charAt(0).toUpperCase() ||
                   user?.email?.charAt(0).toUpperCase() ||
                   "?"}
@@ -185,9 +191,13 @@ export default function Profile() {
             </div>
             <div className="flex-1 text-center sm:text-left">
               <h1 className="text-3xl font-bold">{user?.name || "User"}</h1>
-              <p className="mt-1 text-yellow-100">{user?.email}</p>
+              <p className={`mt-1 ${
+                user?.role === "ADMIN" ? "text-blue-100" : "text-yellow-100"
+              }`}>{user?.email}</p>
               <div className="mt-3">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-800 text-white">
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white ${
+                  user?.role === "ADMIN" ? "bg-blue-800" : "bg-yellow-800"
+                }`}>
                   <FiTag className="mr-1" />
                   {user?.role === "ADMIN"
                     ? "Admin"
@@ -196,7 +206,9 @@ export default function Profile() {
                     : "Customer"}
                 </span>
                 {accountCreatedDate && (
-                  <span className="ml-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-800 text-white">
+                  <span className={`ml-2 inline-flex items-center px-3 py-1 rounded-full text-sm font-medium text-white ${
+                    user?.role === "ADMIN" ? "bg-blue-800" : "bg-yellow-800"
+                  }`}>
                     <FiClock className="mr-1" />
                     {t("profile.memberSince")}: {formatDate(accountCreatedDate)}
                   </span>
@@ -229,7 +241,7 @@ export default function Profile() {
               <button
                 onClick={() => setEditing(!editing)}
                 className={`flex items-center text-sm font-medium ${
-                  editing ? "text-red-500" : "text-yellow-600"
+                  editing ? "text-red-500" : user?.role === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                 }`}
               >
                 {editing ? (
@@ -260,7 +272,11 @@ export default function Profile() {
                       type="text"
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
-                      className="focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
+                      className={`focus:ring-2 focus:ring-offset-2 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 px-3 border ${
+                        user?.role === "ADMIN" 
+                          ? "focus:ring-blue-500 focus:border-blue-500" 
+                          : "focus:ring-yellow-500 focus:border-yellow-500"
+                      }`}
                     />
                   </div>
                 ) : (
@@ -312,7 +328,11 @@ export default function Profile() {
                       type="text"
                       value={editedLocation}
                       onChange={(e) => setEditedLocation(e.target.value)}
-                      className="focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 px-3 border"
+                      className={`focus:ring-2 focus:ring-offset-2 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 px-3 border ${
+                        user?.role === "ADMIN" 
+                          ? "focus:ring-blue-500 focus:border-blue-500" 
+                          : "focus:ring-yellow-500 focus:border-yellow-500"
+                      }`}
                     />
                   </div>
                 ) : (
@@ -333,8 +353,10 @@ export default function Profile() {
                   disabled={isSaving || !editedName.trim()}
                   className={`flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
                     isSaving || !editedName.trim()
-                      ? "bg-yellow-300"
-                      : "bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                      ? user?.role === "ADMIN" ? "bg-blue-300" : "bg-yellow-300"
+                      : user?.role === "ADMIN"
+                        ? "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        : "bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
                   }`}
                 >
                   <FiSave className="mr-2" />
@@ -353,7 +375,11 @@ export default function Profile() {
             <div className="space-y-4">
               <button
                 onClick={handleLogout}
-                className="flex items-center bg-slate-100 rounded-lg p-2 text-yellow-600 hover:text-yellow-800 hover:scale-105 transition duration-200"
+                className={`flex items-center bg-slate-100 rounded-lg p-2 hover:scale-105 transition duration-200 ${
+                  user?.role === "ADMIN" 
+                    ? "text-blue-600 hover:text-blue-800" 
+                    : "text-yellow-600 hover:text-yellow-800"
+                }`}
               >
                 <FiLogOut className="mr-2" />
                 {t("logout")}

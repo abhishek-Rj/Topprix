@@ -41,6 +41,8 @@ export default function PricingPlans() {
   const [editingPlan, setEditingPlan] = useState<PricingPlan | null>(null);
   const [deletingPlanId, setDeletingPlanId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [planToDelete, setPlanToDelete] = useState<PricingPlan | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -124,18 +126,21 @@ export default function PricingPlans() {
     setShowForm(true);
   };
 
-  const handleDelete = async (planId: string) => {
-    if (!confirm("Are you sure you want to delete this pricing plan?")) {
-      return;
-    }
+  const handleDelete = (plan: PricingPlan) => {
+    setPlanToDelete(plan);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!planToDelete) return;
 
     try {
-      setDeletingPlanId(planId);
-      const response = await fetch(`${baseUrl}api/pricing-plans/${planId}`, {
+      setDeletingPlanId(planToDelete.id);
+      const response = await fetch(`${baseUrl}api/pricing-plans/${planToDelete.id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          "user-email": user?.email || "",
+          "user-email": localStorage.getItem('userEmail') || "",
         },
       });
 
@@ -150,7 +155,14 @@ export default function PricingPlans() {
       toast.error("Failed to delete pricing plan");
     } finally {
       setDeletingPlanId(null);
+      setShowDeleteDialog(false);
+      setPlanToDelete(null);
     }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteDialog(false);
+    setPlanToDelete(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -329,7 +341,7 @@ export default function PricingPlans() {
                         <FiEdit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleDelete(plan.id)}
+                        onClick={() => handleDelete(plan)}
                         disabled={deletingPlanId === plan.id}
                         className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
                         title="Delete plan"
@@ -591,6 +603,83 @@ export default function PricingPlans() {
                 </button>
               </div>
             </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteDialog && planToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4"
+          >
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                  <FiTrash2 className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    Delete Pricing Plan
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    This action cannot be undone
+                  </p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-gray-700 mb-3">
+                  Are you sure you want to delete the pricing plan:
+                </p>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <h4 className="font-semibold text-gray-900 mb-1">
+                    {planToDelete.name}
+                  </h4>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {planToDelete.description}
+                  </p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-gray-900">
+                      {formatCurrency(planToDelete.amount, planToDelete.currency)}
+                    </span>
+                    <span className="text-gray-500">
+                      per {planToDelete.interval}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={cancelDelete}
+                  disabled={deletingPlanId === planToDelete.id}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={deletingPlanId === planToDelete.id}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {deletingPlanId === planToDelete.id ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <FiTrash2 className="w-4 h-4" />
+                      Delete Plan
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </motion.div>
         </div>
       )}
