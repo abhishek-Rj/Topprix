@@ -18,6 +18,7 @@ import {
   FiSettings,
 } from "react-icons/fi";
 import { motion } from "framer-motion";
+import Footer from "../../components/Footer";
 
 interface PricingPlan {
     id: string;
@@ -683,6 +684,7 @@ export default function PricingPlans() {
           </motion.div>
         </div>
       )}
+      <Footer />
     </div>
   );
 } 

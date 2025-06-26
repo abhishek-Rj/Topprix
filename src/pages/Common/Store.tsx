@@ -445,13 +445,15 @@ export default function StoreDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-yellow-50">
-      <Navigation />
-      <main className="pt-20 pb-10">
+    <>
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <Navigation />
+      </div>
+      <main className={`pt-20 pb-10 ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-9xl mx-auto max-h-max overflow-y-auto p-4 sm:p-6">
             {/* Store Header with Name, Description & Edit Button */}
-            <div className="mb-6 bg-yellow-100 rounded-xl p-4 sm:p-6 shadow-sm">
+            <div className={`mb-6 ${userRole === "ADMIN" ? "bg-blue-100" : "bg-yellow-100"} rounded-xl p-4 sm:p-6 shadow-sm`}>
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
                 {/* Store Logo */}
                 <div className="w-full sm:w-32 shrink-0">
@@ -459,10 +461,10 @@ export default function StoreDetailPage() {
                     <img
                       src={store.logo}
                       alt={`${store.name} Logo`}
-                      className="w-full aspect-[4/3] object-cover rounded-md border border-yellow-300 shadow-sm"
+                      className={`w-full aspect-[4/3] object-cover rounded-md border ${userRole === "ADMIN" ? "border-blue-300" : "border-yellow-300"} shadow-sm`}
                     />
                   ) : (
-                    <div className="w-full aspect-[4/3] flex items-center justify-center text-2xl font-semibold text-yellow-700 bg-yellow-200 rounded-md border border-yellow-300 shadow-sm">
+                    <div className={`w-full aspect-[4/3] flex items-center justify-center text-2xl font-semibold ${userRole === "ADMIN" ? "text-blue-700 bg-blue-200 border-blue-300" : "text-yellow-700 bg-yellow-200 border-yellow-300"} rounded-md border shadow-sm`}>
                       {store.name?.charAt(0).toUpperCase() || "S"}
                     </div>
                   )}
@@ -477,7 +479,7 @@ export default function StoreDetailPage() {
                     {(userRole === "ADMIN" || userRole === "RETAILER") && (
                       <button
                         onClick={handleEditStore}
-                        className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition"
+                        className={`w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-600" : "bg-yellow-500 hover:bg-yellow-600"} text-white rounded-md transition`}
                       >
                         <HiPencil />
                         Edit Store
@@ -501,10 +503,10 @@ export default function StoreDetailPage() {
                     setActiveTab("flyers");
                     localStorage.setItem("lastVisited", "flyers");
                   }}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-l-full border border-yellow-500 font-medium transition-all ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-l-full border ${userRole === "ADMIN" ? "border-blue-500" : "border-yellow-500"} font-medium transition-all ${
                     activeTab === "flyers"
-                      ? "bg-yellow-500 text-white"
-                      : "bg-white text-yellow-600 hover:bg-yellow-100"
+                      ? userRole === "ADMIN" ? "bg-blue-500 text-white" : "bg-yellow-500 text-white"
+                      : userRole === "ADMIN" ? "bg-white text-blue-600 hover:bg-blue-100" : "bg-white text-yellow-600 hover:bg-yellow-100"
                   }`}
                 >
                   <HiNewspaper />
@@ -515,10 +517,10 @@ export default function StoreDetailPage() {
                     setActiveTab("coupons");
                     localStorage.setItem("lastVisited", "coupons");
                   }}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-r-full border border-yellow-500 font-medium transition-all ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-r-full border ${userRole === "ADMIN" ? "border-blue-500" : "border-yellow-500"} font-medium transition-all ${
                     activeTab === "coupons"
-                      ? "bg-yellow-500 text-white"
-                      : "bg-white text-yellow-600 hover:bg-yellow-100"
+                      ? userRole === "ADMIN" ? "bg-blue-500 text-white" : "bg-yellow-500 text-white"
+                      : userRole === "ADMIN" ? "bg-white text-blue-600 hover:bg-blue-100" : "bg-white text-yellow-600 hover:bg-yellow-100"
                   }`}
                 >
                   <HiTag />
@@ -529,7 +531,7 @@ export default function StoreDetailPage() {
               {(userRole === "ADMIN" || userRole === "RETAILER") && (
                 <button
                   onClick={handleCreate}
-                  className="w-full sm:w-auto flex items-center justify-center gap-2 bg-yellow-500 text-white font-semibold px-5 py-2 rounded-md hover:bg-yellow-600 transition"
+                  className={`w-full sm:w-auto flex items-center justify-center gap-2 ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-600" : "bg-yellow-500 hover:bg-yellow-600"} text-white font-semibold px-5 py-2 rounded-md transition`}
                 >
                   <HiPlus />
                   {activeTab === "flyers" ? "Create Flyer" : "Create Coupon"}
@@ -538,7 +540,7 @@ export default function StoreDetailPage() {
             </div>
 
             {/* Tab Content Area */}
-            <div className="min-h-[200px] sm:min-h-[300px] bg-yellow-50 rounded-xl p-4 sm:p-5 shadow-inner">
+            <div className={`min-h-[200px] sm:min-h-[300px] ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"} rounded-xl p-4 sm:p-5 shadow-inner`}>
               {activeTab === "flyers" ? (
                 flyers ? (
                   <FlyerList
@@ -551,7 +553,7 @@ export default function StoreDetailPage() {
                 ) : (
                   <div className="text-center text-gray-700">
                     <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
-                      <HiNewspaper className="text-yellow-600" />
+                      <HiNewspaper className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
                       Flyers
                     </h2>
                     <p className="text-sm sm:text-base">
@@ -570,7 +572,7 @@ export default function StoreDetailPage() {
               ) : (
                 <div className="text-center text-gray-700">
                   <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
-                    <HiTag className="text-yellow-600" />
+                    <HiTag className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
                     Coupons
                   </h2>
                   <p className="text-sm sm:text-base">
@@ -586,7 +588,7 @@ export default function StoreDetailPage() {
       {/* Create Dialog */}
       {showDialog && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto max-h-[90vh] overflow-y-auto p-4 sm:p-6 scrollbar-thin scrollbar-thumb-yellow-400 scrollbar-track-transparent">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 {isEditing ? "Edit" : "Create"}{" "}
@@ -602,7 +604,6 @@ export default function StoreDetailPage() {
                 <HiX size={24} />
               </button>
             </div>
-
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               {activeTab === "flyers" ? (
                 // Flyer Form
@@ -628,7 +629,54 @@ export default function StoreDetailPage() {
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Description
+                    </label>
+                    <input
+                      type="text"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    />
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        Flyer Image <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg"
+                        onChange={(e) => handleFileChange(e, "flyer")}
+                        className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
+                        required
+                      />
+                      {flyerImagePreview && (
+                        <div className="relative inline-block mt-2 h-16">
+                          <img
+                            src={flyerImagePreview}
+                            alt="Flyer Preview"
+                            className="h-full rounded shadow object-contain"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFlyerImagePreview(null);
+                              setFlyerImage(null);
+                            }}
+                            className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                          >
+                            <MdCancel className="text-lg" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    {/* Start Date */}
                     <div ref={startRef} className="relative">
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
                         Start Date <span className="text-red-500">*</span>
@@ -656,6 +704,7 @@ export default function StoreDetailPage() {
                       )}
                     </div>
 
+                    {/* End Date */}
                     <div ref={endRef} className="relative">
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
                         End Date <span className="text-red-500">*</span>
@@ -684,40 +733,8 @@ export default function StoreDetailPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Flyer Image <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="file"
-                      accept="image/png, image/jpeg"
-                      onChange={(e) => handleFileChange(e, "flyer")}
-                      className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
-                      required={!isEditing}
-                    />
-                    {flyerImagePreview && (
-                      <div className="relative inline-block mt-2">
-                        <img
-                          src={flyerImagePreview}
-                          alt="Flyer Preview"
-                          className="max-h-48 rounded shadow object-contain"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFlyerImagePreview(null);
-                            setFlyerImage(null);
-                          }}
-                          className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
-                        >
-                          <MdCancel className="text-lg" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <input
                         type="checkbox"
                         id="isPremium"
@@ -725,14 +742,11 @@ export default function StoreDetailPage() {
                         onChange={(e) => setIsPremium(e.target.checked)}
                         className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
                       />
-                      <label
-                        htmlFor="isPremium"
-                        className="text-sm font-medium text-gray-700"
-                      >
+                      <label htmlFor="isPremium" className="text-sm font-medium text-gray-700">
                         Premium Flyer
                       </label>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <input
                         type="checkbox"
                         id="isSponsored"
@@ -740,17 +754,14 @@ export default function StoreDetailPage() {
                         onChange={(e) => setIsSponsored(e.target.checked)}
                         className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
                       />
-                      <label
-                        htmlFor="isSponsored"
-                        className="text-sm font-medium text-gray-700"
-                      >
+                      <label htmlFor="isSponsored" className="text-sm font-medium text-gray-700">
                         Sponsored Flyer
                       </label>
                     </div>
                   </div>
                 </>
               ) : (
-                // Existing Coupon Form
+                // Coupon Form
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div>
@@ -773,6 +784,7 @@ export default function StoreDetailPage() {
                         type="text"
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
+                        placeholder="e.g., SAVE20"
                         className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                         required
                       />
@@ -976,6 +988,6 @@ export default function StoreDetailPage() {
         </div>
       )}
       <Footer />
-    </div>
+    </>
   );
 }

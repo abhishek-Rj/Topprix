@@ -74,6 +74,7 @@ export default function Signup() {
     }
 
     try {
+      
       const registerUserResponse = await fetch(
         `${import.meta.env.VITE_APP_BASE_URL}register`,
         {

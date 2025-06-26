@@ -19,6 +19,7 @@ import {
   FiShield,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import userLogout from "@/hooks/userLogout";
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -145,8 +146,8 @@ export default function Profile() {
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
-      navigate("/login");
+      await userLogout();
+      window.location.reload();
     } catch (error) {
       console.error("Error signing out:", error);
     }

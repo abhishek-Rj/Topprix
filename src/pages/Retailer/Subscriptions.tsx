@@ -19,6 +19,7 @@ import {
   FiExternalLink,
 } from "react-icons/fi";
 import { motion } from "framer-motion";
+import Footer from "../../components/Footer";
 
 interface PricingPlan {
   id: string;
@@ -45,6 +46,7 @@ interface Subscription {
 }
 
 export default function Subscriptions() {
+  const [userData, setUserData] = useState<any>(null);
   const { user, userRole, loading: authLoading } = useAuthenticate();
   const navigate = useNavigate();
   const [plans, setPlans] = useState<PricingPlan[]>([]);
@@ -54,7 +56,6 @@ export default function Subscriptions() {
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string>("");
-
   // Redirect non-retailer users
   if (userRole !== "RETAILER" && userRole !== "ADMIN") {
     navigate("/not-found");
@@ -62,9 +63,22 @@ export default function Subscriptions() {
   }
 
   useEffect(() => {
+    fetchUser();
     fetchPricingPlans();
     fetchCurrentSubscription();
   }, []);
+
+  const fetchUser = async () => {
+    const response = await fetch(`${baseUrl}user/${localStorage.getItem('userEmail') || ""}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "user-email": localStorage.getItem('userEmail') || "",
+      },
+    });
+    const userData = await response.json();
+    setUserData(userData);
+  };
 
   const fetchPricingPlans = async () => {
     try {
@@ -81,7 +95,9 @@ export default function Subscriptions() {
       }
 
       const data = await response.json();
-      setPlans(data.pricingPlans || []);
+      // Filter only active plans
+      const activePlans = (data.pricingPlans || []).filter((plan: PricingPlan) => plan.isActive);
+      setPlans(activePlans);
     } catch (error) {
       console.error("Error fetching pricing plans:", error);
       toast.error("Failed to load pricing plans");
@@ -90,7 +106,16 @@ export default function Subscriptions() {
 
   const fetchCurrentSubscription = async () => {
     try {
-      const response = await fetch(`${baseUrl}api/subscriptions/current`, {
+      const fetchCurrentUser = await fetch(`${baseUrl}user/${userData.id}/subscription`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "user-email": localStorage.getItem('userEmail') || "",
+        },
+      });
+      const userResponse = await fetchCurrentUser.json();
+      const userId = userResponse.id;
+      const response = await fetch(`${baseUrl}api/${userId}/current`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -121,28 +146,30 @@ export default function Subscriptions() {
           "user-email": localStorage.getItem('userEmail') || "",
         },
         body: JSON.stringify({
-          userId: user?.uid,
+          userId: userData.id,
           pricingPlanId: plan.id,
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create subscription");
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to create subscription");
+      }
       
+      // Handle successful subscription creation
       if (data.hostedInvoiceUrl) {
         setPaymentUrl(data.hostedInvoiceUrl);
         setShowPaymentModal(true);
-        toast.success("Subscription created! Please complete payment to activate.");
+        toast.success(data.message || "Subscription created! Please complete payment to activate.");
       } else {
-        toast.success("Subscription created successfully!");
-        fetchCurrentSubscription();
+        toast.success(data.message || "Subscription created successfully!");
+        // Refresh current subscription data
+        await fetchCurrentSubscription();
       }
     } catch (error) {
       console.error("Error creating subscription:", error);
-      toast.error("Failed to create subscription");
+      toast.error(error instanceof Error ? error.message : "Failed to create subscription");
     } finally {
       setCreatingSubscription(false);
     }
@@ -442,6 +469,7 @@ export default function Subscriptions() {
           </motion.div>
         </div>
       )}
+      <Footer />
     </div>
   );
 } 

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiMenu, FiX, FiSearch, FiUser } from "react-icons/fi";
 import { auth, db } from "../context/firebaseProvider";
 import { onAuthStateChanged } from "firebase/auth";
 import { getDoc, doc } from "firebase/firestore";
 import SkeletonNav from "./ui/navbarSkeleton";
+import userLogout from "@/hooks/userLogout";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,6 +15,7 @@ const Navigation = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -225,12 +227,8 @@ const Navigation = () => {
                     <button
                       onClick={async () => {
                         try {
-                          await auth.signOut();
-                          // Wait for a short delay to ensure auth state is cleared
-                          await new Promise((resolve) =>
-                            setTimeout(resolve, 100)
-                          );
-                          window.location.href = "/"; // Redirect to home page instead of reload
+                          await userLogout();
+                          navigate('/login');
                         } catch (error) {
                           console.error("Error signing out:", error);
                         }
@@ -365,12 +363,8 @@ const Navigation = () => {
                     <button
                       onClick={async () => {
                         try {
-                          await auth.signOut();
-                          // Wait for a short delay to ensure auth state is cleared
-                          await new Promise((resolve) =>
-                            setTimeout(resolve, 100)
-                          );
-                          window.location.href = "/"; // Redirect to home page instead of reload
+                          await userLogout();
+                          navigate('/login');
                         } catch (error) {
                           console.error("Error signing out:", error);
                         }

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { FiTool, FiClock, FiBell, FiStar } from "react-icons/fi";
 import Navigation from "../../components/navigation";
+import Footer from "../../components/Footer";
 
 export default function RetailerDashboard() {
   return (
@@ -176,6 +177,7 @@ export default function RetailerDashboard() {
           </motion.div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

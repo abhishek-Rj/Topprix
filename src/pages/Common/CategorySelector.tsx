@@ -19,7 +19,7 @@ export default function CategorySelector({ selected, onChange }: Props) {
   const [newCat, setNewCat] = useState("");
   const [adding, setAdding] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { user } = useAuthenticate();
+  const { user, userRole } = useAuthenticate();
 
   useEffect(() => {
     if (dialogOpen) {
@@ -95,8 +95,8 @@ export default function CategorySelector({ selected, onChange }: Props) {
             onClick={() => toggleCategory(cat.id)}
             className={`px-2 sm:px-4 py-1 hover:scale-105 rounded-full text-xs sm:text-sm border transition ${
               selected.includes(cat.id)
-                ? "bg-yellow-600 text-white border-yellow-600"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-yellow-50"
+                ? userRole === "ADMIN" ? "bg-blue-600 text-white border-blue-600" : "bg-yellow-600 text-white border-yellow-600"
+                : userRole === "ADMIN" ? "bg-white text-gray-700 border-gray-300 hover:bg-blue-50" : "bg-white text-gray-700 border-gray-300 hover:bg-yellow-50"
             }`}
           >
             {cat.name}
@@ -110,12 +110,12 @@ export default function CategorySelector({ selected, onChange }: Props) {
             value={newCat}
             onChange={(e) => setNewCat(e.target.value)}
             placeholder="New category"
-            className="px-3 py-2 border border-gray-300 rounded-md focus:ring-yellow-500 focus:border-yellow-500 w-full"
+            className={`px-3 py-2 border border-gray-300 rounded-md focus:ring-${userRole === "ADMIN" ? "blue" : "yellow"}-500 focus:border-${userRole === "ADMIN" ? "blue" : "yellow"}-500 w-full`}
           />
           <div className="flex gap-2">
             <button
               onClick={handleAddNew}
-              className="flex-1 sm:flex-none px-4 bg-yellow-600 text-white rounded-md hover:bg-yellow-700"
+              className={`flex-1 sm:flex-none px-4 ${userRole === "ADMIN" ? "bg-blue-600 hover:bg-blue-700" : "bg-yellow-600 hover:bg-yellow-700"} text-white rounded-md`}
             >
               Add
             </button>
@@ -133,7 +133,7 @@ export default function CategorySelector({ selected, onChange }: Props) {
       ) : (
         <button
           onClick={() => setDialogOpen(true)}
-          className="text-xs sm:text-sm text-yellow-600 hover:underline mt-2"
+          className={`text-xs sm:text-sm ${userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} hover:underline mt-2`}
         >
           + Add New Category
         </button>

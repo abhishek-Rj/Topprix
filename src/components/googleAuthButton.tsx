@@ -11,21 +11,35 @@ export default function GoogleAuthButton() {
     try {
       const user = await signInWithGoogle();
       if (user) {
-        const userData = {
-          name: user.displayName,
-          email: user.email,
-          role: "USER",
-        };
-
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
 
-        if (!docSnap.exists()) {
-          await setDoc(docRef, userData);
+        let userData;
+        let isNewUser = false;
+        
+        if (docSnap.exists()) {
+          // User exists - preserve their current role, update name and email
+          const existingData = docSnap.data();
+          userData = {
+            name: user.displayName,
+            email: user.email,
+            role: existingData.role || "USER", // Keep existing role, default to USER if not found
+          };
         } else {
-          navigate("/");
+          // New user - set default role as USER
+          isNewUser = true;
+          userData = {
+            name: user.displayName,
+            email: user.email,
+            role: "USER",
+          };
         }
 
+        // Always update/overwrite user data
+        await setDoc(docRef, userData);
+
+        // Only register with backend for new users
+        if (isNewUser) {
         try {
           const registerUser = await fetch(
             `${import.meta.env.VITE_APP_BASE_URL}register`,
@@ -46,6 +60,10 @@ export default function GoogleAuthButton() {
           }
         } catch (error) {
           console.error("Error sending user data to server:", error);
+          }
+        } else {
+          // Existing user - directly navigate to home
+          navigate("/");
         }
       }
     } catch (error) {

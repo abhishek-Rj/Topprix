@@ -10,6 +10,7 @@ import {
   FiDollarSign,
 } from "react-icons/fi";
 import Navigation from "../../components/navigation";
+import Footer from "../../components/Footer";
 
 export default function AdminDashboard() {
   return (
@@ -263,6 +264,7 @@ export default function AdminDashboard() {
           </motion.div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

@@ -14,7 +14,8 @@ import useClickOutside from "@/hooks/useClickOutside";
 import Footer from "@/components/Footer";
 
 export default function RetailerStores() {
-  const { user, userRole, loading } = useAuthenticate();
+  const userRole = localStorage.getItem("userRole");
+  const { user, loading } = useAuthenticate();
   const [stores, setStores] = useState<any[]>([]);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [confirmStoreName, setConfirmStoreName] = useState("");
@@ -105,13 +106,16 @@ export default function RetailerStores() {
       </div>
     </>
   ) : (
-    <div className="min-h-screen bg-yellow-50">
-      <Navigation />
-      <div className="bg-yellow-50 rounded-2xl shadow-xl p-6 sm:p-8 border border-yellow-100">
-        <main className="pt-10">
+    <div className={`min-h-screen flex flex-col ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <Navigation />
+      </div>
+      
+      <main className={`flex-1 pt-20 pb-10 ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
+        <div className={`${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"} rounded-2xl p-6 sm:p-8 border ${userRole === "ADMIN" ? "border-blue-100" : "border-yellow-100"} min-h-full`}>
           <div className="max-w-7xl mx-auto mb-6 sm:mb-8">
-            <div className="bg-white rounded-2xl shadow-xl hover:shadow-yellow-200 p-6 sm:p-8 border border-yellow-100">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 bg-yellow-100 border border-yellow-100 rounded-xl px-4 py-3 shadow-inner">
+            <div className={`bg-white rounded-2xl shadow-xl hover:shadow-${userRole === "ADMIN" ? "blue" : "yellow"}-200 p-6 sm:p-8 border ${userRole === "ADMIN" ? "border-blue-100" : "border-yellow-100"}`}>
+              <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 ${userRole === "ADMIN" ? "bg-blue-100 border-blue-100" : "bg-yellow-100 border-yellow-100"} border rounded-xl px-4 py-3 shadow-inner`}>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {userRole === "USER" || userRole === null
                     ? "All Stores"
@@ -120,7 +124,7 @@ export default function RetailerStores() {
                 {(userRole === "RETAILER" || userRole === "ADMIN") && (
                   <button
                     onClick={() => navigate("/stores/create-new-store")}
-                    className="w-full sm:w-auto px-5 py-2 bg-yellow-500 hover:scale-105 text-white rounded-md hover:bg-yellow-700 transition"
+                    className={`w-full sm:w-auto px-5 py-2 ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-700" : "bg-yellow-500 hover:bg-yellow-700"} hover:scale-105 text-white rounded-md transition`}
                   >
                     + Create New Store
                   </button>
@@ -132,7 +136,7 @@ export default function RetailerStores() {
                   {stores.map((store) => (
                     <div
                       key={store.id}
-                      className="relative aspect-square bg-white rounded-xl sm:rounded-2xl shadow-lg group overflow-hidden hover:scale-[1.02] transition-all duration-300 hover:ring-2 hover:ring-yellow-400"
+                      className={`relative aspect-square bg-white rounded-xl sm:rounded-2xl shadow-lg group overflow-hidden hover:scale-[1.02] transition-all duration-300 hover:ring-2 ${userRole === "ADMIN" ? "hover:ring-blue-400" : "hover:ring-yellow-400"}`}
                     >
                       {/* Dropdown Menu */}
                       {(userRole === "RETAILER" || userRole === "ADMIN") && (
@@ -156,9 +160,9 @@ export default function RetailerStores() {
                             <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-50">
                               <button
                                 onClick={() => handleEdit(store.id)}
-                                className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
                               >
-                                <HiPencil className="text-yellow-600" />
+                                <HiPencil className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
                                 Edit Details
                               </button>
                               {userRole === "ADMIN" && (
@@ -182,7 +186,7 @@ export default function RetailerStores() {
                       >
                         {/* Logo/Image Section */}
                         <div
-                          className="h-1/2 relative bg-gradient-to-br from-yellow-100 to-yellow-200"
+                          className={`h-1/2 relative ${userRole === "ADMIN" ? "bg-gradient-to-br from-blue-100 to-blue-200" : "bg-gradient-to-br from-yellow-100 to-yellow-200"}`}
                           style={{
                             backgroundImage: store.logo
                               ? `url(${store.logo})`
@@ -193,7 +197,7 @@ export default function RetailerStores() {
                         >
                           {!store.logo && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-3xl sm:text-4xl text-yellow-600/50">
+                              <span className={`text-3xl sm:text-4xl ${userRole === "ADMIN" ? "text-blue-600/50" : "text-yellow-600/50"}`}>
                                 {store.name.charAt(0).toUpperCase()}
                               </span>
                             </div>
@@ -202,7 +206,7 @@ export default function RetailerStores() {
                         </div>
 
                         {/* Content Section */}
-                        <div className="flex-1 p-3 sm:p-4 flex flex-col justify-between bg-yellow-50">
+                        <div className={`flex-1 p-3 sm:p-4 flex flex-col justify-between ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
                           <div>
                             <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2 line-clamp-1">
                               {store.name}
@@ -218,7 +222,7 @@ export default function RetailerStores() {
                               (cat: any, idx: number) => (
                                 <span
                                   key={cat.id || idx}
-                                  className="bg-yellow-100 text-yellow-800 px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium"
+                                  className={`${userRole === "ADMIN" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"} px-1.5 sm:px-2 py-0.5 rounded-full text-xs font-medium`}
                                 >
                                   #{cat.name}
                                 </span>
@@ -231,14 +235,14 @@ export default function RetailerStores() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center text-gray-600 text-base sm:text-lg">
+                <div className="text-center text-gray-600 text-base sm:text-lg py-16">
                   You haven't created any stores yet.
                 </div>
               )}
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
 
       {/* Delete Confirmation Modal */}
       {confirmDeleteId && storeToDelete && (
@@ -255,7 +259,7 @@ export default function RetailerStores() {
               type="text"
               value={confirmStoreName}
               onChange={(e) => setConfirmStoreName(e.target.value)}
-              className="w-full border border-gray-300 px-3 py-2 rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className={`w-full border border-gray-300 px-3 py-2 rounded-md mb-4 focus:outline-none focus:ring-2 ${userRole === "ADMIN" ? "focus:ring-blue-500" : "focus:ring-yellow-500"}`}
               placeholder="Enter store name"
             />
             <div className="flex flex-col sm:flex-row justify-end gap-3">
