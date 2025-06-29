@@ -66,7 +66,7 @@ export default function Signup() {
             
             if (statusResponse.ok) {
               const userData = await statusResponse.json();
-              isVerified = userData.user.emailVerified;
+              isVerified = userData.emailVerified;
             }
           }
           
@@ -211,21 +211,12 @@ export default function Signup() {
       if (checkUserResponse.ok) {
         const existingUser = await checkUserResponse.json();
         
-        // If user exists but is not verified, send verification email directly
-        if (existingUser && !existingUser.emailVerified) {
-          try {
-            // Try to sign in with existing credentials to get the user object
-            await sendEmailVerification(existingUser.email);
-            toast.success("Verification email sent! Please check your inbox.");
-            setShowVerification(true);
-            return;
-          } catch (error) {
-            console.error("Error sending verification email:", error);
-            setError("Failed to send verification email. Please try again.");
-            setLoading(false);
-            return;
-          }
-        } 
+        // If user exists, show error message
+        if (existingUser) {
+          setError("An account with this email already exists. Please login instead.");
+          setLoading(false);
+          return;
+        }
       }
 
       // If user doesn't exist or other conditions, proceed with normal signup
