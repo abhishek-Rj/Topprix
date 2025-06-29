@@ -192,7 +192,7 @@ export default function Login() {
           </p>
 
           <form className="mt-6 space-y-4" onSubmit={handleSignUp}>
-            {error && <p className="text-red-600 text-sm">{error}</p>}
+            {error && <p className="text-red-600 bg-red-200 rounded-md text-sm">{error}</p>}
 
             <div className="relative">
               <FiMail className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
