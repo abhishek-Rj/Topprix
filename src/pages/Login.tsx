@@ -83,9 +83,11 @@ export default function Login() {
       try {
         const userCredential = await logInWithEmailandPassword(email, password);
         
-        if (userCredential && userCredential.user) {
+        await userCredential.reload()
+        console.log(userCredential.emailVerified);
+        if (userCredential) {
           // Double-check Firebase email verification
-          if (userCredential.user.emailVerified) {
+          if (userCredential.emailVerified) {
             toast.success("Login successful!");
             navigate("/");
           } else {
