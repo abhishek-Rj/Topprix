@@ -49,7 +49,7 @@ export default function Login() {
     }
 
     try {
-      const checkForUser = await fetch(`${baseUrl}user/check/${email}`, {
+      const checkForUser = await fetch(`${baseUrl}user/${email}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

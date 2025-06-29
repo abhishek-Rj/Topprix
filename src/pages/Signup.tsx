@@ -50,7 +50,7 @@ export default function Signup() {
           
           if (auth.currentUser?.emailVerified) {
             clearInterval(interval);
-            const updateEmailVerification = await fetch(`${baseUrl}user/update/${email}`, {
+            const updateEmailVerification = await fetch(`${baseUrl}user/${email}`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
