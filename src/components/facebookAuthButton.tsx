@@ -9,6 +9,12 @@ export default function FacebookAuthButton() {
         try {
             const user = await signInWithFacebook();
             if (user) {
+                // Check if email is verified (Facebook accounts are typically pre-verified)
+                if (!user.emailVerified) {
+                    // For Facebook auth, this is unusual but handle it gracefully
+                    console.warn("Facebook account email not verified");
+                }
+
                 const userData = {
                     name: user.displayName,
                     email: user.email,

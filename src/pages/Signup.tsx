@@ -1,7 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useFirebase } from "../context/firebaseProvider";
 import { useNavigate } from "react-router-dom";
-import { FiMail, FiPhone, FiLock } from "react-icons/fi";
+import { FiMail, FiPhone, FiLock, FiCheckCircle } from "react-icons/fi";
 import { ReactTyped } from "react-typed";
 import { MdOutlinePerson } from "react-icons/md";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ import Input from "../components/Input";
 import { auth } from "../context/firebaseProvider";
 import { toast } from "react-toastify";
 import { sendEmailVerification } from "firebase/auth";
+import baseUrl from "@/hooks/baseurl";
 
 export default function Signup() {
   const [name, setName] = useState<string>("");
@@ -23,6 +24,9 @@ export default function Signup() {
   const [phoneError, setPhoneError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
   const [roleError, setRoleError] = useState<boolean>(false);
+  const [showVerification, setShowVerification] = useState<boolean>(false);
+  const [isResending, setIsResending] = useState<boolean>(false);
+  const [pollingInterval, setPollingInterval] = useState<number | null>(null);
 
   const roleRef = useRef<HTMLSelectElement>(null);
   const { signUpUserWithEmailAndPassword } = useFirebase();
@@ -35,6 +39,82 @@ export default function Signup() {
 
   const validatePhone = (phone: string): boolean => {
     return /^[0-9]{10}$/.test(phone);
+  };
+
+  // Start polling for email verification when verification view is shown
+  useEffect(() => {
+    if (showVerification) {
+      const interval = setInterval(async () => {
+        try {
+          await auth.currentUser?.reload();
+          
+          if (auth.currentUser?.emailVerified) {
+            clearInterval(interval);
+            const updateEmailVerification = await fetch(`${baseUrl}user/update/${email}`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ emailVerified: true }),
+            });
+
+            if (updateEmailVerification.ok) {
+            toast.success("Email verified successfully! Please login.");
+              await auth.signOut();
+              navigate("/login");
+            } else {
+              throw new Error("Failed to update email verification");
+            }
+          }
+        } catch (error) {
+          console.error("Error checking email verification:", error);
+        }
+      }, 3000);
+
+      setPollingInterval(interval);
+
+      return () => {
+        if (interval) {
+          clearInterval(interval);
+        }
+      };
+    }
+  }, [showVerification, navigate]);
+
+  const handleResendEmail = async () => {
+    if (!auth.currentUser) {
+      toast.error("No user found. Please sign up again.");
+      setShowVerification(false);
+      return;
+    }
+
+    setIsResending(true);
+    try {
+      await sendEmailVerification(auth.currentUser);
+      toast.success("Verification email sent successfully!");
+    } catch (error: any) {
+      console.error("Error sending verification email:", error);
+      if (error.code === 'auth/too-many-requests') {
+        toast.error("Too many requests. Please wait a few minutes before trying again.");
+      } else {
+        toast.error("Failed to send verification email. Please try again.");
+      }
+    } finally {
+      setIsResending(false);
+    }
+  };
+
+  const handleBackToSignup = () => {
+    auth.signOut();
+    setShowVerification(false);
+    // Reset form fields
+    setName("");
+    setEmail("");
+    setPhone("");
+    setPassword("");
+    if (roleRef.current) {
+      roleRef.current.value = "";
+    }
   };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -110,7 +190,7 @@ export default function Signup() {
       try {
         await sendEmailVerification(userCredential.user);
         toast.success("Verification email sent! Please check your inbox.");
-        await auth.signOut();
+        setShowVerification(true);
       } catch (err) {
         console.error("Error sending verification email:", err);
         try {
@@ -124,7 +204,6 @@ export default function Signup() {
         throw new Error("Failed to send verification email. Please try again.");
       }
 
-      navigate("/verify-email");
     } catch (error) {
       console.error("Error during sign-up:", error);
       setError("Failed to create account");
@@ -133,6 +212,54 @@ export default function Signup() {
     }
   };
 
+  // Show verification view
+  if (showVerification) {
+    return (
+      <div className="flex items-center justify-center min-h-screen flex-col bg-yellow-50 px-4 sm:px-6 lg:px-8">
+        <div className="text-center max-w-md mx-auto">
+          <FiMail className="text-yellow-600 text-4xl sm:text-6xl mb-4 mx-auto" />
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
+            Email Verification Required
+          </h1>
+          <p className="text-sm sm:text-lg text-gray-600 mb-6 leading-relaxed">
+            Please check your email for the verification link. You must verify your email before you can access the application.
+          </p>
+          
+          <div className="space-y-4">
+            <button 
+              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleResendEmail}
+              disabled={isResending}
+            >
+              {isResending ? "Sending..." : "Resend Verification Email"}
+            </button>
+            
+            <button 
+              className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+              onClick={handleBackToSignup}
+            >
+              Back to Signup
+            </button>
+          </div>
+
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Note:</strong> We're automatically checking for verification. Once verified, you'll be redirected to login.
+            </p>
+          </div>
+
+          <p className="text-sm text-gray-600 mt-4">
+            If you don't see the verification email,{" "}
+            <span className="text-yellow-600 font-medium">
+              please check your spam folder.
+            </span>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show signup form
   return (
     <div className="min-h-screen flex items-center justify-center bg-yellow-50 p-4">
       <div className="max-w-5xl w-full flex flex-col md:flex-row gap-6">
@@ -219,7 +346,7 @@ export default function Signup() {
               <Input
                 value={phone}
                 setValue={setPhone}
-                className={emailError ? "border-red-500" : ""}
+                className={phoneError ? "border-red-500" : ""}
                 type="tel"
                 placeholder={t("phone")}
               />

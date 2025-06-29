@@ -10,6 +10,7 @@ import Input from "../components/Input";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "../context/firebaseProvider";
 import { toast } from "react-toastify";
+import baseUrl from "@/hooks/baseurl";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("");
@@ -48,43 +49,23 @@ export default function Login() {
     }
 
     try {
-      const userCredential = await logInWithEmailandPassword(email, password);
-      let verifiedEmail = true;
-      if (!userCredential.emailVerified) {
-        verifiedEmail = false;
-      }
-      if (userCredential.uid) {
-        console.log(userCredential);
-        const userDoc = await getDoc(doc(db, "users", userCredential.uid));
-        const userData = userDoc.data();
-        if (userData) {
-          if (userData?.role === "USER") {
-            if (!verifiedEmail) {
-              toast.info("Please verify your email to continue");
-            }
-            navigate("/explore/coupons");
-          } else if (userData?.role === "RETAILER") {
-            if (!verifiedEmail) {
-              toast.info("Please verify your email to continue");
-              await auth.signOut();
-              navigate("/login");
-            } else {
-              navigate("/");
-            }
-          } else if (userData?.role === "ADMIN") {
-            if (!verifiedEmail) {
-              toast.info("Please verify your email to continue");
-              await auth.signOut();
-              navigate("/login");
-            } else {
-              navigate("/");
-            }
-          }
+      const checkForUser = await fetch(`${baseUrl}user/check/${email}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const checkForUserResponse = await checkForUser.json();
+      
+      if (checkForUserResponse.emailVerified) {
+        const userCredential = await logInWithEmailandPassword(email, password);
+        if (userCredential.emailVerified) {
+          navigate("/");
         } else {
-          setError(t("Could not find user data"));
+          toast.info("Please verify your email before logging in");
+          navigate("/verify-email");
         }
-      } else {
-        setError(t("Invalid email or password"));
       }
     } catch (error) {
       console.error(error);

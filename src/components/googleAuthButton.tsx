@@ -11,6 +11,12 @@ export default function GoogleAuthButton() {
     try {
       const user = await signInWithGoogle();
       if (user) {
+        // Check if email is verified (Google accounts are typically pre-verified)
+        if (!user.emailVerified) {
+          // For Google auth, this is unusual but handle it gracefully
+          console.warn("Google account email not verified");
+        }
+
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
 

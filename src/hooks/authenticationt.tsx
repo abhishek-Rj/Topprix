@@ -6,6 +6,7 @@ import { getDoc, doc } from "firebase/firestore";
 export default function useAuthenticate() {
   const [authenticated, setAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<any>(null);
+  const [emailVerified, setEmailVerified] = useState<boolean>(false);
   const [userRole, setUserRole] = useState<string | null>(() => {
     // Try to get cached user role from localStorage for instant access
     const cached = localStorage.getItem('userRole');
@@ -13,13 +14,29 @@ export default function useAuthenticate() {
   });
   const [loading, setLoading] = useState<boolean>(true);
 
-
   useEffect(() => {
     setLoading(true);
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // Check if email is verified
+        if (!user.emailVerified) {
+          // If email is not verified, sign out the user and don't set as authenticated
+          await auth.signOut();
+          setUser(null);
+          setAuthenticated(false);
+          setUserRole(null);
+          setEmailVerified(false);
+          // Clear cached data
+          localStorage.removeItem('userRole');
+          localStorage.removeItem('userEmail');
+          setLoading(false);
+          return;
+        }
+
+        // Only proceed if email is verified
         setAuthenticated(true);
         setUser(user);
+        setEmailVerified(true);
         
         // Check if we have cached user data
         const cachedUserEmail = localStorage.getItem('userEmail');
@@ -55,6 +72,7 @@ export default function useAuthenticate() {
         setUser(null);
         setAuthenticated(false);
         setUserRole(null);
+        setEmailVerified(false);
         // Clear cached data on logout
         localStorage.removeItem('userRole');
         localStorage.removeItem('userEmail');
@@ -65,5 +83,5 @@ export default function useAuthenticate() {
     return () => unsubscribe();
   }, []);
 
-  return { authenticated, user, userRole, loading };
+  return { authenticated, user, userRole, loading, emailVerified };
 }

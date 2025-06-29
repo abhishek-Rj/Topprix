@@ -68,7 +68,7 @@ const Navigation = () => {
       { name: t("navigation.coupon"), path: "/explore/coupons" },
       { name: t("navigation.stores"), path: "/stores" },
       { name: t("navigation.favourite"), path: "/favourite" },
-      { name: t("navigation.wishlist"), path: "/wishlist" },
+      { name: "Shopping Lists", path: "/shopping-lists" },
       { name: t("navigation.profile"), path: "/profile" },
     ];
   }

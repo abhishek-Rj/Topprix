@@ -18,6 +18,7 @@ import FlyerPage from "./pages/Flyer";
 import FavoritesPage from "./pages/Favorites";
 import EmailVerification from "./pages/EmailVerification";
 import RetailerDashboard from "./pages/Retailer/RetailerDashboard";
+import ShoppingList from "./pages/ShoppingList";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
           <Route path="/explore/coupons" element={<CouponPage />} />
           <Route path="/explore/flyers" element={<FlyerPage />} />
           <Route path="/favourite" element={<FavoritesPage />} />
+          <Route path="/shopping-lists" element={<ShoppingList />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/admin/pricing-plans" element={<PricingPlans />} />
           <Route path="/subscriptions" element={<Subscriptions />} />
