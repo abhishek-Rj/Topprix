@@ -388,7 +388,7 @@ export default function Signup() {
           </p>
 
           <form className="mt-6 space-y-4" onSubmit={handleSignUp}>
-            {error && <p className="text-red-600 bg-red-300 rounded-md text-sm">{error}</p>}
+            {error && <p className="text-red-600 bg-red-300 rounded-md text-sm p-2">{error}</p>}
 
             <div className="relative">
               <MdOutlinePerson className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
