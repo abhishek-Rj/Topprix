@@ -46,10 +46,34 @@ export default function Signup() {
     if (showVerification) {
       const interval = setInterval(async () => {
         try {
-          await auth.currentUser?.reload();
+          let isVerified = false;
           
-          if (auth.currentUser?.emailVerified) {
+          if (auth.currentUser) {
+            // Handle Firebase user
+            await auth.currentUser.reload();
+            isVerified = auth.currentUser.emailVerified;
+          } else {
+            // Handle existing unverified user from database
+            const statusResponse = await fetch(
+              `${baseUrl}user/${email}`,
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+            
+            if (statusResponse.ok) {
+              const userData = await statusResponse.json();
+              isVerified = userData.user.emailVerified;
+            }
+          }
+          
+          if (isVerified) {
             clearInterval(interval);
+            
+            // Update email verification status in database
             const updateEmailVerification = await fetch(`${baseUrl}user/${email}`, {
               method: "POST",
               headers: {
@@ -59,8 +83,10 @@ export default function Signup() {
             });
 
             if (updateEmailVerification.ok) {
-            toast.success("Email verified successfully! Please login.");
-              await auth.signOut();
+              toast.success("Email verified successfully! Please login.");
+              if (auth.currentUser) {
+                await auth.signOut();
+              }
               navigate("/login");
             } else {
               throw new Error("Failed to update email verification");
@@ -79,19 +105,36 @@ export default function Signup() {
         }
       };
     }
-  }, [showVerification, navigate]);
+  }, [showVerification, navigate, email]);
 
   const handleResendEmail = async () => {
-    if (!auth.currentUser) {
-      toast.error("No user found. Please sign up again.");
-      setShowVerification(false);
-      return;
-    }
-
     setIsResending(true);
     try {
-      await sendEmailVerification(auth.currentUser);
-      toast.success("Verification email sent successfully!");
+      // Check if we have a Firebase user or need to handle existing unverified user
+      if (auth.currentUser) {
+        await sendEmailVerification(auth.currentUser);
+        toast.success("Verification email sent successfully!");
+      } else {
+        // Handle existing unverified user from database
+        const resendResponse = await fetch(
+          `${baseUrl}resend-verification`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: email,
+            }),
+          }
+        );
+        
+        if (resendResponse.ok) {
+          toast.success("Verification email sent successfully!");
+        } else {
+          throw new Error("Failed to send verification email");
+        }
+      }
     } catch (error: any) {
       console.error("Error sending verification email:", error);
       if (error.code === 'auth/too-many-requests') {
@@ -154,9 +197,40 @@ export default function Signup() {
     }
 
     try {
-      
+      // First, check if user already exists in the database
+      const checkUserResponse = await fetch(
+        `${baseUrl}user/${email}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (checkUserResponse.ok) {
+        const existingUser = await checkUserResponse.json();
+        
+        // If user exists but is not verified, send verification email directly
+        if (existingUser && !existingUser.emailVerified) {
+          try {
+            // Try to sign in with existing credentials to get the user object
+            await sendEmailVerification(existingUser.email);
+            toast.success("Verification email sent! Please check your inbox.");
+            setShowVerification(true);
+            return;
+          } catch (error) {
+            console.error("Error sending verification email:", error);
+            setError("Failed to send verification email. Please try again.");
+            setLoading(false);
+            return;
+          }
+        } 
+      }
+
+      // If user doesn't exist or other conditions, proceed with normal signup
       const registerUserResponse = await fetch(
-        `${import.meta.env.VITE_APP_BASE_URL}register`,
+        `${baseUrl}register`,
         {
           method: "POST",
           headers: {
