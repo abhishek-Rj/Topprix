@@ -49,6 +49,7 @@ export default function Login() {
     }
 
     try {
+      // First, check if user exists in the database
       const checkForUser = await fetch(`${baseUrl}user/${email}`, {
         method: "GET",
         headers: {
@@ -56,20 +57,73 @@ export default function Login() {
         },
       });
 
+      if (!checkForUser.ok) {
+        setError("User not found. Please check your email or sign up.");
+        setLoading(false);
+        return;
+      }
+
       const checkForUserResponse = await checkForUser.json();
       
-      if (checkForUserResponse.emailVerified) {
-        const userCredential = await logInWithEmailandPassword(email, password);
-        if (userCredential.emailVerified) {
-          navigate("/");
-        } else {
-          toast.info("Please verify your email before logging in");
-          navigate("/verify-email");
-        }
+      // Check if user exists
+      if (!checkForUserResponse) {
+        setError("User not found. Please check your email or sign up.");
+        setLoading(false);
+        return;
       }
+
+      // Check if email is verified
+      if (!checkForUserResponse.emailVerified) {
+        setError("Please verify your email before logging in. Check your inbox for verification link.");
+        setLoading(false);
+        return;
+      }
+
+      // If user exists and is verified, proceed with login
+      try {
+        const userCredential = await logInWithEmailandPassword(email, password);
+        
+        if (userCredential && userCredential.user) {
+          // Double-check Firebase email verification
+          if (userCredential.user.emailVerified) {
+            toast.success("Login successful!");
+            navigate("/");
+          } else {
+            // Firebase user exists but email not verified
+            await auth.signOut();
+            setError("Please verify your email before logging in. Check your inbox for verification link.");
+            setLoading(false);
+            return;
+          }
+        } else {
+          setError("Invalid email or password. Please try again.");
+          setLoading(false);
+          return;
+        }
+      } catch (firebaseError: any) {
+        console.error("Firebase login error:", firebaseError);
+        
+        // Handle specific Firebase auth errors
+        if (firebaseError.code === 'auth/user-not-found') {
+          setError("User not found. Please check your email or sign up.");
+        } else if (firebaseError.code === 'auth/wrong-password') {
+          setError("Incorrect password. Please try again.");
+        } else if (firebaseError.code === 'auth/too-many-requests') {
+          setError("Too many failed attempts. Please try again later.");
+        } else if (firebaseError.code === 'auth/user-disabled') {
+          setError("This account has been disabled. Please contact support.");
+        } else if (firebaseError.code === 'auth/invalid-email') {
+          setError("Invalid email format. Please check your email address.");
+        } else {
+          setError("Login failed. Please check your credentials and try again.");
+        }
+        setLoading(false);
+        return;
+      }
+
     } catch (error) {
-      console.error(error);
-      setError(t("Login failed"));
+      console.error("Error during login:", error);
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
     }
