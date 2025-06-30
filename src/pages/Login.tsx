@@ -82,9 +82,24 @@ export default function Login() {
       // If user exists and is verified, proceed with login
       try {
         const userCredential = await logInWithEmailandPassword(email, password);
-        
+        const checkEmailVerification  = await fetch(`${baseUrl}user/${email}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!checkEmailVerification.ok) {
+          setError("Something went wrong. Please try again.");
+          setLoading(false);
+          return;
+        }
+        const checkEmailVerificationResponse = await checkEmailVerification.json();
+        if (!checkEmailVerificationResponse.emailVerified) {
+          setError("Please verify your email before logging in. Check your inbox for verification link.");
+          setLoading(false);
+          return;
+        }
         await userCredential.reload()
-        console.log(userCredential.emailVerified);
         if (userCredential) {
           // Double-check Firebase email verification
           if (userCredential.emailVerified) {
