@@ -56,7 +56,6 @@ export const CouponCard = ({
   const { user, userRole } = useAuthenticate();
   const [showDeleteDialogueBox, setShowDeleteDialogueBox] =
     useState<boolean>(false);
-
   const isAuthorized = userRole === "ADMIN" || userRole === "RETAILER";
 
   const calculateDaysLeft = () => {
@@ -81,9 +80,16 @@ export const CouponCard = ({
 
   const fetchShoppingLists = async () => {
     if (!user?.uid) return;
+
+    const fetchUser = await fetch (`${baseUrl}user/${user?.email}`)
+    if (!fetchUser.ok) {
+      toast.error("Couldn't fetch user data")
+      throw new Error ("Couldn't fetch user data")
+    }
+    const fetchUserResponse = await fetchUser.json()
     
     try {
-      const response = await fetch(`${baseUrl}api/users/${user.uid}/shopping-lists`, {
+      const response = await fetch(`${baseUrl}api/users/${fetchUserResponse?.id}/shopping-lists`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -137,8 +143,15 @@ export const CouponCard = ({
       return;
     }
 
+    const fetchUser = await fetch (`${baseUrl}user/${user?.email}`)
+    if (!fetchUser.ok) {
+      toast.error("Couldn't fetch user data")
+      throw new Error ("Couldn't fetch user data")
+    }
+    const fetchUserResponse = await fetchUser.json()
+
     try {
-      const response = await fetch(`${baseUrl}favourites`, {
+      const response = await fetch(`${baseUrl}favourites/${fetchUserResponse?.id}`, {
         method: isInWishlist ? "DELETE" : "POST",
         headers: {
           "Content-Type": "application/json",

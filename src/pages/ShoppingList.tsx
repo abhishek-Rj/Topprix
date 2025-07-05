@@ -5,7 +5,7 @@ import Loader from "../components/loading";
 import useAuthenticate from "../hooks/authenticationt";
 import baseUrl from "../hooks/baseurl";
 import { toast } from "react-toastify";
-import { HiPlus, HiTrash, HiPencil, HiCheck, HiX } from "react-icons/hi";
+import { HiPlus, HiTrash, HiCheck, HiX } from "react-icons/hi";
 import Footer from "@/components/Footer";
 
 interface ShoppingListItem {
@@ -16,7 +16,7 @@ interface ShoppingListItem {
   flyerItemId?: string;
 }
 
-interface ShoppingList {
+interface ShoppingList {  
   id: string;
   title: string;
   userId: string;
@@ -38,14 +38,15 @@ export default function ShoppingList() {
   const [newItemName, setNewItemName] = useState("");
   const [newItemQuantity, setNewItemQuantity] = useState(1);
 
+  if (user === null) {
+    navigate("/login");
+  }
+
   useEffect(() => {
-    if (user === null) {
-      navigate("/login");
-    }
     if (user) {
       fetchShoppingLists();
     }
-  }, [user]);
+  }, [user, loading]);
 
   const fetchShoppingLists = async () => {
     if (!user?.uid) return;

@@ -110,8 +110,15 @@ export const FlyerCard = ({
       return;
     }
 
+    const fetchUser = await fetch (`${baseUrl}user/${user?.email}`)
+    if (!fetchUser.ok) {
+      toast.error("Couldn't fetch user data")
+      throw new Error ("Couldn't fetch user data")
+    }
+    const fetchUserResponse = await fetchUser.json()
+
     try {
-      const response = await fetch(`${baseUrl}favourites`, {
+      const response = await fetch(`${baseUrl}favourites/${fetchUserResponse?.id}`, {
         method: isInWishlist ? "DELETE" : "POST",
         headers: {
           "Content-Type": "application/json",

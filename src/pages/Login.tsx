@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { auth, useFirebase } from "../context/firebaseProvider";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock } from "react-icons/fi";
@@ -7,10 +7,9 @@ import { useTranslation } from "react-i18next";
 import GoogleAuthButton from "../components/googleAuthButton";
 import FacebookAuthButton from "../components/facebookAuthButton";
 import Input from "../components/Input";
-import { getDoc, doc } from "firebase/firestore";
-import { db } from "../context/firebaseProvider";
 import { toast } from "react-toastify";
 import baseUrl from "@/hooks/baseurl";
+import useAuthenticate from "@/hooks/authenticationt";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("");
@@ -22,6 +21,13 @@ export default function Login() {
   const { logInWithEmailandPassword } = useFirebase();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { user } = useAuthenticate();
+  
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user]);
 
   const validateEmail = (email: string): boolean => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
