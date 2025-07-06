@@ -26,7 +26,7 @@ interface ShoppingList {
 }
 
 export default function ShoppingList() {
-  const { user, loading } = useAuthenticate();
+  const { user, userRole, loading } = useAuthenticate();
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null)
   const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
@@ -42,25 +42,43 @@ export default function ShoppingList() {
     navigate("/login");
   }
 
-  useEffect(() => {
-    if (user) {
-      fetchShoppingLists();
-    }
-  }, [user, loading]);
+  if (userRole == "ADMIN" || userRole == "RETAILER") {
+    navigate("/not-found");
+  }
 
-  const fetchShoppingLists = async () => {
-    if (!user?.uid) return;
+  // Fetch backend user ID on mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      if (!user?.email) return;
+      
+      try {
+        const response = await fetch(`${baseUrl}user/${user.email}`);
+        if (!response.ok) {
+          toast.error("Couldn't fetch user data");
+          throw new Error("Couldn't fetch user data");
+        }
+        const userData = await response.json();
+        const userIdentity = userData?.id;
+        setUserId(userIdentity);
+        
+        // Only fetch shopping lists after we have the user ID
+        if (userIdentity) {
+          fetchShoppingLists(userIdentity);
+        }
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+      }
+    };
+    
+    fetchUserId();
+  }, [user?.email]);
+
+  const fetchShoppingLists = async (userIdentity: string) => {
+    if (!userIdentity) return;
     
     setIsLoading(true);
     try {
-      const fetchUser = await fetch (`${baseUrl}user/${user?.email}`)
-      if (!fetchUser.ok) {
-        toast.error("Couldn't fetch user data")
-        throw new Error ("Couldn't fetch user data")
-      }
-      const fetchUserResponse = await fetchUser.json()
-      setUserId(fetchUserResponse?.id)
-      const response = await fetch(`${baseUrl}api/users/${fetchUserResponse?.id}/shopping-lists?includeItems=true`, {
+      const response = await fetch(`${baseUrl}api/users/${userIdentity}/shopping-lists?includeItems=true`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -83,7 +101,7 @@ export default function ShoppingList() {
   };
 
   const createShoppingList = async () => {
-    if (!user?.uid || !newListTitle.trim()) return;
+    if (!userId || !newListTitle.trim()) return;
 
     try {
       const response = await fetch(`${baseUrl}api/shopping-lists`, {
@@ -102,7 +120,7 @@ export default function ShoppingList() {
         toast.success("Shopping list created successfully");
         setShowCreateModal(false);
         setNewListTitle("");
-        fetchShoppingLists();
+        fetchShoppingLists(userId);
       } else {
         throw new Error("Failed to create shopping list");
       }
@@ -126,7 +144,7 @@ export default function ShoppingList() {
 
       if (response.ok) {
         toast.success("Shopping list deleted successfully");
-        fetchShoppingLists();
+        fetchShoppingLists(userId || "");
       } else {
         throw new Error("Failed to delete shopping list");
       }
@@ -157,7 +175,7 @@ export default function ShoppingList() {
         setShowAddItemModal(false);
         setNewItemName("");
         setNewItemQuantity(1);
-        fetchShoppingLists();
+        fetchShoppingLists(userId || "");
       } else {
         throw new Error("Failed to add item");
       }
@@ -180,7 +198,7 @@ export default function ShoppingList() {
 
       if (response.ok) {
         toast.success("Item updated successfully");
-        fetchShoppingLists();
+        fetchShoppingLists(userId || "");
       } else {
         throw new Error("Failed to update item");
       }
@@ -204,7 +222,7 @@ export default function ShoppingList() {
 
       if (response.ok) {
         toast.success("Item deleted successfully");
-        fetchShoppingLists();
+        fetchShoppingLists(userId || "");
       } else {
         throw new Error("Failed to delete item");
       }

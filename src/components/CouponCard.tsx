@@ -46,6 +46,7 @@ export const CouponCard = ({
   onDelete?: (couponId: string) => void;
 }) => {
   const [showPreview, setShowPreview] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [store, setStore] = useState<any>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [shoppingLists, setShoppingLists] = useState<any[]>([]);
@@ -57,6 +58,27 @@ export const CouponCard = ({
   const [showDeleteDialogueBox, setShowDeleteDialogueBox] =
     useState<boolean>(false);
   const isAuthorized = userRole === "ADMIN" || userRole === "RETAILER";
+
+  // Fetch user ID from backend when component mounts
+  useEffect(() => {
+    const fetchUserId = async () => {
+      if (!user?.email) return;
+      
+      try {
+        const response = await fetch(`${baseUrl}user/${user.email}`);
+        if (!response.ok) {
+          toast.error("Couldn't fetch user data");
+          throw new Error("Couldn't fetch user data");
+        }
+        const userData = await response.json();
+        setUserId(userData?.id);
+      } catch (error) {
+        console.error("Error fetching user ID:", error);
+      }
+    };
+
+    fetchUserId();
+  }, [user?.email]);
 
   const calculateDaysLeft = () => {
     const endDate = new Date(coupon.endDate);
@@ -79,17 +101,13 @@ export const CouponCard = ({
   }, [coupon?.storeId]);
 
   const fetchShoppingLists = async () => {
-    if (!user?.uid) return;
-
-    const fetchUser = await fetch (`${baseUrl}user/${user?.email}`)
-    if (!fetchUser.ok) {
-      toast.error("Couldn't fetch user data")
-      throw new Error ("Couldn't fetch user data")
+    if (!userId) {
+      toast.error("User data not available. Please try again.");
+      return;
     }
-    const fetchUserResponse = await fetchUser.json()
     
     try {
-      const response = await fetch(`${baseUrl}api/users/${fetchUserResponse?.id}/shopping-lists`, {
+      const response = await fetch(`${baseUrl}api/users/${userId}/shopping-lists`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -100,14 +118,20 @@ export const CouponCard = ({
       if (response.ok) {
         const data = await response.json();
         setShoppingLists(data.shoppingLists || []);
+      } else {
+        throw new Error("Failed to fetch shopping lists");
       }
     } catch (error) {
       console.error("Error fetching shopping lists:", error);
+      toast.error("Failed to fetch shopping lists");
     }
   };
 
   const addToShoppingList = async () => {
-    if (!selectedListId || !user?.uid) return;
+    if (!selectedListId || !userId) {
+      toast.error("Please select a shopping list");
+      return;
+    }
 
     try {
       const response = await fetch(`${baseUrl}api/shopping-lists/${selectedListId}/items`, {
@@ -143,15 +167,13 @@ export const CouponCard = ({
       return;
     }
 
-    const fetchUser = await fetch (`${baseUrl}user/${user?.email}`)
-    if (!fetchUser.ok) {
-      toast.error("Couldn't fetch user data")
-      throw new Error ("Couldn't fetch user data")
+    if (!userId) {
+      toast.error("User data not available. Please try again.");
+      return;
     }
-    const fetchUserResponse = await fetchUser.json()
 
     try {
-      const response = await fetch(`${baseUrl}favourites/${fetchUserResponse?.id}`, {
+      const response = await fetch(`${baseUrl}favourites/${userId}`, {
         method: isInWishlist ? "DELETE" : "POST",
         headers: {
           "Content-Type": "application/json",
