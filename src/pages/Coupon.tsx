@@ -235,21 +235,21 @@ export default function CouponPage() {
             <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div className="relative">
-                  <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
+                  <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
                   <input
                     type="text"
                     placeholder="Search coupons..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
                   />
                 </div>
                 <div className="relative">
-                  <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
+                  <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
                   <select
                     value={selectedCategory}
                     onChange={(e) => handleCategorySelect(e.target.value)}
-                    className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
                   >
                     <option value="all">All Categories</option>
                     {categories.map((category) => (
@@ -260,7 +260,7 @@ export default function CouponPage() {
                   </select>
                 </div>
                 <div className="relative">
-                  <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
+                  <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
                   <select
                     value={sortBy}
                     onChange={(e) => {
@@ -268,7 +268,7 @@ export default function CouponPage() {
                       setSortBy(newSortBy);
                       localStorage.setItem("sortBy", newSortBy);
                     }}
-                    className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
                   >
                     <option value="all">All</option>
                     <option value="active">Active</option>
