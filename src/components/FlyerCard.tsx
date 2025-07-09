@@ -256,18 +256,18 @@ export const FlyerCard = ({
               
               {/* Action buttons overlay for USER role */}
               {user && userRole === "USER" && (
-                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-1 right-1 flex gap-1 opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={handleAddToShoppingList}
-                    className="p-1 bg-white/90 hover:bg-white text-green-600 hover:text-green-700 rounded-full shadow-sm transition-colors"
+                    className="p-1 bg-white/90 sm:hover:bg-white text-green-600 sm:hover:text-green-700 rounded-full shadow-sm transition-colors"
                     title="Add to Shopping List"
                   >
                     <HiShoppingCart size={12} />
                   </button>
                   <button
                     onClick={toggleWishlist}
-                    className={`p-1 bg-white/90 hover:bg-white rounded-full shadow-sm transition-colors ${
-                      isInWishlist ? "text-red-500" : "text-gray-500 hover:text-red-500"
+                    className={`p-1 bg-white/90 sm:hover:bg-white rounded-full shadow-sm transition-colors ${
+                      isInWishlist ? "text-red-500" : "text-gray-500 sm:hover:text-red-500"
                     }`}
                     title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
                   >
@@ -323,7 +323,7 @@ export const FlyerCard = ({
                     <>
                       <button
                         onClick={handleAddToShoppingList}
-                        className="p-2 text-green-600 hover:text-green-700 transition-colors"
+                        className="p-2 text-green-600 sm:hover:text-green-700 transition-colors"
                         title="Add to Shopping List"
                       >
                         <HiShoppingCart className="w-5 h-5" />
@@ -331,7 +331,7 @@ export const FlyerCard = ({
                       <button
                         onClick={toggleWishlist}
                         className={`p-2 transition-colors ${
-                          isInWishlist ? "text-red-500" : "text-gray-500 hover:text-red-500"
+                          isInWishlist ? "text-red-500" : "text-gray-500 sm:hover:text-red-500"
                         }`}
                         title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
                       >
@@ -343,7 +343,7 @@ export const FlyerCard = ({
                     <>
                       <button
                         onClick={handleEdit}
-                        className="p-2 text-yellow-600 hover:text-yellow-700 transition-colors"
+                        className="p-2 text-yellow-600 sm:hover:text-yellow-700 transition-colors"
                         title="Edit Flyer"
                       >
                         <HiPencil className="w-5 h-5" />
@@ -351,7 +351,7 @@ export const FlyerCard = ({
                       <button
                         onClick={handleDeleteClick}
                         disabled={isDeleting}
-                        className="p-2 text-red-600 hover:text-red-700 transition-colors disabled:opacity-50"
+                        className="p-2 text-red-600 sm:hover:text-red-700 transition-colors disabled:opacity-50"
                         title="Delete Flyer"
                       >
                         <HiTrash className="w-5 h-5" />
@@ -360,7 +360,7 @@ export const FlyerCard = ({
                   )}
                   <button
                     onClick={() => setShowPreview(false)}
-                    className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                    className="p-2 text-gray-500 sm:hover:text-gray-700 transition-colors"
                   >
                     <HiX className="w-5 h-5" />
                   </button>
@@ -540,7 +540,7 @@ export const FlyerCard = ({
                       <div className="bg-green-50/70 rounded-2xl p-5 sm:p-6 shadow-inner space-y-3">
                         <button
                           onClick={handleAddToShoppingList}
-                          className="w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                          className="w-full bg-green-500 sm:hover:bg-green-600 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
                         >
                           <HiShoppingCart className="w-5 h-5" />
                           Add to Shopping List
@@ -549,8 +549,8 @@ export const FlyerCard = ({
                           onClick={toggleWishlist}
                           className={`w-full py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 ${
                             isInWishlist
-                              ? "bg-red-500 hover:bg-red-600 text-white"
-                              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                              ? "bg-red-500 sm:hover:bg-red-600 text-white"
+                              : "bg-gray-100 sm:hover:bg-gray-200 text-gray-700"
                           }`}
                         >
                           <HiHeart className="w-5 h-5" />
