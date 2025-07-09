@@ -609,14 +609,14 @@ export const FlyerCard = ({
                   setSelectedListId("");
                   setQuantity(1);
                 }}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md sm:hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 onClick={addToShoppingList}
                 disabled={!selectedListId}
-                className="px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white rounded-md transition"
+                className="px-4 py-2 bg-green-500 sm:hover:bg-green-600 disabled:bg-gray-300 text-white rounded-md transition"
               >
                 Add to List
               </button>
