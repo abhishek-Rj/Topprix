@@ -260,11 +260,11 @@ export const CouponCard = ({
   return (
     <>
       <Card
-        className="w-full hover:translate-y-1 max-w-sm rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all relative group"
+        className="w-full hover:translate-y-1 rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all relative group"
         onClick={() => setShowPreview(true)}
       >
-        <CardContent className="p-4 space-y-3">
-        <div className="w-full max-w-sm rounded-lg shadow-sm overflow-hidden bg-white p-4 relative">
+        <CardContent className="p-3 sm:p-4 space-y-3">
+        <div className="w-full rounded-lg shadow-sm overflow-hidden bg-white p-3 sm:p-4 relative">
           {/* Action buttons overlay for USER role */}
           {user && userRole === "USER" && (
             <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -287,32 +287,32 @@ export const CouponCard = ({
             </div>
           )}
           
-          <div className="flex flex-col items-center space-y-3">
+          <div className="flex flex-col items-center space-y-2 sm:space-y-3">
             {/* Title */}
-            <h2 className="text-lg font-semibold text-gray-800 truncate">
+            <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 truncate text-center line-clamp-2">
               {coupon.title}
             </h2>
 
             {/* Images */}
-            <div className="flex gap-4 justify-center">
+            <div className="flex gap-2 sm:gap-4 justify-center">
               {coupon.barcodeUrl && (
                 <img
                   src={coupon.barcodeUrl}
                   alt="Barcode"
-                  className="w-24 h-24 object-contain rounded-md shadow"
+                  className="w-16 h-16 sm:w-20 md:w-24 object-contain rounded-md shadow"
                 />
               )}
               {coupon.qrCodeUrl && (
                 <img
                   src={coupon.qrCodeUrl}
                   alt="QR Code"
-                  className="w-24 h-24 object-contain rounded-md shadow"
+                  className="w-16 h-16 sm:w-20 md:w-24 object-contain rounded-md shadow"
                 />
               )}
             </div>
 
             {/* Valid Until */}
-            <span className="text-sm font-medium text-yellow-600">
+            <span className="text-xs sm:text-sm font-medium text-yellow-600 text-center">
             {calculateDaysLeft() === 0
                     ? "Last day" 
                     : (calculateDaysLeft() < 0) ? "Expired" :  calculateDaysLeft() + " days left"}

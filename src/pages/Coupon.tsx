@@ -232,37 +232,35 @@ export default function CouponPage() {
 
           <div className="pt-8">
             {/* Filters and Search */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div className="relative">
-                  <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
                   <input
                     type="text"
                     placeholder="Search coupons..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
                   />
                 </div>
                 <div className="relative">
-                  <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                  <div className="relative">
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => handleCategorySelect(e.target.value)}
-                      className={`w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
-                    >
-                      <option value="all">All Categories</option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => handleCategorySelect(e.target.value)}
+                    className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                  >
+                    <option value="all">All Categories</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className="relative">
-                  <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                  <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
                   <select
                     value={sortBy}
                     onChange={(e) => {
@@ -270,15 +268,15 @@ export default function CouponPage() {
                       setSortBy(newSortBy);
                       localStorage.setItem("sortBy", newSortBy);
                     }}
-                    className={`w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-9 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
                   >
                     <option value="all">All</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                   </select>
                 </div>
-                <div className="text-right">
-                  <span className="text-gray-600">
+                <div className="text-center sm:text-right">
+                  <span className="text-xs sm:text-sm text-gray-600">
                     Showing {filteredCoupons.length} of {pagination?.total || 0}{" "}
                     coupons
                   </span>
@@ -288,22 +286,24 @@ export default function CouponPage() {
           </div>
 
           {/* Coupon Grid */}
-          {coupons.length > 0 ? (
-            <CouponList
-              coupons={sortedCoupons}
-              pagination={pagination}
-              onPageChange={setCurrentPage}
-              showLogo={true}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ) : (
-            <div className="text-center py-8">
-              <p className="text-gray-600">
-                No coupons found matching your criteria.
-              </p>
-            </div>
-          )}
+          <div className={`min-h-[200px] sm:min-h-[300px] rounded-xl p-4 sm:p-5 shadow-inner ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
+            {coupons.length > 0 ? (
+              <CouponList
+                coupons={sortedCoupons}
+                pagination={pagination}
+                onPageChange={setCurrentPage}
+                showLogo={true}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-600">
+                  No coupons found matching your criteria.
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </main>
       <Footer />
