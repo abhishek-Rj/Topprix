@@ -11,7 +11,6 @@ import Footer from "../components/Footer";
 import { FaStore } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Navigation from "../components/navigation";
-import CartSidebar from "../components/CartSidebar";
 import { auth, db } from "../context/firebaseProvider";
 import { getDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
@@ -184,25 +183,6 @@ export default function CouponPage() {
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navigation />
       </div>
-
-      {userData.name && (
-        <>
-          <motion.button
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="fixed bottom-8 right-8 z-50 bg-yellow-500 text-white p-4 rounded-full shadow-lg hover:bg-yellow-600 transition-colors duration-200 flex items-center justify-center"
-          >
-            <HiShoppingCart className="w-6 h-6" />
-          </motion.button>
-          <CartSidebar
-            isOpen={isMobileMenuOpen}
-            onClose={() => setIsMobileMenuOpen(false)}
-          />
-        </>
-      )}
       <main id="goto" className="pt-20 pb-10 bg-yellow-50">
         <div className="max-w-7xl mx-auto px-4">
           {currentPage === 1 ? (

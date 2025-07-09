@@ -44,6 +44,7 @@ export default function RetailerStores() {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+
   
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -87,6 +88,17 @@ export default function RetailerStores() {
       });
       
       const data = await response.json();
+
+      const fetchUser = await fetch(`${baseUrl}user/${localStorage.getItem("userEmail")}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "user-email": user?.email || "",
+        },
+      });
+
+      const userId = (await fetchUser.json()).id;
+      data.stores = data.stores.filter((store: any) => store?.ownerId === userId);
       
       if (data.stores) {
         setStores(data.stores);
@@ -278,9 +290,6 @@ export default function RetailerStores() {
 
               {/* Results Summary */}
               <div className="mb-4 flex justify-between items-center">
-                <p className="text-sm text-gray-600">
-                  Showing {stores.length} of {paginationData.totalCount} stores
-                </p>
                 {isLoading && (
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>

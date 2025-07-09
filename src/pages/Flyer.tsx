@@ -11,7 +11,6 @@ import { FaStore } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Navigation from "../components/navigation";
 import Footer from "../components/Footer";
-import CartSidebar from "../components/CartSidebar";
 import baseUrl from "@/hooks/baseurl";
 import { toast } from "react-toastify";
 import FlyerList from "@/components/FlyerCard";
@@ -178,26 +177,6 @@ export default function FlyerPage() {
         <Navigation />
       </div>
       <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-white pt-16">
-        {/* Add Floating Action Button */}
-        {user != null ? (
-          <motion.button
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsMobileMenuOpen(true)}
-            className="fixed bottom-8 right-8 z-50 bg-yellow-500 text-white p-4 rounded-full shadow-lg hover:bg-yellow-600 transition-colors duration-200 flex items-center justify-center"
-          >
-            <HiShoppingCart className="w-6 h-6" />
-          </motion.button>
-        ) : (
-          <></>
-        )}
-        <CartSidebar
-          isOpen={isMobileMenuOpen}
-          onClose={() => setIsMobileMenuOpen(false)}
-        />
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Hero Section - Only show on first page */}
           {pagination && pagination.currentPage === 1 && (

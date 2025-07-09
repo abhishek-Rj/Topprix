@@ -57,6 +57,7 @@ export default function ShoppingList() {
           toast.error("Couldn't fetch user data");
           throw new Error("Couldn't fetch user data");
         }
+        
         const userData = await response.json();
         const userIdentity = userData?.id;
         setUserId(userIdentity);

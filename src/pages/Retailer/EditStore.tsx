@@ -158,6 +158,35 @@ export default function EditStore() {
     }
   };
 
+  const handleCropCancel = () => {
+    setShowCropModal(false);
+    setImageSrc(null);
+    // Reset the file input
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  };
+
+  const handleCropSkip = async () => {
+    if (imageSrc) {
+      try {
+        // Convert the original image to a file without cropping
+        const response = await fetch(imageSrc);
+        const blob = await response.blob();
+        const file = new File([blob], "original-logo.jpg", {
+          type: "image/jpeg",
+        });
+        setLogo(file);
+        setLogoPreview(URL.createObjectURL(file));
+        setShowCropModal(false);
+        setImageSrc(null);
+      } catch (error) {
+        toast.error("Error processing image");
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -456,13 +485,17 @@ export default function EditStore() {
                     <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
                       <button
                         type="button"
-                        onClick={() => {
-                          setShowCropModal(false);
-                          setImageSrc(null);
-                        }}
+                        onClick={handleCropCancel}
                         className="w-full sm:w-auto px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                       >
                         Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCropSkip}
+                        className="w-full sm:w-auto px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                      >
+                        Skip Crop
                       </button>
                       <button
                         type="button"

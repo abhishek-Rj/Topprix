@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useFirebase } from "../context/firebaseProvider";
 import { useNavigate } from "react-router-dom";
-import { FiMail, FiPhone, FiLock, FiCheckCircle } from "react-icons/fi";
+import { FiMail, FiPhone, FiLock } from "react-icons/fi";
 import { ReactTyped } from "react-typed";
 import { MdOutlinePerson } from "react-icons/md";
 import { useTranslation } from "react-i18next";
