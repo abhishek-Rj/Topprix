@@ -302,15 +302,15 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="flex justify-between items-center mb-12"
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4"
           >
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">Popular Flyers</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Popular Flyers</h2>
               <p className="text-gray-600">Discover the latest deals from top stores</p>
             </div>
             <button
               onClick={() => navigate("/explore/flyers")}
-              className={`font-medium flex items-center gap-2 group ${userRole === "ADMIN" ? "text-blue-600 hover:text-blue-700" : "text-yellow-600 hover:text-yellow-700"}`}
+              className={`font-medium flex items-center gap-2 group px-4 py-2 rounded-lg ${userRole === "ADMIN" ? "text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100" : "text-yellow-600 hover:text-yellow-700 bg-yellow-50 hover:bg-yellow-100"}`}
             >
               View All
               <HiTrendingUp className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -365,15 +365,15 @@ export default function Home() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="flex justify-between items-center mb-12"
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-4"
           >
             <div>
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">Popular Coupons</h2>
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Popular Coupons</h2>
               <p className="text-gray-600">Save big with these exclusive discount codes</p>
             </div>
             <button
               onClick={() => navigate("/explore/coupons")}
-              className={`font-medium flex items-center gap-2 group ${userRole === "ADMIN" ? "text-blue-600 hover:text-blue-700" : "text-yellow-600 hover:text-yellow-700"}`}
+              className={`font-medium flex items-center gap-2 group px-4 py-2 rounded-lg ${userRole === "ADMIN" ? "text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100" : "text-yellow-600 hover:text-yellow-700 bg-yellow-50 hover:bg-yellow-100"}`}
             >
               View All
               <HiTrendingUp className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

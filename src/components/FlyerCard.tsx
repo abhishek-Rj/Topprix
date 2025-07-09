@@ -234,57 +234,64 @@ export const FlyerCard = ({
   return (
     <>
       <Card
-        className="w-full hover:translate-y-1 max-w-sm rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all relative group"
+        className="w-full hover:translate-y-1 rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all relative group"
         onClick={() => setShowPreview(true)}
       >
-        <CardContent className="p-4 space-y-3">
-          <div className="relative aspect-[4/3] z-10 w-full overflow-hidden rounded-lg">
-            {flyer.imageUrl ? (
-              <img
-                src={flyer.imageUrl}
-                alt={flyer.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                <FiImage className="w-12 h-12 text-gray-400" />
-              </div>
-            )}
-            
-            {/* Action buttons overlay for USER role */}
-            {user && userRole === "USER" && (
-              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button
-                  onClick={handleAddToShoppingList}
-                  className="p-1.5 bg-white/90 hover:bg-white text-green-600 hover:text-green-700 rounded-full shadow-sm transition-colors"
-                  title="Add to Shopping List"
-                >
-                  <HiShoppingCart size={16} />
-                </button>
-                <button
-                  onClick={toggleWishlist}
-                  className={`p-1.5 bg-white/90 hover:bg-white rounded-full shadow-sm transition-colors ${
-                    isInWishlist ? "text-red-500" : "text-gray-500 hover:text-red-500"
-                  }`}
-                  title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-                >
-                  <HiHeart size={16} />
-                </button>
-              </div>
-            )}
-          </div>
+        <CardContent className="p-4">
+          {/* Mobile Layout - Horizontal */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Image Section */}
+            <div className="relative w-full sm:w-32 h-32 sm:h-24 overflow-hidden rounded-lg flex-shrink-0">
+              {flyer.imageUrl ? (
+                <img
+                  src={flyer.imageUrl}
+                  alt={flyer.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <FiImage className="w-8 h-8 text-gray-400" />
+                </div>
+              )}
+              
+              {/* Action buttons overlay for USER role */}
+              {user && userRole === "USER" && (
+                <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={handleAddToShoppingList}
+                    className="p-1 bg-white/90 hover:bg-white text-green-600 hover:text-green-700 rounded-full shadow-sm transition-colors"
+                    title="Add to Shopping List"
+                  >
+                    <HiShoppingCart size={12} />
+                  </button>
+                  <button
+                    onClick={toggleWishlist}
+                    className={`p-1 bg-white/90 hover:bg-white rounded-full shadow-sm transition-colors ${
+                      isInWishlist ? "text-red-500" : "text-gray-500 hover:text-red-500"
+                    }`}
+                    title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+                  >
+                    <HiHeart size={12} />
+                  </button>
+                </div>
+              )}
+            </div>
 
-          <div className="flex items-center flex-col justify-between">
-            <h2 className="text-lg font-semibold text-gray-800 truncate">
-              {flyer.title}
-            </h2>
-            <span className="text-sm font-medium text-yellow-600">
-              {calculateDaysLeft() === 0
-                ? "Last day"
-                : calculateDaysLeft() < 0
-                ? "Expired"
-                : calculateDaysLeft() + " days left"}
-            </span>
+            {/* Content Section */}
+            <div className="flex-1 min-w-0">
+              <h2 className="text-sm sm:text-lg font-semibold text-gray-800 line-clamp-2 mb-2">
+                {flyer.title}
+              </h2>
+              <div className="flex items-center justify-between">
+                <span className="text-xs sm:text-sm font-medium text-yellow-600">
+                  {calculateDaysLeft() === 0
+                    ? "Last day"
+                    : calculateDaysLeft() < 0
+                    ? "Expired"
+                    : calculateDaysLeft() + " days left"}
+                </span>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
