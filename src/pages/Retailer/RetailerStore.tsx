@@ -98,7 +98,9 @@ export default function RetailerStores() {
       });
 
       const userId = (await fetchUser.json()).id;
-      data.stores = data.stores.filter((store: any) => store?.ownerId === userId);
+      if (userRole === "RETAILER") {
+        data.stores = data.stores.filter((store: any) => store?.ownerId === userId);
+      }
       
       if (data.stores) {
         setStores(data.stores);
@@ -212,7 +214,9 @@ export default function RetailerStores() {
                 <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   {userRole === "ADMIN"
                     ? "All Stores"
-                    : "Your Stores"}
+                    : userRole === "RETAILER"
+                      ? "Your Stores"
+                      : "Stores"}
                 </h1>
                 {(userRole === "RETAILER" || userRole === "ADMIN") && (
                   <button

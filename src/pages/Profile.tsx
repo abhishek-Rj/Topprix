@@ -17,9 +17,61 @@ import {
   FiLogOut,
   FiClock,
   FiShield,
+  FiCreditCard,
+  FiCheckCircle,
+  FiAlertCircle,
+  FiCalendar,
+  FiStar,
+  FiZap,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import userLogout from "@/hooks/userLogout";
+import baseUrl from "@/hooks/baseurl";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+interface PricingPlan {
+  id: string;
+  name: string;
+  description: string;
+  stripePriceId: string;
+  amount: number;
+  currency: string;
+  interval: string;
+  isActive: boolean;
+  features: string[];
+  maxStores: number | null;
+  maxFlyers: number | null;
+  maxCoupons: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Subscription {
+  id: string;
+  userId: string;
+  pricingPlanId: string;
+  stripeSubscriptionId: string;
+  status: string;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  createdAt: string;
+  updatedAt: string;
+  pricingPlan: PricingPlan;
+}
+
+interface UserSubscription {
+  subscription: Subscription;
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    hasActiveSubscription: boolean;
+    subscriptionStatus: string;
+    currentPeriodEnd: string;
+  };
+}
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -38,6 +90,8 @@ export default function Profile() {
   const [accountCreatedDate, setAccountCreatedDate] = useState<Date | null>(
     null
   );
+  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+  const [subscriptionLoading, setSubscriptionLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
@@ -60,6 +114,11 @@ export default function Profile() {
               : new Date(userData.createdAt);
             setAccountCreatedDate(createdAt);
           }
+
+          // Fetch subscription data for retailers
+          if (userData.role === "RETAILER" && currentUser.email) {
+            await fetchUserSubscription(currentUser.email);
+          }
         } else {
           console.log("No user document found");
         }
@@ -73,13 +132,42 @@ export default function Profile() {
     return () => unsubscribe();
   }, [navigate]);
 
+  const fetchUserSubscription = async (email: string) => {
+    setSubscriptionLoading(true);
+    try {
+      // Get the user ID from the backend using email
+      const userResponse = await fetch(`${baseUrl}user/${email}`);
+      if (!userResponse.ok) {
+        throw new Error("Failed to fetch user data");
+      }
+      const userData = await userResponse.json();
+      
+      // Then fetch the subscription using the backend user ID
+      const subscriptionResponse = await fetch(`${baseUrl}api/users/${userData.id}/subscription`, {
+        method: 'GET', 
+        headers: {
+          "Content-Type" : "application/json", 
+          "user-email" : localStorage.getItem("userEmail") || ""
+        }
+      });
+      if (subscriptionResponse.ok) {
+        const subscriptionData = await subscriptionResponse.json();
+        setSubscription(subscriptionData);
+      }
+    } catch (error) {
+      console.error("Error fetching subscription:", error);
+    } finally {
+      setSubscriptionLoading(false);
+    }
+  };
+
   const handleOnClickDelete = async () => {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
 
     try {
       const userDelete = await fetch(
-        `${import.meta.env.VITE_APP_BASE_URL}user/delete/${currentUser.email}`,
+        `${baseUrl}user/delete/${currentUser.email}`,
         {
           method: "DELETE",
           headers: {
@@ -104,6 +192,7 @@ export default function Profile() {
       console.error("Error deleting user account:", error);
     }
   };
+
   const handleSave = async () => {
     const currentUser = auth.currentUser;
     if (!currentUser) return;
@@ -113,7 +202,7 @@ export default function Profile() {
 
     try {
       const updateUser = await fetch(
-        `${import.meta.env.VITE_APP_BASE_URL}user/update/${currentUser?.email}`,
+        `${baseUrl}user/update/${currentUser?.email}`,
         {
           method: "POST",
           headers: {
@@ -159,6 +248,65 @@ export default function Profile() {
       month: "long",
       day: "numeric",
     }).format(date);
+  };
+
+  const formatSubscriptionDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }).format(date);
+  };
+
+  const getSubscriptionStatusColor = (status: string) => {
+    switch (status) {
+      case "ACTIVE":
+        return "bg-green-100 text-green-800";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800";
+      case "EXPIRED":
+        return "bg-yellow-100 text-yellow-800";
+      case "INCOMPLETE":
+        return "bg-orange-100 text-orange-800";
+      case "INCOMPLETE_EXPIRED":
+        return "bg-red-100 text-red-800";
+      case "PAST_DUE":
+        return "bg-yellow-100 text-yellow-800";
+      case "TRIALING":
+        return "bg-blue-100 text-blue-800";
+      case "UNPAID":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getSubscriptionIcon = (status: string) => {
+    switch (status) {
+      case "ACTIVE":
+        return <FiCheckCircle className="w-4 h-4" />;
+      case "CANCELLED":
+        return <FiX className="w-4 h-4" />;
+      case "EXPIRED":
+        return <FiAlertCircle className="w-4 h-4" />;
+      case "INCOMPLETE":
+        return <FiClock className="w-4 h-4" />;
+      case "INCOMPLETE_EXPIRED":
+        return <FiX className="w-4 h-4" />;
+      case "PAST_DUE":
+        return <FiAlertCircle className="w-4 h-4" />;
+      case "TRIALING":
+        return <FiStar className="w-4 h-4" />;
+      case "UNPAID":
+        return <FiX className="w-4 h-4" />;
+      default:
+        return <FiClock className="w-4 h-4" />;
+    }
+  };
+
+  const handlePricingPlans = () => {
+    navigate("/admin/pricing-plans");
   };
 
   if (loader) {
@@ -235,6 +383,195 @@ export default function Profile() {
           )}
 
           <div className="p-6 sm:p-10">
+            {/* Subscription Section for Retailers */}
+            {user?.role === "RETAILER" && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                  <FiCreditCard className="mr-2 text-yellow-600" />
+                  Subscription Details
+                </h2>
+                {subscriptionLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader />
+                  </div>
+                ) : subscription ? (
+                  <div className="space-y-6">
+                    {/* Summary Card */}
+                    <Card className="bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+                      <CardHeader>
+                        <CardTitle className="flex items-center justify-between">
+                          <span className="flex items-center">
+                            <FiCreditCard className="mr-2 text-purple-600" />
+                            Subscription Summary
+                          </span>
+                          <Badge 
+                            variant={subscription.user.subscriptionStatus === "ACTIVE" ? "default" : "secondary"}
+                            className={getSubscriptionStatusColor(subscription.user.subscriptionStatus)}
+                          >
+                            <span className="flex items-center">
+                              {getSubscriptionIcon(subscription.user.subscriptionStatus)}
+                              <span className="ml-1">{subscription.user.subscriptionStatus}</span>
+                            </span>
+                          </Badge>
+                        </CardTitle>
+                        <CardDescription>
+                          {subscription.subscription.pricingPlan.name} - €{subscription.subscription.pricingPlan.amount}/{subscription.subscription.pricingPlan.interval}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-purple-600">{subscription.subscription.pricingPlan.amount}€</div>
+                            <div className="text-sm text-gray-600">Monthly Cost</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-green-600">{subscription.subscription.pricingPlan.features.length}</div>
+                            <div className="text-sm text-gray-600">Features</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-blue-600">
+                              {subscription.user.currentPeriodEnd ? 
+                                Math.ceil((new Date(subscription.user.currentPeriodEnd).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+                                : 0
+                              }
+                            </div>
+                            <div className="text-sm text-gray-600">Days Remaining</div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    {/* Main Details Grid */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      {/* Current Plan */}
+                      <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+                        <CardHeader>
+                          <CardTitle className="flex items-center justify-between">
+                            <span className="flex items-center">
+                              <FiStar className="mr-2 text-yellow-600" />
+                              Current Plan
+                            </span>
+                            <Badge 
+                              variant={subscription.subscription.status === "ACTIVE" ? "default" : "secondary"}
+                              className={getSubscriptionStatusColor(subscription.subscription.status)}
+                            >
+                              <span className="flex items-center">
+                                {getSubscriptionIcon(subscription.subscription.status)}
+                                <span className="ml-1">{subscription.subscription.status}</span>
+                              </span>
+                            </Badge>
+                          </CardTitle>
+                          <CardDescription>
+                            {subscription.subscription.pricingPlan.name} - €{subscription.subscription.pricingPlan.amount}/{subscription.subscription.pricingPlan.interval}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Plan Name:</span>
+                              <span className="font-semibold">{subscription.subscription.pricingPlan.name}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Price:</span>
+                              <span className="font-semibold">€{subscription.subscription.pricingPlan.amount}/{subscription.subscription.pricingPlan.interval}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Currency:</span>
+                              <span className="font-semibold">{subscription.subscription.pricingPlan.currency.toUpperCase()}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Auto-Renew:</span>
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                subscription.subscription.cancelAtPeriodEnd ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"
+                              }`}>
+                                {subscription.subscription.cancelAtPeriodEnd ? "Will Cancel" : "Active"}
+                              </span>
+                            </div>
+                            {subscription.subscription.currentPeriodStart && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Current Period Start:</span>
+                                <span className="font-semibold">{formatSubscriptionDate(subscription.subscription.currentPeriodStart)}</span>
+                              </div>
+                            )}
+                            {subscription.subscription.currentPeriodEnd && (
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-600">Current Period End:</span>
+                                <span className="font-semibold">{formatSubscriptionDate(subscription.subscription.currentPeriodEnd)}</span>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                      {/* Plan Features */}
+                      <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+                        <CardHeader>
+                          <CardTitle className="flex items-center">
+                            <FiZap className="mr-2 text-green-600" />
+                            Plan Features
+                          </CardTitle>
+                          <CardDescription>
+                            What's included in your current plan
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {subscription.subscription.pricingPlan.features?.map((feature: string, index: number) => (
+                              <div key={index} className="flex items-center">
+                                <FiCheckCircle className="w-4 h-4 text-green-500 mr-2" />
+                                <span className="text-sm">{feature}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                      {/* Subscription Details */}
+                      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+                        <CardHeader>
+                          <CardTitle className="flex items-center">
+                            <FiCalendar className="mr-2 text-blue-600" />
+                            Subscription IDs & Dates
+                          </CardTitle>
+                          <CardDescription>
+                            Important subscription information
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Subscription ID:</span>
+                              <span className="font-mono text-xs text-gray-600">{subscription.subscription.id.slice(0, 8)}...</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Stripe ID:</span>
+                              <span className="font-mono text-xs text-gray-600">{subscription.subscription.stripeSubscriptionId.slice(0, 8)}...</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-gray-600">Created:</span>
+                              <span className="font-semibold">{formatSubscriptionDate(subscription.subscription.createdAt)}</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                ) : (
+                  <Card className="bg-gray-50 border-gray-200">
+                    <CardContent className="p-6">
+                      <div className="text-center">
+                        <FiAlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Active Subscription</h3>
+                        <p className="text-gray-600 mb-4">
+                          You don't have an active subscription. Choose a plan to get started.
+                        </p>
+                        <button onClick={handlePricingPlans} className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg transition-colors">
+                          Pricing Plans
+                        </button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-semibold text-gray-800">
                 {t("profile.personalInfo")}

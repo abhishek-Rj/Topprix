@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import baseUrl from "../hooks/baseurl";
 import CouponList from "../components/CouponCard";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import useAuthenticate from "@/hooks/authenticationt";
 
 interface Coupon {
   id: string;
@@ -57,6 +58,7 @@ export default function CouponPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [pagination, setPagination] = useState<any>(null);
   const itemsPerPage = 12;
+  const { userRole } = useAuthenticate();
 
   useEffect(() => {
     localStorage.setItem("sortBy", "all");
@@ -183,7 +185,7 @@ export default function CouponPage() {
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navigation />
       </div>
-      <main id="goto" className="pt-20 pb-10 bg-yellow-50">
+      <main id="goto" className={`pt-20 pb-10 ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
         <div className="max-w-7xl mx-auto px-4">
           {currentPage === 1 ? (
             <>
@@ -191,7 +193,7 @@ export default function CouponPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-center mb-12 bg-yellow-100 rounded-xl p-4"
+                className={`text-center mb-12 rounded-xl p-4 ${userRole === "ADMIN" ? "bg-blue-100" : "bg-yellow-100"}`}
               >
                 <h1 className="text-4xl pt-6 sm:text-5xl font-bold text-gray-900 mb-4">
                   Find the Best Coupons
@@ -209,17 +211,17 @@ export default function CouponPage() {
                 className="flex flex-wrap justify-center gap-4 mb-8"
               >
                 <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <HiTag className="text-yellow-600" />
+                  <HiTag className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
                   <span className="text-gray-700">
                     {pagination?.totalItems || 0}+ Active Coupons
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <FaStore className="text-yellow-600" />
+                  <FaStore className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
                   <span className="text-gray-700">500+ Partner Stores</span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <HiUser className="text-yellow-600" />
+                  <HiUser className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
                   <span className="text-gray-700">1M+ Happy Users</span>
                 </div>
               </motion.div>
@@ -239,7 +241,7 @@ export default function CouponPage() {
                     placeholder="Search coupons..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    className={`w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
                   />
                 </div>
                 <div className="relative">
@@ -248,7 +250,7 @@ export default function CouponPage() {
                     <select
                       value={selectedCategory}
                       onChange={(e) => handleCategorySelect(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                      className={`w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
                     >
                       <option value="all">All Categories</option>
                       {categories.map((category) => (
@@ -268,7 +270,7 @@ export default function CouponPage() {
                       setSortBy(newSortBy);
                       localStorage.setItem("sortBy", newSortBy);
                     }}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    className={`w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
                   >
                     <option value="all">All</option>
                     <option value="active">Active</option>

@@ -274,7 +274,7 @@ export default function PricingPlans() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-8"
+            className="text-center mb-8 bg-blue-100 p-4 rounded-2xl"
           >
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="bg-blue-100 p-3 rounded-full">
@@ -285,7 +285,7 @@ export default function PricingPlans() {
               </h1>
             </div>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Manage subscription plans and pricing tiers for retailers
+              Manage subscription plans and pricing tiers
             </p>
           </motion.div>
 
