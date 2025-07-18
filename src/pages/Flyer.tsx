@@ -380,7 +380,6 @@ export default function FlyerPage() {
               </div>
             ) : filteredFlyers.length > 0 ? (
               <FlyerList
-                showLogo={true}
                 flyers={filteredFlyers}
                 pagination={pagination}
                 onPageChange={handlePageChange}

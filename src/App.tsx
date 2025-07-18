@@ -18,6 +18,7 @@ import FlyerPage from "./pages/Flyer";
 import WishlistPage from "./pages/Wishlist";
 import RetailerDashboard from "./pages/Retailer/RetailerDashboard";
 import ShoppingList from "./pages/ShoppingList";
+import PDFViewer from "./pages/PDFViewer";
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
           <Route path="/not-found" element={<NotFound />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
           <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
+          <Route path="/pdf-viewer/:flyerId" element={<PDFViewer />} />
         </Routes>
       </BrowserRouter>
     </>

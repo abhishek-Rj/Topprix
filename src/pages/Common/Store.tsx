@@ -588,7 +588,6 @@ export default function StoreDetailPage() {
               {activeTab === "flyers" ? (
                 flyers ? (
                   <FlyerList
-                    showLogo={false}
                     flyers={flyers}
                     pagination={pagination}
                     onPageChange={onPagination}

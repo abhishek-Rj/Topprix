@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useFirebase } from "../context/firebaseProvider";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiPhone, FiLock } from "react-icons/fi";

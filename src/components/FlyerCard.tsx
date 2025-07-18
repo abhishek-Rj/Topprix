@@ -11,6 +11,7 @@ import { FaStore } from "react-icons/fa";
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import { useNavigate } from "react-router-dom";
 
 export const FlyerCard = ({
   flyer,
@@ -31,15 +32,15 @@ export const FlyerCard = ({
   const [quantity, setQuantity] = useState(1);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [numPages, setNumPages] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState<number>(1);
   const { user, userRole } = useAuthenticate();
   const [showDeleteDialogueBox, setShowDeleteDialogueBox] =
     useState<boolean>(false);
+  const navigate = useNavigate();
 
   const isAuthorized = userRole === "ADMIN" || userRole === "RETAILER";
 
   // Set up PDF.js worker
-  pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdf.worker.min.js', import.meta.url).toString();
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
   // Check if the flyer is a PDF
   const isPdf = flyer?.imageUrl?.toLowerCase().includes('.pdf');
@@ -309,41 +310,58 @@ export const FlyerCard = ({
       {/* Preview Modal */}
       {showPreview && store && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-hidden flex flex-col">
             {/* Header Bar */}
-            <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white p-4">
+            <div className="bg-gradient-to-r from-yellow-800 to-yellow-700 text-white p-3 sm:p-4 flex-shrink-0">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <h2 className="text-xl font-bold">{flyer.title}</h2>
-                  <div className="flex items-center gap-4 text-sm">
-                    <span className="bg-white/20 px-3 py-1 rounded-full">
+                <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                  {/* Store Logo and Info */}
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                    {store.logo && (
+                      <img
+                        src={store.logo}
+                        alt={store.name}
+                        className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg object-cover flex-shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-sm sm:text-xl font-bold truncate">{flyer.title}</h2>
+                      <p className="text-xs sm:text-sm text-white/90 truncate">{store.name}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Status badges - Hidden on mobile */}
+                  <div className="hidden sm:flex items-center gap-4 text-sm">
+                    <span className="bg-white/20 px-3 py-1 rounded-full whitespace-nowrap">
                       Valid: {new Date(flyer.startDate).toLocaleDateString()} - {new Date(flyer.endDate).toLocaleDateString()}
                     </span>
-                    <span className={`px-3 py-1 rounded-full ${
-                      calculateDaysLeft() > 0 ? 'bg-green-500/20' : 'bg-red-500/20'
+                    <span className={`px-3 py-1 rounded-full whitespace-nowrap ${
+                      calculateDaysLeft() > 0 ? 'bg-green-500/50' : 'bg-red-500/50'
                     }`}>
                       {calculateDaysLeft() > 0 ? 'Active' : 'Expired'}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                
+                {/* Action Buttons */}
+                <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                   {user && userRole === "USER" && (
                     <>
                       <button
                         onClick={handleAddToShoppingList}
-                        className="p-2 text-white/80 hover:text-white transition-colors"
+                        className="p-1.5 sm:p-2 text-white/80 hover:text-white transition-colors"
                         title="Add to Shopping List"
                       >
-                        <HiShoppingCart className="w-5 h-5" />
+                        <HiShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                       <button
                         onClick={addToWishlist}
-                        className={`p-2 transition-colors ${
+                        className={`p-1.5 sm:p-2 transition-colors ${
                           isInWishlist ? "text-red-300" : "text-white/80 hover:text-white"
                         }`}
                         title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
                       >
-                        <HiHeart className="w-5 h-5" />
+                        <HiHeart className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </>
                   )}
@@ -351,40 +369,52 @@ export const FlyerCard = ({
                     <>
                       <button
                         onClick={handleEdit}
-                        className="p-2 text-white/80 hover:text-white transition-colors"
+                        className="p-1.5 sm:p-2 text-white/80 hover:text-white transition-colors"
                         title="Edit Flyer"
                       >
-                        <HiPencil className="w-5 h-5" />
+                        <HiPencil className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                       <button
                         onClick={handleDeleteClick}
                         disabled={isDeleting}
-                        className="p-2 text-white/80 hover:text-white transition-colors disabled:opacity-50"
+                        className="p-1.5 sm:p-2 text-white/80 hover:text-white transition-colors disabled:opacity-50"
                         title="Delete Flyer"
                       >
-                        <HiTrash className="w-5 h-5" />
+                        <HiTrash className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </>
                   )}
                   <button
                     onClick={() => setShowPreview(false)}
-                    className="p-2 text-white/80 hover:text-white transition-colors"
+                    className="p-1.5 sm:p-2 text-white/80 hover:text-white transition-colors"
                   >
-                    <HiX className="w-5 h-5" />
+                    <HiX className="w-4 h-4 sm:w-5 sm:h-5" />
                   </button>
                 </div>
               </div>
+              
+              {/* Mobile Status badges */}
+              <div className="flex sm:hidden items-center gap-2 mt-2 text-xs">
+                <span className="bg-white/20 px-2 py-1 rounded-full">
+                  {new Date(flyer.startDate).toLocaleDateString()} - {new Date(flyer.endDate).toLocaleDateString()}
+                </span>
+                <span className={`px-2 py-1 rounded-full ${
+                  calculateDaysLeft() > 0 ? 'bg-green-500/50' : 'bg-red-500/50'
+                }`}>
+                  {calculateDaysLeft() > 0 ? 'Active' : 'Expired'}
+                </span>
+              </div>
             </div>
 
-            {/* Main Content */}
-            <div className="flex flex-col h-full">
+            {/* Main Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300 hover:scrollbar-thumb-gray-400">
               {/* Magazine-style Image Section */}
-              <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
+              <div className="flex items-center justify-center p-4 sm:p-8 bg-gray-50 min-h-full">
                 <div className="relative w-full max-w-4xl">
                   <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
                     {isPdf ? (
-                      // PDF Display with react-pdf
-                      <div className="w-full h-auto flex items-center justify-center" style={{ maxHeight: '70vh' }}>
+                      // PDF Display with proper scrolling
+                      <div className="relative">
                         <Document
                           file={flyer.imageUrl}
                           onLoadSuccess={({ numPages }) => setNumPages(numPages)}
@@ -405,40 +435,51 @@ export const FlyerCard = ({
                             </div>
                           }
                         >
-                          <Page
-                            pageNumber={pageNumber}
-                            width={Math.min(800, window.innerWidth * 0.8)}
-                            renderTextLayer={false}
-                            renderAnnotationLayer={false}
-                          />
+                          {/* PDF Pages Container with proper scrolling */}
+                          <div className="pdf-container p-2 sm:p-4 space-y-4">
+                            {Array.from(new Array(numPages || 1), (el, index) => (
+                              <div key={`page_${index + 1}`} className="flex justify-center">
+                                <div className="shadow-lg">
+                                  <Page
+                                    pageNumber={index + 1}
+                                    width={Math.min(700, window.innerWidth * 0.85)}
+                                    renderTextLayer={true}
+                                    renderAnnotationLayer={false}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </Document>
                         
-                        {/* PDF Navigation */}
+                        {/* Page Count */}
                         {numPages && numPages > 1 && (
-                          <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
-                            Page {pageNumber} of {numPages}
+                          <div className="absolute top-4 right-4 bg-black/70 text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm">
+                            {numPages} pages
                           </div>
                         )}
                       </div>
                     ) : (
                       // Regular Image
-                      <img
-                        src={flyer.imageUrl}
-                        alt={flyer.title}
-                        className="w-full h-auto object-contain"
-                        style={{ maxHeight: '70vh' }}
-                      />
+                      <div className="p-2 sm:p-4">
+                        <img  
+                          src={flyer.imageUrl}
+                          alt={flyer.title}
+                          className="w-full h-auto object-contain mx-auto"
+                          style={{ maxHeight: '70vh' }}
+                        />
+                      </div>
                     )}
                   </div>
                   
                   {/* Image overlay info */}
-                  <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
+                  <div className="absolute top-4 left-4 bg-black/70 text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm">
                     {flyer.isPremium ? 'Premium Flyer' : 'Standard Flyer'}
                   </div>
                   
                   {/* Categories overlay */}
                   {flyer.categories && flyer.categories.length > 0 && (
-                    <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
+                    <div className="absolute bottom-4 left-4 flex flex-wrap gap-1 sm:gap-2 max-w-xs">
                       {flyer.categories.map((cat: any) => (
                         <span
                           key={cat.id}
@@ -452,85 +493,65 @@ export const FlyerCard = ({
                 </div>
               </div>
 
-              {/* Store Details Footer */}
-              <div className="bg-white border-t border-gray-200 p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Store Information */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                      <FaStore className="text-yellow-600" />
-                      Store Information
-                    </h3>
-                    <div className="flex items-start gap-4">
-                      {store.logo && (
-                        <img
-                          src={store.logo}
-                          alt={store.name}
-                          className="w-16 h-16 rounded-xl object-cover shadow-md"
-                        />
-                      )}
-                      <div className="flex-1">
-                        <h4 className="text-xl font-bold text-gray-800 mb-1">
-                          {store.name}
-                        </h4>
-                        <p className="text-gray-600 mb-2">{store.description}</p>
-                        <div className="space-y-1 text-sm text-gray-600">
-                          {store.phone && (
-                            <p><span className="font-medium">Phone:</span> {store.phone}</p>
-                          )}
-                          {store.email && (
-                            <p><span className="font-medium">Email:</span> {store.email}</p>
-                          )}
-                          {store.type && (
-                            <p><span className="font-medium">Type:</span> {store.type}</p>
-                          )}
+              {/* Store Details Section - Compact */}
+              <div className="bg-white border-t border-gray-200 p-4 sm:p-6 flex-shrink-0">
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <FaStore className="text-yellow-600" />
+                    Store Details
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Store Contact Info */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-700">Contact Information</h4>
+                      <div className="space-y-1 text-sm text-gray-600">
+                        {store.phone && (
+                          <p><span className="font-medium">Phone:</span> {store.phone}</p>
+                        )}
+                        {store.email && (
+                          <p><span className="font-medium">Email:</span> {store.email}</p>
+                        )}
+                        {store.type && (
+                          <p><span className="font-medium">Type:</span> {store.type}</p>
+                        )}
+                        {store.description && (
+                          <p className="text-gray-600 text-sm mt-2">{store.description}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Address and Actions */}
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-700">Location</h4>
+                      <div className="bg-gray-50 rounded-lg p-3">
+                        <p className="text-sm text-gray-800">{store.address || "Address not available"}</p>
+                      </div>
+                      
+                      {/* User Actions */}
+                      {user && userRole === "USER" && (
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            onClick={handleAddToShoppingList}
+                            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
+                          >
+                            <HiShoppingCart className="w-4 h-4" />
+                            Add to List
+                          </button>
+                          <button
+                            onClick={addToWishlist}
+                            className={`flex-1 py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm ${
+                              isInWishlist
+                                ? "bg-red-500 hover:bg-red-600 text-white"
+                                : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                            }`}
+                          >
+                            <HiHeart className="w-4 h-4" />
+                            {isInWishlist ? "Remove" : "Wishlist"}
+                          </button>
                         </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
-
-                  {/* Location and Actions */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-gray-800">Location & Actions</h3>
-                    
-                    {/* Address */}
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 mb-2">
-                        <span className="font-medium">Address:</span>
-                      </p>
-                      <p className="text-gray-800">{store.address || "Address not available"}</p>
-                    </div>
-
-                    {/* Map placeholder */}
-                    {store.latitude && store.longitude && (
-                      <div className="bg-gray-100 rounded-lg p-4 h-32 flex items-center justify-center">
-                        <p className="text-gray-500 text-sm">Map view available</p>
-                      </div>
-                    )}
-
-                    {/* User Actions */}
-                    {user && userRole === "USER" && (
-                      <div className="flex gap-2">
-                        <button
-                          onClick={handleAddToShoppingList}
-                          className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
-                        >
-                          <HiShoppingCart className="w-4 h-4" />
-                          Add to Shopping List
-                        </button>
-                        <button
-                          onClick={addToWishlist}
-                          className={`flex-1 py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm ${
-                            isInWishlist
-                              ? "bg-red-500 hover:bg-red-600 text-white"
-                              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
-                          }`}
-                        >
-                          <HiHeart className="w-4 h-4" />
-                          {isInWishlist ? "Remove" : "Wishlist"}
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -666,4 +687,3 @@ const FlyerList = ({
 };
 
 export default FlyerList;
-

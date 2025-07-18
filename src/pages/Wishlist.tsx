@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { FiHeart, FiTrash2, FiEdit, FiPlus, FiImage, FiFileText, FiTag } from "react-icons/fi";
 import Navigation from "../components/navigation";

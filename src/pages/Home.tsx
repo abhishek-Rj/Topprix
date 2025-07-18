@@ -315,7 +315,7 @@ export default function Home() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                 >
-                  <FlyerCard flyer={flyer} showlogo={false} />
+                  <FlyerCard flyer={flyer} />
                 </motion.div>
               ))}
             </motion.div>
