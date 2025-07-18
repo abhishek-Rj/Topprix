@@ -15,8 +15,7 @@ import EditStore from "./pages/Retailer/EditStore";
 import StoreDetailPage from "./pages/Common/Store";
 import CouponPage from "./pages/Coupon";
 import FlyerPage from "./pages/Flyer";
-import FavoritesPage from "./pages/Favorites";
-import EmailVerification from "./pages/EmailVerification";
+import WishlistPage from "./pages/Wishlist";
 import RetailerDashboard from "./pages/Retailer/RetailerDashboard";
 import ShoppingList from "./pages/ShoppingList";
 
@@ -35,7 +34,7 @@ function App() {
           <Route path="/stores/store/:id" element={<StoreDetailPage />} />
           <Route path="/explore/coupons" element={<CouponPage />} />
           <Route path="/explore/flyers" element={<FlyerPage />} />
-          <Route path="/favourite" element={<FavoritesPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/shopping-lists" element={<ShoppingList />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/admin/pricing-plans" element={<PricingPlans />} />
@@ -43,7 +42,6 @@ function App() {
           <Route path="/deals" element={<Deals />} />
           <Route path="/not-found" element={<NotFound />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
-          <Route path="/verify-email" element={<EmailVerification />} />
           <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
         </Routes>
       </BrowserRouter>

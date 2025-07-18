@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { auth, useFirebase } from "../context/firebaseProvider";
+import { useFirebase } from "../context/firebaseProvider";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock } from "react-icons/fi";
 import { ReactTyped } from "react-typed";
@@ -78,46 +78,13 @@ export default function Login() {
         return;
       }
 
-      // Check if email is verified
-      if (!checkForUserResponse.emailVerified) {
-        setError("Please verify your email before logging in. Check your inbox for verification link.");
-        setLoading(false);
-        return;
-      }
-
-      // If user exists and is verified, proceed with login
+      // If user exists in database, proceed with Firebase login
       try {
         const userCredential = await logInWithEmailandPassword(email, password);
-        const checkEmailVerification  = await fetch(`${baseUrl}user/${email}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (!checkEmailVerification.ok) {
-          setError("Something went wrong. Please try again.");
-          setLoading(false);
-          return;
-        }
-        const checkEmailVerificationResponse = await checkEmailVerification.json();
-        if (!checkEmailVerificationResponse.emailVerified) {
-          setError("Please verify your email before logging in. Check your inbox for verification link.");
-          setLoading(false);
-          return;
-        }
-        await userCredential.reload()
+        
         if (userCredential) {
-          // Double-check Firebase email verification
-          if (userCredential.emailVerified) {
             toast.success("Login successful!");
             navigate("/");
-          } else {
-            // Firebase user exists but email not verified
-            await auth.signOut();
-            setError("Please verify your email before logging in. Check your inbox for verification link.");
-            setLoading(false);
-            return;
-          }
         } else {
           setError("Invalid email or password. Please try again.");
           setLoading(false);

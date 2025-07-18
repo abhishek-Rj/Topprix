@@ -7,6 +7,10 @@ import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
 import ConfirmDeleteDialog from "./confirmDeleteOption";
 import { FiImage } from "react-icons/fi";
+import { FaStore } from "react-icons/fa";
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 
 export const FlyerCard = ({
   flyer,
@@ -14,7 +18,6 @@ export const FlyerCard = ({
   onDelete,
 }: {
   flyer: any;
-  showlogo: boolean;
   onEdit?: (flyer: any) => void;
   onDelete?: (flyerId: string) => void;
 }) => {
@@ -27,11 +30,19 @@ export const FlyerCard = ({
   const [selectedListId, setSelectedListId] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [isInWishlist, setIsInWishlist] = useState(false);
+  const [numPages, setNumPages] = useState<number | null>(null);
+  const [pageNumber, setPageNumber] = useState<number>(1);
   const { user, userRole } = useAuthenticate();
   const [showDeleteDialogueBox, setShowDeleteDialogueBox] =
     useState<boolean>(false);
 
   const isAuthorized = userRole === "ADMIN" || userRole === "RETAILER";
+
+  // Set up PDF.js worker
+  pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdf.worker.min.js', import.meta.url).toString();
+
+  // Check if the flyer is a PDF
+  const isPdf = flyer?.imageUrl?.toLowerCase().includes('.pdf');
 
   // Fetch user ID from backend when component mounts
   useEffect(() => {
@@ -127,7 +138,7 @@ export const FlyerCard = ({
     }
   };
 
-  const toggleWishlist = async () => {
+  const addToWishlist = async () => {
     if (!user) {
       toast.error("Please login to add items to wishlist");
       return;
@@ -139,27 +150,26 @@ export const FlyerCard = ({
     }
 
     try {
-      const response = await fetch(`${baseUrl}favourites/${userId}`, {
-        method: isInWishlist ? "DELETE" : "POST",
+      const response = await fetch(`${baseUrl}api/users/${userId}/wishlist`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "user-email": user?.email || "",
         },
         body: JSON.stringify({
-          flyerId: flyer.id,
-          type: "flyer"
+          name: flyer.title,
+          flyerItemId: flyer.id,
         }),
       });
 
       if (response.ok) {
-        setIsInWishlist(!isInWishlist);
-        toast.success(isInWishlist ? "Removed from wishlist" : "Added to wishlist");
+        toast.success("Added to wishlist successfully!");
       } else {
-        throw new Error("Failed to update wishlist");
+        throw new Error("Failed to add to wishlist");
       }
     } catch (error) {
-      console.error("Error updating wishlist:", error);
-      toast.error("Failed to update wishlist");
+      console.error("Error adding to wishlist:", error);
+      toast.error("Failed to add to wishlist");
     }
   };
 
@@ -265,7 +275,7 @@ export const FlyerCard = ({
                     <HiShoppingCart size={12} />
                   </button>
                   <button
-                    onClick={toggleWishlist}
+                    onClick={addToWishlist}
                     className={`p-1 bg-white/90 sm:hover:bg-white rounded-full shadow-sm transition-colors ${
                       isInWishlist ? "text-red-500" : "text-gray-500 sm:hover:text-red-500"
                     }`}
@@ -299,23 +309,21 @@ export const FlyerCard = ({
       {/* Preview Modal */}
       {showPreview && store && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              {/* Store Header */}
-              <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-y-auto">
+            {/* Header Bar */}
+            <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white p-4">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  {store.logo && (
-                    <img
-                      src={store.logo}
-                      alt={store.name}
-                      className="w-12 h-12 rounded-xl object-cover shadow-md"
-                    />
-                  )}
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      {store.name}
-                    </h2>
-                    <p className="text-sm text-gray-600">{store.address}</p>
+                  <h2 className="text-xl font-bold">{flyer.title}</h2>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="bg-white/20 px-3 py-1 rounded-full">
+                      Valid: {new Date(flyer.startDate).toLocaleDateString()} - {new Date(flyer.endDate).toLocaleDateString()}
+                    </span>
+                    <span className={`px-3 py-1 rounded-full ${
+                      calculateDaysLeft() > 0 ? 'bg-green-500/20' : 'bg-red-500/20'
+                    }`}>
+                      {calculateDaysLeft() > 0 ? 'Active' : 'Expired'}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -323,15 +331,15 @@ export const FlyerCard = ({
                     <>
                       <button
                         onClick={handleAddToShoppingList}
-                        className="p-2 text-green-600 sm:hover:text-green-700 transition-colors"
+                        className="p-2 text-white/80 hover:text-white transition-colors"
                         title="Add to Shopping List"
                       >
                         <HiShoppingCart className="w-5 h-5" />
                       </button>
                       <button
-                        onClick={toggleWishlist}
+                        onClick={addToWishlist}
                         className={`p-2 transition-colors ${
-                          isInWishlist ? "text-red-500" : "text-gray-500 sm:hover:text-red-500"
+                          isInWishlist ? "text-red-300" : "text-white/80 hover:text-white"
                         }`}
                         title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
                       >
@@ -343,7 +351,7 @@ export const FlyerCard = ({
                     <>
                       <button
                         onClick={handleEdit}
-                        className="p-2 text-yellow-600 sm:hover:text-yellow-700 transition-colors"
+                        className="p-2 text-white/80 hover:text-white transition-colors"
                         title="Edit Flyer"
                       >
                         <HiPencil className="w-5 h-5" />
@@ -351,7 +359,7 @@ export const FlyerCard = ({
                       <button
                         onClick={handleDeleteClick}
                         disabled={isDeleting}
-                        className="p-2 text-red-600 sm:hover:text-red-700 transition-colors disabled:opacity-50"
+                        className="p-2 text-white/80 hover:text-white transition-colors disabled:opacity-50"
                         title="Delete Flyer"
                       >
                         <HiTrash className="w-5 h-5" />
@@ -360,205 +368,170 @@ export const FlyerCard = ({
                   )}
                   <button
                     onClick={() => setShowPreview(false)}
-                    className="p-2 text-gray-500 sm:hover:text-gray-700 transition-colors"
+                    className="p-2 text-white/80 hover:text-white transition-colors"
                   >
                     <HiX className="w-5 h-5" />
                   </button>
                 </div>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Left Column */}
-                <div className="space-y-6">
-                  <section>
-                    <h3 className="text-xl font-bold text-yellow-600 mb-4 border-b border-yellow-100 pb-2">
-                      Flyer Details
-                    </h3>
-                    <div className="bg-yellow-50/70 rounded-2xl p-5 sm:p-6 shadow-inner space-y-4">
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600 font-medium">
-                          Valid From:
-                        </span>
-                        <span className="text-gray-800">
-                          {new Date(flyer.startDate).toLocaleDateString()}
-                        </span>
+            {/* Main Content */}
+            <div className="flex flex-col h-full">
+              {/* Magazine-style Image Section */}
+              <div className="flex-1 flex items-center justify-center p-8 bg-gray-50">
+                <div className="relative w-full max-w-4xl">
+                  <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
+                    {isPdf ? (
+                      // PDF Display with react-pdf
+                      <div className="w-full h-auto flex items-center justify-center" style={{ maxHeight: '70vh' }}>
+                        <Document
+                          file={flyer.imageUrl}
+                          onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                          onLoadError={(error) => {
+                            console.error('Error loading PDF:', error);
+                            toast.error('Failed to load PDF');
+                          }}
+                          loading={
+                            <div className="flex flex-col items-center justify-center py-20">
+                              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
+                              <span className="text-lg text-gray-500 mt-4">Loading PDF...</span>
+                            </div>
+                          }
+                          error={
+                            <div className="flex flex-col items-center justify-center py-20">
+                              <div className="text-red-600 text-2xl font-bold mb-4">PDF</div>
+                              <p className="text-gray-500">Failed to load PDF</p>
+                            </div>
+                          }
+                        >
+                          <Page
+                            pageNumber={pageNumber}
+                            width={Math.min(800, window.innerWidth * 0.8)}
+                            renderTextLayer={false}
+                            renderAnnotationLayer={false}
+                          />
+                        </Document>
+                        
+                        {/* PDF Navigation */}
+                        {numPages && numPages > 1 && (
+                          <div className="absolute bottom-4 right-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
+                            Page {pageNumber} of {numPages}
+                          </div>
+                        )}
                       </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600 font-medium">
-                          Valid Until:
-                        </span>
-                        <span className="text-gray-800">
-                          {new Date(flyer.endDate).toLocaleDateString()}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600 font-medium">
-                          Status:
-                        </span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          calculateDaysLeft() > 0
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                          {calculateDaysLeft() > 0 ? "Active" : "Expired"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600 font-medium">
-                          Type:
-                        </span>
-                        <span className="text-gray-800">
-                          {flyer.isPremium ? "Premium" : "Standard"}
-                        </span>
-                      </div>
-                    </div>
-                  </section>
-
-                  <section>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      Categories
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {flyer.categories?.map((cat: any) => (
+                    ) : (
+                      // Regular Image
+                      <img
+                        src={flyer.imageUrl}
+                        alt={flyer.title}
+                        className="w-full h-auto object-contain"
+                        style={{ maxHeight: '70vh' }}
+                      />
+                    )}
+                  </div>
+                  
+                  {/* Image overlay info */}
+                  <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm">
+                    {flyer.isPremium ? 'Premium Flyer' : 'Standard Flyer'}
+                  </div>
+                  
+                  {/* Categories overlay */}
+                  {flyer.categories && flyer.categories.length > 0 && (
+                    <div className="absolute bottom-4 left-4 flex flex-wrap gap-2">
+                      {flyer.categories.map((cat: any) => (
                         <span
                           key={cat.id}
-                          className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm"
+                          className="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium"
                         >
                           {cat.name}
                         </span>
                       ))}
                     </div>
-                  </section>
-
-                  {flyer.description && (
-                    <section>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Description
-                      </h3>
-                      <p className="text-gray-600">{flyer.description}</p>
-                    </section>
-                  )}
-
-                  {store.latitude && store.longitude && (
-                    <section>
-                      <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Store Location
-                      </h3>
-                      <div className="space-y-3">
-                        <iframe
-                          width="100%"
-                          height="200"
-                          className="rounded-lg shadow"
-                          loading="lazy"
-                          allowFullScreen
-                          src={`https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${store.latitude},${store.longitude}`}
-                        />
-                        <div className="bg-gray-50 rounded-lg p-3 text-sm text-gray-600">
-                          <p>
-                            <span className="font-medium">Address:</span>{" "}
-                            {store.address || "Not available"}
-                          </p>
-                          <p>
-                            <span className="font-medium">Coordinates:</span>{" "}
-                            {store.latitude}, {store.longitude}
-                          </p>
-                        </div>
-                      </div>
-                    </section>
                   )}
                 </div>
+              </div>
 
-                {/* Right Column */}
-                <div className="space-y-6">
-                  {/* Store Details Section */}
-                  <section>
-                    <h3 className="text-xl font-bold text-yellow-600 mb-4 border-b border-yellow-100 pb-2">
+              {/* Store Details Footer */}
+              <div className="bg-white border-t border-gray-200 p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Store Information */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                      <FaStore className="text-yellow-600" />
                       Store Information
                     </h3>
-                    <div className="bg-yellow-50/70 rounded-2xl p-5 sm:p-6 shadow-inner space-y-4">
-                      <div className="flex items-center gap-4">
-                        {store.logo && (
-                          <img
-                            src={store.logo}
-                            alt={store.name}
-                            className="w-16 h-16 rounded-xl object-cover shadow-md"
-                          />
-                        )}
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-800">
-                            {store.name}
-                          </h4>
-                          <p className="text-sm text-gray-600">
-                            {store.address}
-                          </p>
+                    <div className="flex items-start gap-4">
+                      {store.logo && (
+                        <img
+                          src={store.logo}
+                          alt={store.name}
+                          className="w-16 h-16 rounded-xl object-cover shadow-md"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <h4 className="text-xl font-bold text-gray-800 mb-1">
+                          {store.name}
+                        </h4>
+                        <p className="text-gray-600 mb-2">{store.description}</p>
+                        <div className="space-y-1 text-sm text-gray-600">
+                          {store.phone && (
+                            <p><span className="font-medium">Phone:</span> {store.phone}</p>
+                          )}
+                          {store.email && (
+                            <p><span className="font-medium">Email:</span> {store.email}</p>
+                          )}
+                          {store.type && (
+                            <p><span className="font-medium">Type:</span> {store.type}</p>
+                          )}
                         </div>
                       </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600 font-medium">
-                          Store Type:
-                        </span>
-                        <span className="text-gray-800">
-                          {store.type || "Retail"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600 font-medium">
-                          Contact:
-                        </span>
-                        <span className="text-gray-800">
-                          {store.phone || "Not available"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600 font-medium">
-                          Email:
-                        </span>
-                        <span className="text-gray-800">
-                          {store.email || "Not available"}
-                        </span>
-                      </div>
                     </div>
-                  </section>
-
-                  {/* Flyer Image */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      Flyer Image
-                    </h3>
-                    <img
-                      src={flyer.imageUrl}
-                      alt={flyer.title}
-                      className="w-full rounded-lg shadow"
-                    />
                   </div>
 
-                  {user && userRole === "USER" && (
-                    <section>
-                      <h3 className="text-xl font-bold text-green-600 mb-4 border-b border-green-100 pb-2">
-                        Shopping Actions
-                      </h3>
-                      <div className="bg-green-50/70 rounded-2xl p-5 sm:p-6 shadow-inner space-y-3">
+                  {/* Location and Actions */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-gray-800">Location & Actions</h3>
+                    
+                    {/* Address */}
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-sm text-gray-600 mb-2">
+                        <span className="font-medium">Address:</span>
+                      </p>
+                      <p className="text-gray-800">{store.address || "Address not available"}</p>
+                    </div>
+
+                    {/* Map placeholder */}
+                    {store.latitude && store.longitude && (
+                      <div className="bg-gray-100 rounded-lg p-4 h-32 flex items-center justify-center">
+                        <p className="text-gray-500 text-sm">Map view available</p>
+                      </div>
+                    )}
+
+                    {/* User Actions */}
+                    {user && userRole === "USER" && (
+                      <div className="flex gap-2">
                         <button
                           onClick={handleAddToShoppingList}
-                          className="w-full bg-green-500 sm:hover:bg-green-600 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                          className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm"
                         >
-                          <HiShoppingCart className="w-5 h-5" />
+                          <HiShoppingCart className="w-4 h-4" />
                           Add to Shopping List
                         </button>
                         <button
-                          onClick={toggleWishlist}
-                          className={`w-full py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                          onClick={addToWishlist}
+                          className={`flex-1 py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 text-sm ${
                             isInWishlist
-                              ? "bg-red-500 sm:hover:bg-red-600 text-white"
-                              : "bg-gray-100 sm:hover:bg-gray-200 text-gray-700"
+                              ? "bg-red-500 hover:bg-red-600 text-white"
+                              : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                           }`}
                         >
-                          <HiHeart className="w-5 h-5" />
-                          {isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+                          <HiHeart className="w-4 h-4" />
+                          {isInWishlist ? "Remove" : "Wishlist"}
                         </button>
                       </div>
-                    </section>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -641,14 +614,12 @@ const FlyerList = ({
   flyers,
   pagination,
   onPageChange,
-  showLogo,
   onEdit,
   onDelete,
 }: {
   flyers: any[];
   pagination: any;
   onPageChange: (page: number) => void;
-  showLogo: boolean;
   onEdit?: (flyer: any) => void;
   onDelete?: (flyerId: string) => void;
 }) => {
@@ -661,7 +632,6 @@ const FlyerList = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {flyers.map((flyer: any) => (
           <FlyerCard
-            showlogo={showLogo}
             key={flyer.id}
             flyer={flyer}
             onEdit={onEdit}
@@ -696,3 +666,4 @@ const FlyerList = ({
 };
 
 export default FlyerList;
+

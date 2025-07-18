@@ -161,7 +161,7 @@ export const CouponCard = ({
     }
   };
 
-  const toggleWishlist = async () => {
+  const addToWishlist = async () => {
     if (!user) {
       toast.error("Please login to add items to wishlist");
       return;
@@ -173,27 +173,26 @@ export const CouponCard = ({
     }
 
     try {
-      const response = await fetch(`${baseUrl}favourites/${userId}`, {
-        method: isInWishlist ? "DELETE" : "POST",
+      const response = await fetch(`${baseUrl}api/users/${userId}/wishlist`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "user-email": user?.email || "",
         },
         body: JSON.stringify({
-          couponId: coupon.id,
-          type: "coupon"
+          name: coupon.title,
+          targetPrice: coupon.discountAmount ? parseFloat(coupon.discountAmount) : undefined,
         }),
       });
 
       if (response.ok) {
-        setIsInWishlist(!isInWishlist);
-        toast.success(isInWishlist ? "Removed from wishlist" : "Added to wishlist");
+        toast.success("Added to wishlist successfully!");
       } else {
-        throw new Error("Failed to update wishlist");
+        throw new Error("Failed to add to wishlist");
       }
     } catch (error) {
-      console.error("Error updating wishlist:", error);
-      toast.error("Failed to update wishlist");
+      console.error("Error adding to wishlist:", error);
+      toast.error("Failed to add to wishlist");
     }
   };
 
@@ -276,7 +275,7 @@ export const CouponCard = ({
                 <HiShoppingCart size={16} />
               </button>
               <button
-                onClick={toggleWishlist}
+                onClick={addToWishlist}
                 className={`p-1.5 bg-white/90 sm:hover:bg-white rounded-full shadow-sm transition-colors ${
                   isInWishlist ? "text-red-500" : "text-gray-500 sm:hover:text-red-500"
                 }`}
@@ -355,7 +354,7 @@ export const CouponCard = ({
                         <HiShoppingCart className="w-5 h-5" />
                       </button>
                       <button
-                        onClick={toggleWishlist}
+                        onClick={addToWishlist}
                         className={`p-2 transition-colors ${
                           isInWishlist ? "text-red-500" : "text-gray-500 sm:hover:text-red-500"
                         }`}
@@ -566,7 +565,7 @@ export const CouponCard = ({
                           Add to Shopping List
                         </button>
                         <button
-                          onClick={toggleWishlist}
+                          onClick={addToWishlist}
                           className={`w-full py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 ${
                             isInWishlist
                               ? "bg-red-500 sm:hover:bg-red-600 text-white"

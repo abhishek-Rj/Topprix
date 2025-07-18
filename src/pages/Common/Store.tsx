@@ -40,6 +40,9 @@ export default function StoreDetailPage() {
   const [flyerImagePreview, setFlyerImagePreview] = useState<string | null>(
     null
   );
+  const [flyerPdf, setFlyerPdf] = useState<File | null>(null);
+  const [flyerPdfPreview, setFlyerPdfPreview] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<"image" | "pdf">("image");
   const [isPremium, setIsPremium] = useState(false);
   const [isSponsored, setIsSponsored] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -183,7 +186,18 @@ export default function StoreDetailPage() {
     setTitle(flyer.title);
     setDescription(flyer.description);
     setSelectedCategories(categoriesForFlyer.get(flyer.id) || []);
-    setFlyerImagePreview(flyer.imageUrl);
+    
+    // Handle both image and PDF flyers
+    if (flyer.pdfUrl) {
+      setFileType("pdf");
+      setFlyerPdfPreview(flyer.pdfUrl);
+      setFlyerImagePreview(null);
+    } else {
+      setFileType("image");
+      setFlyerImagePreview(flyer.imageUrl);
+      setFlyerPdfPreview(null);
+    }
+    
     setIsPremium(flyer.isPremium);
     setIsSponsored(flyer.isSponsored);
     setStartDate(flyer.startDate ? new Date(flyer.startDate) : undefined);
@@ -196,19 +210,37 @@ export default function StoreDetailPage() {
     type: "barcode" | "qrcode" | "flyer"
   ) => {
     const file = e.target.files?.[0];
-    if (file && ["image/jpeg", "image/png"].includes(file.type)) {
-      if (type === "barcode") {
-        setBarcodeFile(file);
-        setBarcodePreview(URL.createObjectURL(file));
-      } else if (type === "qrcode") {
-        setQrCodeFile(file);
-        setQrCodePreview(URL.createObjectURL(file));
-      } else if (type === "flyer") {
+    if (!file) return;
+
+    if (type === "barcode" || type === "qrcode") {
+      if (["image/jpeg", "image/png"].includes(file.type)) {
+        if (type === "barcode") {
+          setBarcodeFile(file);
+          setBarcodePreview(URL.createObjectURL(file));
+        } else if (type === "qrcode") {
+          setQrCodeFile(file);
+          setQrCodePreview(URL.createObjectURL(file));
+        }
+      } else {
+        toast.error("Only JPG or PNG files are allowed for barcode/QR code.");
+      }
+    } else if (type === "flyer") {
+      // Handle both image and PDF files for flyers
+      if (["image/jpeg", "image/png"].includes(file.type)) {
+        setFileType("image");
         setFlyerImage(file);
         setFlyerImagePreview(URL.createObjectURL(file));
+        setFlyerPdf(null);
+        setFlyerPdfPreview(null);
+      } else if (file.type === "application/pdf") {
+        setFileType("pdf");
+        setFlyerPdf(file);
+        setFlyerPdfPreview(URL.createObjectURL(file));
+        setFlyerImage(null);
+        setFlyerImagePreview(null);
+      } else {
+        toast.error("Only JPG, PNG, or PDF files are allowed for flyers.");
       }
-    } else {
-      toast.error("Only JPG or PNG files are allowed.");
     }
   };
 
@@ -239,7 +271,7 @@ export default function StoreDetailPage() {
         selectedCategories.length === 0 ||
         !startDate ||
         !endDate ||
-        !flyerImage
+        (!flyerImage && !flyerPdf)
       ) {
         toast.error("Please fill in all required fields for the flyer.");
         setIsSubmitting(false);
@@ -248,13 +280,22 @@ export default function StoreDetailPage() {
 
       try {
         let imageUrl = "";
-        if (flyerImage) {
+        let pdfUrl = "";
+
+        if (fileType === "image" && flyerImage) {
           const imageRef = ref(
             storage,
             `flyers/${Date.now()}_${flyerImage.name}`
           );
           await uploadBytes(imageRef, flyerImage);
           imageUrl = await getDownloadURL(imageRef);
+        } else if (fileType === "pdf" && flyerPdf) {
+          const pdfRef = ref(
+            storage,
+            `flyers/${Date.now()}_${flyerPdf.name}`
+          );
+          await uploadBytes(pdfRef, flyerPdf);
+          pdfUrl = await getDownloadURL(pdfRef);
         }
 
         const flyerData = {
@@ -262,7 +303,7 @@ export default function StoreDetailPage() {
           description,
           storeId: id,
           categoryIds: selectedCategories,
-          imageUrl: imageUrl || (isEditing ? selectedFlyer.imageUrl : null),
+          imageUrl: fileType === "image" ? (imageUrl || (isEditing ? selectedFlyer?.imageUrl : null)) : (pdfUrl || (isEditing ? selectedFlyer?.pdfUrl : null)),
           startDate,
           endDate,
           isPremium,
@@ -427,6 +468,9 @@ export default function StoreDetailPage() {
     setQrCodePreview(null);
     setFlyerImage(null);
     setFlyerImagePreview(null);
+    setFlyerPdf(null);
+    setFlyerPdfPreview(null);
+    setFileType("image");
     setIsPremium(false);
     setIsSponsored(false);
     setStartDate(undefined);
@@ -644,15 +688,45 @@ export default function StoreDetailPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Flyer Image <span className="text-red-600">*</span>
+                        Flyer File <span className="text-red-600">*</span>
                       </label>
+                      
+                      {/* File Type Toggle */}
+                      <div className="flex gap-2 mb-3">
+                        <button
+                          type="button"
+                          onClick={() => setFileType("image")}
+                          className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                            fileType === "image"
+                              ? "bg-yellow-500 text-white"
+                              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                          }`}
+                        >
+                          Image
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFileType("pdf")}
+                          className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                            fileType === "pdf"
+                              ? "bg-yellow-500 text-white"
+                              : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                          }`}
+                        >
+                          PDF
+                        </button>
+                      </div>
+
+                      {/* File Input */}
                       <input
                         type="file"
-                        accept="image/png, image/jpeg"
+                        accept={fileType === "image" ? "image/png, image/jpeg" : "application/pdf"}
                         onChange={(e) => handleFileChange(e, "flyer")}
                         className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
                         required
                       />
+                      
+                      {/* Preview Section */}
                       {flyerImagePreview && (
                         <div className="relative inline-block mt-2 h-16">
                           <img
@@ -665,6 +739,29 @@ export default function StoreDetailPage() {
                             onClick={() => {
                               setFlyerImagePreview(null);
                               setFlyerImage(null);
+                            }}
+                            className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                          >
+                            <MdCancel className="text-lg" />
+                          </button>
+                        </div>
+                      )}
+                      
+                      {flyerPdfPreview && (
+                        <div className="relative inline-block mt-2 h-16">
+                          <div className="h-full w-12 bg-red-100 rounded shadow flex items-center justify-center">
+                            <div className="text-center">
+                              <div className="text-red-600 text-xs font-bold">PDF</div>
+                              <div className="text-red-600 text-xs">
+                                {flyerPdf?.name?.substring(0, 10)}...
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFlyerPdfPreview(null);
+                              setFlyerPdf(null);
                             }}
                             className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
                           >

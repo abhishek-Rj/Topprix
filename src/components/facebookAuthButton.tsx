@@ -1,5 +1,6 @@
 import { useFirebase } from "../context/firebaseProvider";
 import { useNavigate } from "react-router-dom";
+import baseUrl from "@/hooks/baseurl";
 
 export default function FacebookAuthButton() {
     const { signInWithFacebook } = useFirebase();
@@ -9,26 +10,20 @@ export default function FacebookAuthButton() {
         try {
             const user = await signInWithFacebook();
             if (user) {
-                // Check if email is verified (Facebook accounts are typically pre-verified)
-                if (!user.emailVerified) {
-                    // For Facebook auth, this is unusual but handle it gracefully
-                    console.warn("Facebook account email not verified");
-                }
-
-                const userData = {
-                    name: user.displayName,
-                    email: user.email,
-                };
-
                 try {
                     const registerUser = await fetch(
-                        `${import.meta.env.VITE_APP_BASE_URL}register`,
+                        `${baseUrl}register`,
                         {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
                             },
-                            body: JSON.stringify(userData),
+                            body: JSON.stringify({
+                                username: user.displayName,
+                                email: user.email,
+                                phone: "", // Facebook auth doesn't provide phone, so we'll leave it empty
+                                role: "USER",
+                            }),
                         }
                     );
                     const data = await registerUser.json();
@@ -36,7 +31,7 @@ export default function FacebookAuthButton() {
                         navigate("/");
                     } else {
                         throw new Error(
-                            "User registration durind db save failed"
+                            "User registration during db save failed"
                         );
                     }
                 } catch (error) {

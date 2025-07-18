@@ -4,9 +4,6 @@ import { FaStore, FaRegSmile, FaRegHeart, FaRegMoneyBillAlt } from "react-icons/
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Footer from "../components/Footer";
-import { auth, db } from "../context/firebaseProvider";
-import { getDoc, doc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
 import { CouponCard } from "@/components/CouponCard";
@@ -16,11 +13,9 @@ import baseUrl from "@/hooks/baseurl";
 export default function Home() {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [userName, setUsername] = useState<string | null>(null);
-  const [loginButtonClassName, setLoginButtonClassName] = useState<string>("");
   const [coupons, setCoupons] = useState<any[]>([]);
   const [flyers, setFlyers] = useState<any[]>([]);
-  const { userRole } = useAuthenticate();
+  const { user, userRole, loading } = useAuthenticate();
 
   useEffect(() => {
     try {
@@ -54,23 +49,6 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
-          setUsername(userData.name);
-          setLoginButtonClassName("text-yellow-800 font-bold bg-yellow-200");
-        } else {
-          toast.info("You are not signed in");
-        }
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -91,6 +69,10 @@ export default function Home() {
       }
     }
   };
+
+  // Get user name for display
+  const userName = user?.displayName || user?.email?.split('@')[0] || null;
+  const loginButtonClassName = user ? "text-yellow-800 font-bold bg-yellow-200" : "";
 
   return (
     <div className={`min-h-screen ${userRole === "ADMIN" ? "bg-gradient-to-br from-blue-50 via-white to-indigo-50" : "bg-gradient-to-br from-yellow-50 via-white to-orange-50"}`}>
@@ -125,7 +107,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => {
-                  if (userName) {
+                  if (user) {
                     navigate("/profile");
                   } else {
                     navigate("/login");
@@ -133,8 +115,8 @@ export default function Home() {
                 }}
                 className={`flex items-center gap-2 px-4 py-2 ${loginButtonClassName} rounded-full transition-all duration-200 shadow-md hover:shadow-lg ${userRole === "ADMIN" ? "hover:bg-blue-300" : "hover:bg-yellow-300"}`}
               >
-                {userName ? (
-                  <>{userName.charAt(0).toUpperCase()}</>
+                {user ? (
+                  <>{userName?.charAt(0).toUpperCase()}</>
                 ) : (
                   <>
                     <HiUser />
@@ -184,7 +166,7 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => {
-                    if (userName) {
+                    if (user) {
                       navigate("/profile");
                     } else {
                       navigate("/login");
@@ -192,8 +174,8 @@ export default function Home() {
                   }}
                   className={`flex items-center gap-2 px-4 py-2 ${loginButtonClassName} rounded-full transition-all duration-200 ${userRole === "ADMIN" ? "hover:bg-blue-300" : "hover:bg-yellow-300"}`}
                 >
-                  {userName ? (
-                    <>{userName.split(" ")[0]}</>
+                  {user ? (
+                    <>{userName?.split(" ")[0]}</>
                   ) : (
                     <>
                       <HiUser />

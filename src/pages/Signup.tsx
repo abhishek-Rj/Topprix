@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { useFirebase } from "../context/firebaseProvider";
 import { useNavigate } from "react-router-dom";
 import { FiMail, FiPhone, FiLock } from "react-icons/fi";
@@ -8,9 +8,7 @@ import { useTranslation } from "react-i18next";
 import GoogleAuthButton from "../components/googleAuthButton";
 import FacebookAuthButton from "../components/facebookAuthButton";
 import Input from "../components/Input";
-import { auth } from "../context/firebaseProvider";
 import { toast } from "react-toastify";
-import { sendEmailVerification } from "firebase/auth";
 import baseUrl from "@/hooks/baseurl";
 
 export default function Signup() {
@@ -24,9 +22,6 @@ export default function Signup() {
   const [phoneError, setPhoneError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
   const [roleError, setRoleError] = useState<boolean>(false);
-  const [showVerification, setShowVerification] = useState<boolean>(false);
-  const [isResending, setIsResending] = useState<boolean>(false);
-  const [pollingInterval, setPollingInterval] = useState<number | null>(null);
 
   const roleRef = useRef<HTMLSelectElement>(null);
   const { signUpUserWithEmailAndPassword } = useFirebase();
@@ -39,125 +34,6 @@ export default function Signup() {
 
   const validatePhone = (phone: string): boolean => {
     return /^[0-9]{10}$/.test(phone);
-  };
-
-  // Start polling for email verification when verification view is shown
-  useEffect(() => {
-    if (showVerification) {
-      const interval = setInterval(async () => {
-        try {
-          let isVerified = false;
-          
-          if (auth.currentUser) {
-            // Handle Firebase user
-            await auth.currentUser.reload();
-            isVerified = auth.currentUser.emailVerified;
-          } else {
-            // Handle existing unverified user from database
-            const statusResponse = await fetch(
-              `${baseUrl}user/${email}`,
-              {
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              }
-            );
-            
-            if (statusResponse.ok) {
-              const userData = await statusResponse.json();
-              isVerified = userData.emailVerified;
-            }
-          }
-          
-          if (isVerified) {
-            clearInterval(interval);
-            
-            // Update email verification status in database
-            const updateEmailVerification = await fetch(`${baseUrl}user/${email}`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ emailVerified: true }),
-            });
-
-            if (updateEmailVerification.ok) {
-              toast.success("Email verified successfully! Please login.");
-              if (auth.currentUser) {
-                await auth.signOut();
-              }
-              navigate("/login");
-            } else {
-              throw new Error("Failed to update email verification");
-            }
-          }
-        } catch (error) {
-          console.error("Error checking email verification:", error);
-        }
-      }, 3000);
-
-      setPollingInterval(interval);
-
-      return () => {
-        if (interval) {
-          clearInterval(interval);
-        }
-      };
-    }
-  }, [showVerification, navigate, email]);
-
-  const handleResendEmail = async () => {
-    setIsResending(true);
-    try {
-      // Check if we have a Firebase user or need to handle existing unverified user
-      if (auth.currentUser) {
-        await sendEmailVerification(auth.currentUser);
-        toast.success("Verification email sent successfully!");
-      } else {
-        // Handle existing unverified user from database
-        const resendResponse = await fetch(
-          `${baseUrl}resend-verification`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email: email,
-            }),
-          }
-        );
-        
-        if (resendResponse.ok) {
-          toast.success("Verification email sent successfully!");
-        } else {
-          throw new Error("Failed to send verification email");
-        }
-      }
-    } catch (error: any) {
-      console.error("Error sending verification email:", error);
-      if (error.code === 'auth/too-many-requests') {
-        toast.error("Too many requests. Please wait a few minutes before trying again.");
-      } else {
-        toast.error("Failed to send verification email. Please try again.");
-      }
-    } finally {
-      setIsResending(false);
-    }
-  };
-
-  const handleBackToSignup = () => {
-    auth.signOut();
-    setShowVerification(false);
-    // Reset form fields
-    setName("");
-    setEmail("");
-    setPhone("");
-    setPassword("");
-    if (roleRef.current) {
-      roleRef.current.value = "";
-    }
   };
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -219,7 +95,20 @@ export default function Signup() {
         }
       }
 
-      // If user doesn't exist or other conditions, proceed with normal signup
+      // Create user in Firebase first
+      const userCredential = await signUpUserWithEmailAndPassword(
+        name,
+        email,
+        phone,
+        password,
+        roleRef.current.value
+      );
+      
+      if (!userCredential || !userCredential.user) {
+        throw new Error("Failed to create Firebase user");
+      }
+
+      // Create user in the database
       const registerUserResponse = await fetch(
         `${baseUrl}register`,
         {
@@ -238,93 +127,38 @@ export default function Signup() {
 
       const data = await registerUserResponse.json();
       if (!data.user) {
-        throw new Error("Failed to register user");
-      }
-
-      const userCredential = await signUpUserWithEmailAndPassword(
-        name,
-        email,
-        phone,
-        password,
-        roleRef.current.value
-      );
-      if (!userCredential || !userCredential.user) {
-        throw new Error("Failed to create user");
-      }
-
-      try {
-        await sendEmailVerification(userCredential.user);
-        toast.success("Verification email sent! Please check your inbox.");
-        setShowVerification(true);
-      } catch (err) {
-        console.error("Error sending verification email:", err);
+        // If database registration fails, delete the Firebase user
         try {
           await userCredential.user.delete();
         } catch (deleteErr) {
-          console.error(
-            "Error deleting user after failed verification:",
-            deleteErr
-          );
+          console.error("Error deleting Firebase user after database failure:", deleteErr);
         }
-        throw new Error("Failed to send verification email. Please try again.");
+        throw new Error("Failed to register user in database");
       }
 
-    } catch (error) {
+      toast.success("Account created successfully! Please login.");
+      navigate("/login");
+
+    } catch (error: any) {
       console.error("Error during sign-up:", error);
-      setError("Failed to create account");
+      
+      // Handle specific Firebase errors
+      if (error.code === 'auth/email-already-in-use') {
+        setError("An account with this email already exists. Please login instead.");
+      } else if (error.code === 'auth/weak-password') {
+        setPasswordError(true);
+        setError("Password is too weak. Please choose a stronger password.");
+      } else if (error.code === 'auth/invalid-email') {
+        setEmailError(true);
+        setError("Please enter a valid email address.");
+      } else {
+        setError("Failed to create account. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Show verification view
-  if (showVerification) {
-    return (
-      <div className="flex items-center justify-center min-h-screen flex-col bg-yellow-50 px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-md mx-auto">
-          <FiMail className="text-yellow-600 text-4xl sm:text-6xl mb-4 mx-auto" />
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
-            Email Verification Required
-          </h1>
-          <p className="text-sm sm:text-lg text-gray-600 mb-6 leading-relaxed">
-            Please check your email for the verification link. You must verify your email before you can access the application.
-          </p>
-          
-          <div className="space-y-4">
-            <button 
-              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleResendEmail}
-              disabled={isResending}
-            >
-              {isResending ? "Sending..." : "Resend Verification Email"}
-            </button>
-            
-            <button 
-              className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-              onClick={handleBackToSignup}
-            >
-              Back to Signup
-            </button>
-          </div>
-
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Note:</strong> We're automatically checking for verification. Once verified, you'll be redirected to login.
-            </p>
-          </div>
-
-          <p className="text-sm text-gray-600 mt-4">
-            If you don't see the verification email,{" "}
-            <span className="text-yellow-600 font-medium">
-              please check your spam folder.
-            </span>
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show signup form
   return (
     <div className="min-h-screen flex items-center justify-center bg-yellow-50 p-4">
       <div className="max-w-5xl w-full flex flex-col md:flex-row gap-6">

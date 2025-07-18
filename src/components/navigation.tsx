@@ -2,36 +2,18 @@ import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { FiMenu, FiX, FiSearch, FiUser } from "react-icons/fi";
-import { auth, db } from "../context/firebaseProvider";
-import { onAuthStateChanged } from "firebase/auth";
-import { getDoc, doc } from "firebase/firestore";
 import SkeletonNav from "./ui/navbarSkeleton";
 import userLogout from "@/hooks/userLogout";
+import useAuthenticate from "@/hooks/authenticationt";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setUserRole(userData.role);
-        } else {
-          setUserRole("USER");
-        }
-      }
-    });
-    return () => unsubscribe();
-  }, []);
+  const { user, userRole, loading } = useAuthenticate();
 
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
@@ -46,19 +28,12 @@ const Navigation = () => {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
     setIsMenuOpen(false);
   }, [location]);
 
   let navLinks: any = [];
 
-  if (user && userRole === null) {
+  if (loading) {
     return <SkeletonNav />;
   }
 
@@ -67,7 +42,7 @@ const Navigation = () => {
       { name: t("navigation.flyer"), path: "/explore/flyers" },
       { name: t("navigation.coupon"), path: "/explore/coupons" },
       { name: t("navigation.stores"), path: "/stores" },
-      { name: t("navigation.favourite"), path: "/favourite" },
+      { name: t("navigation.wishlist"), path: "/wishlist" },
       { name: "Shopping Lists", path: "/shopping-lists" },
       { name: t("navigation.profile"), path: "/profile" },
     ];
@@ -248,153 +223,48 @@ const Navigation = () => {
                       : userRole === "ADMIN"
                         ? "text-blue-100 hover:text-white"
                         : "text-gray-600 hover:text-yellow-600"
-                  }`}
-                >
-                  <FiUser className="mr-1" size={18} />
+                  }`}>
+                  <FiUser className="mr-1" />
                   {t("signIn")}
                 </Link>
               )}
             </div>
 
+            {/* Mobile menu button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`md:hidden focus:outline-none ${
-                isScrolled 
-                  ? "text-gray-600 hover:text-yellow-600" 
-                  : userRole === "ADMIN"
-                    ? "text-blue-100 hover:text-white"
-                    : "text-gray-600 hover:text-yellow-600"
-              }`}
+              className="md:hidden p-2"
             >
-              {isMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+              {isMenuOpen ? (
+                <FiX className="h-6 w-6" />
+              ) : (
+                <FiMenu className="h-6 w-6" />
+              )}
             </button>
           </div>
-        </div>
-      </header>
 
-      {/* Mobile Menu */}
+          {/* Mobile menu */}
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-[72px] bg-white border-t border-gray-100 shadow-lg z-50">
-          <div className="px-4 py-3 space-y-3 max-h-[calc(100vh-72px)] overflow-y-auto">
+            <div className="md:hidden mt-4 pb-4">
+              <nav className="flex flex-col space-y-2">
             {navLinks.map((link: any) => (
               <Link
                 key={link.path}
                 to={link.path}
-                className={`block text-sm font-medium ${
+                    className={`text-sm font-medium py-2 px-4 rounded-md ${
                   location.pathname === link.path
-                    ? "text-yellow-600"
-                    : "text-gray-800 hover:text-yellow-600"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "text-gray-700 hover:bg-yellow-50"
                 }`}
               >
                 {link.name}
               </Link>
             ))}
-
-            <div className="border-t border-gray-100 pt-3">
-              {/* Search */}
-              <div className="mb-3">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder={t("navigation.search")}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                  />
-                  <FiSearch
-                    className="absolute left-3 top-3 text-gray-400"
-                    size={18}
-                  />
-                </div>
-              </div>
-
-              <div className="flex space-x-2 mb-3">
-                <button
-                  onClick={() => changeLanguage("fr")}
-                  className={`px-3 py-1 text-sm rounded-md ${
-                    i18n.language === "fr"
-                      ? "bg-yellow-100 text-yellow-800 font-medium"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  Française
-                </button>
-                <button
-                  onClick={() => changeLanguage("en")}
-                  className={`px-3 py-1 text-sm rounded-md ${
-                    i18n.language === "en"
-                      ? "bg-yellow-100 text-yellow-800 font-medium"
-                      : "bg-gray-100 text-gray-700"
-                  }`}
-                >
-                  English
-                </button>
-              </div>
-
-              {user ? (
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 rounded-full bg-yellow-200 flex items-center justify-center text-yellow-800 font-semibold">
-                      {user.displayName
-                        ? user.displayName.charAt(0)
-                        : user.email.charAt(0)}
-                    </div>
-                    <span className="text-sm font-medium">
-                      {user.displayName || user.email}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Link
-                      to="/profile"
-                      className="text-center px-3 py-2 text-sm bg-gray-100 rounded-md text-gray-700 hover:bg-gray-200"
-                    >
-                      {t("navigation.profile")}
-                    </Link>
-                    {userRole !== "USER" ? (
-                      <>
-                        <Link
-                          to="/stores"
-                          className="text-center px-3 py-2 text-sm bg-gray-100 rounded-md text-gray-700 hover:bg-gray-200"
-                        >
-                          {t("navigation.yourStores")}
-                        </Link>
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                    <button
-                      onClick={async () => {
-                        try {
-                          await userLogout();
-                          navigate('/login');
-                        } catch (error) {
-                          console.error("Error signing out:", error);
-                        }
-                      }}
-                      className="w-full px-3 py-2 text-sm bg-yellow-100 rounded-md text-yellow-800 hover:bg-yellow-200"
-                    >
-                      {t("signOut")}
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-2">
-                  <Link
-                    to="/login"
-                    className="text-center px-3 py-2 text-sm bg-gray-100 rounded-md text-gray-700 hover:bg-gray-200"
-                  >
-                    {t("signIn")}
-                  </Link>
-                  <Link
-                    to="/signup"
-                    className="text-center px-3 py-2 text-sm bg-yellow-500 rounded-md text-white hover:bg-yellow-600"
-                  >
-                    {t("signUp")}
-                  </Link>
-                </div>
-              )}
+              </nav>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </header>
     </>
   );
 };

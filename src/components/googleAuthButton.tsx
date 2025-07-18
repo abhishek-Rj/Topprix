@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useFirebase } from "../context/firebaseProvider";
 import { db } from "../context/firebaseProvider";
 import { getDoc, doc, setDoc } from "firebase/firestore";
+import baseUrl from "@/hooks/baseurl";
 
 export default function GoogleAuthButton() {
   const { signInWithGoogle } = useFirebase();
@@ -11,12 +12,6 @@ export default function GoogleAuthButton() {
     try {
       const user = await signInWithGoogle();
       if (user) {
-        // Check if email is verified (Google accounts are typically pre-verified)
-        if (!user.emailVerified) {
-          // For Google auth, this is unusual but handle it gracefully
-          console.warn("Google account email not verified");
-        }
-
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
 
@@ -48,13 +43,18 @@ export default function GoogleAuthButton() {
         if (isNewUser) {
         try {
           const registerUser = await fetch(
-            `${import.meta.env.VITE_APP_BASE_URL}register`,
+              `${baseUrl}register`,
             {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify(userData),
+                body: JSON.stringify({
+                  username: user.displayName,
+                  email: user.email,
+                  phone: "", // Google auth doesn't provide phone, so we'll leave it empty
+                  role: "USER",
+                }),
             }
           );
 

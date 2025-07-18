@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getDoc, doc, updateDoc } from "firebase/firestore";
-import { db, auth } from "../context/firebaseProvider";
+import { db } from "../context/firebaseProvider";
 import Navigation from "../components/navigation";
 import Loader from "../components/loading";
 import { useTranslation } from "react-i18next";
@@ -29,6 +29,7 @@ import userLogout from "@/hooks/userLogout";
 import baseUrl from "@/hooks/baseurl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import useAuthenticate from "@/hooks/authenticationt";
 
 interface PricingPlan {
   id: string;
@@ -78,6 +79,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const { deleteAccountwithCredentials, deleteAccountwithProviders } =
     useFirebase();
+  const { user: authUser, userRole, loading } = useAuthenticate();
   const [user, setUser] = useState<any>(null);
   const [password, setPassword] = useState<string>("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
@@ -94,14 +96,16 @@ export default function Profile() {
   const [subscriptionLoading, setSubscriptionLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
-      if (!currentUser) {
+    if (loading) return;
+
+    if (!authUser) {
         navigate("/login");
         return;
       }
 
+    const fetchUserData = async () => {
       try {
-        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        const userDoc = await getDoc(doc(db, "users", authUser.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
           setUser(userData);
@@ -116,8 +120,8 @@ export default function Profile() {
           }
 
           // Fetch subscription data for retailers
-          if (userData.role === "RETAILER" && currentUser.email) {
-            await fetchUserSubscription(currentUser.email);
+          if (userData.role === "RETAILER" && authUser.email) {
+            await fetchUserSubscription(authUser.email);
           }
         } else {
           console.log("No user document found");
@@ -127,10 +131,10 @@ export default function Profile() {
       } finally {
         setLoader(false);
       }
-    });
+    };
 
-    return () => unsubscribe();
-  }, [navigate]);
+    fetchUserData();
+  }, [authUser, loading, navigate]);
 
   const fetchUserSubscription = async (email: string) => {
     setSubscriptionLoading(true);
@@ -162,12 +166,11 @@ export default function Profile() {
   };
 
   const handleOnClickDelete = async () => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
+    if (!authUser) return;
 
     try {
       const userDelete = await fetch(
-        `${baseUrl}user/delete/${currentUser.email}`,
+        `${baseUrl}user/delete/${authUser.email}`,
         {
           method: "DELETE",
           headers: {
@@ -176,9 +179,9 @@ export default function Profile() {
         }
       );
       let userDeleteFirebase: any = null;
-      if (currentUser.providerData[0].providerId === "password") {
+      if (authUser.providerData[0].providerId === "password") {
         userDeleteFirebase = await deleteAccountwithCredentials(password);
-      } else if (currentUser.providerData[0].providerId === "google.com") {
+      } else if (authUser.providerData[0].providerId === "google.com") {
         userDeleteFirebase = await deleteAccountwithProviders("google");
       } else {
         userDeleteFirebase = await deleteAccountwithProviders("facebook");
@@ -194,15 +197,14 @@ export default function Profile() {
   };
 
   const handleSave = async () => {
-    const currentUser = auth.currentUser;
-    if (!currentUser) return;
+    if (!authUser) return;
 
     setIsSaving(true);
     setError(null);
 
     try {
       const updateUser = await fetch(
-        `${baseUrl}user/update/${currentUser?.email}`,
+        `${baseUrl}user/update/${authUser?.email}`,
         {
           method: "POST",
           headers: {
@@ -219,7 +221,7 @@ export default function Profile() {
       if (!data.user) {
         throw new Error("Failed to update user data");
       }
-      await updateDoc(doc(db, "users", currentUser.uid), {
+      await updateDoc(doc(db, "users", authUser.uid), {
         name: editedName,
         location: editedLocation,
       });
