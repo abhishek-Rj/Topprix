@@ -15,8 +15,10 @@ import useClickOutside from "@/hooks/useClickOutside";
 import CouponList from "@/components/CouponCard";
 import Footer from "@/components/Footer";
 import FlyerList from "@/components/FlyerCard";
+import { useTranslation } from "react-i18next";
 
 export default function StoreDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"flyers" | "coupons">("flyers");
@@ -76,10 +78,10 @@ export default function StoreDetailPage() {
             setCoupons(couponsData.coupons);
             setPagination(couponsData.pagination);
           } else {
-            toast.error("could fetch coupons");
+            toast.error(t("store.couldFetchCoupons"));
           }
         } catch (err) {
-          toast.error("Something went wrong" + err);
+          toast.error(t("store.somethingWentWrong") + err);
         }
       })();
     } else if (activeTab === "flyers") {
@@ -93,10 +95,10 @@ export default function StoreDetailPage() {
             setFlyers(flyersData.flyers);
             setPagination(flyersData.pagination);
           } else {
-            toast.error("could fetch flyers");
+            toast.error(t("store.couldFetchFlyers"));
           }
         } catch (err) {
-          toast.error("Something went wrong" + err);
+          toast.error(t("store.somethingWentWrong") + err);
         }
       })();
     }
@@ -115,7 +117,7 @@ export default function StoreDetailPage() {
       try {
         const res = await fetch(`${baseUrl}store/${id}`);
         if (!res.ok) {
-          toast.error("Store not found");
+          toast.error(t("store.storeNotFound"));
           navigate("/stores");
           return;
         }
@@ -221,9 +223,9 @@ export default function StoreDetailPage() {
           setQrCodeFile(file);
           setQrCodePreview(URL.createObjectURL(file));
         }
-      } else {
-        toast.error("Only JPG or PNG files are allowed for barcode/QR code.");
-      }
+              } else {
+          toast.error(t("store.onlyJpgPngAllowed"));
+        }
     } else if (type === "flyer") {
       // Handle both image and PDF files for flyers
       if (["image/jpeg", "image/png"].includes(file.type)) {
@@ -238,9 +240,9 @@ export default function StoreDetailPage() {
         setFlyerPdfPreview(URL.createObjectURL(file));
         setFlyerImage(null);
         setFlyerImagePreview(null);
-      } else {
-        toast.error("Only JPG, PNG, or PDF files are allowed for flyers.");
-      }
+              } else {
+          toast.error(t("store.onlyJpgPngPdfAllowed"));
+        }
     }
   };
 
@@ -250,14 +252,14 @@ export default function StoreDetailPage() {
         `${baseUrl}coupons?storeId=${id}&page=${page}&limit=${12}`
       );
       if (!fetchMoreCoupons.ok) {
-        toast.error(`Couldn't fetch more coupons`);
-        throw new Error("Cannot fetch more Coupons");
+        toast.error(t("store.couldntFetchMoreCoupons"));
+        throw new Error(t("store.cannotFetchMoreCoupons"));
       }
       const moreCoupons = await fetchMoreCoupons.json();
       setCoupons(moreCoupons.coupons);
       setPagination(moreCoupons.pagination);
     } catch (error) {
-      toast.error("Cannot load page" + error);
+      toast.error(t("store.cannotLoadPage") + error);
     }
   };
 
@@ -273,7 +275,7 @@ export default function StoreDetailPage() {
         !endDate ||
         (!flyerImage && !flyerPdf)
       ) {
-        toast.error("Please fill in all required fields for the flyer.");
+        toast.error(t("store.pleaseFillRequiredFieldsFlyer"));
         setIsSubmitting(false);
         return;
       }
@@ -327,14 +329,14 @@ export default function StoreDetailPage() {
 
         if (!response.ok) {
           throw new Error(
-            isEditing ? "Failed to update flyer" : "Failed to create flyer"
+            isEditing ? t("store.failedToUpdateFlyer") : t("store.failedToCreateFlyer")
           );
         }
 
         toast.success(
           isEditing
-            ? "Flyer updated successfully"
-            : "Flyer created successfully"
+            ? t("store.flyerUpdatedSuccessfully")
+            : t("store.flyerCreatedSuccessfully")
         );
         setTimeout(() => {
           window.location.reload();
@@ -348,7 +350,7 @@ export default function StoreDetailPage() {
           error
         );
         toast.error(
-          isEditing ? "Error updating flyer" : "Error creating flyer"
+          isEditing ? t("store.errorUpdatingFlyer") : t("store.errorCreatingFlyer")
         );
       }
     } else {
@@ -362,7 +364,7 @@ export default function StoreDetailPage() {
         || !barcodeFile
         || !qrCodeFile
       ) {
-        toast.error("Please fill in all required fields.");
+        toast.error(t("store.pleaseFillRequiredFields"));
         setIsSubmitting(false);
         return;
       }
@@ -418,16 +420,16 @@ export default function StoreDetailPage() {
 
         if (!response.ok) {
           throw new Error(
-            isEditing ? "Failed to update coupon" : "Failed to create coupon"
+            isEditing ? t("store.failedToUpdateCoupon") : t("store.failedToCreateCoupon")
           );
         }
         if (isEditing) {
-          toast.success("Coupon updated successfully");
+          toast.success(t("store.couponUpdatedSuccessfully"));
           setTimeout(() => {
             window.location.reload();
           }, 1000);
         } else {
-          toast.success("Coupon created successfully");
+          toast.success(t("store.couponCreatedSuccessfully"));
           setTimeout(() => {
             window.location.reload();
           }, 1000);
@@ -441,7 +443,7 @@ export default function StoreDetailPage() {
           error
         );
         toast.error(
-          isEditing ? "Error updating coupon" : "Error creating coupon"
+          isEditing ? t("store.errorUpdatingCoupon") : t("store.errorCreatingCoupon")
         );
       }
     }
@@ -521,19 +523,19 @@ export default function StoreDetailPage() {
                       {store.name}
                     </h1>
                     {(userRole === "ADMIN" || userRole === "RETAILER") && (
-                      <button
-                        onClick={handleEditStore}
-                        className={`w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-600" : "bg-yellow-500 hover:bg-yellow-600"} text-white rounded-md transition`}
-                      >
-                        <HiPencil />
-                        Edit Store
-                      </button>
+                                          <button
+                      onClick={handleEditStore}
+                      className={`w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-600" : "bg-yellow-500 hover:bg-yellow-600"} text-white rounded-md transition`}
+                    >
+                      <HiPencil />
+                      {t("store.editStore")}
+                    </button>
                     )}
                   </div>
 
                   {/* Store Description */}
                   <p className="text-sm sm:text-base text-gray-700 mt-1">
-                    {store.description || "No description provided."}
+                    {store.description || t("store.noDescription")}
                   </p>
                 </div>
               </div>
@@ -554,7 +556,7 @@ export default function StoreDetailPage() {
                   }`}
                 >
                   <HiNewspaper />
-                  <span className="hidden sm:inline">Flyers</span>
+                  <span className="hidden sm:inline">{t("store.flyers")}</span>
                 </button>
                 <button
                   onClick={() => {
@@ -568,7 +570,7 @@ export default function StoreDetailPage() {
                   }`}
                 >
                   <HiTag />
-                  <span className="hidden sm:inline">Coupons</span>
+                  <span className="hidden sm:inline">{t("store.coupons")}</span>
                 </button>
               </div>
 
@@ -578,7 +580,7 @@ export default function StoreDetailPage() {
                   className={`w-full sm:w-auto flex items-center justify-center gap-2 ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-600" : "bg-yellow-500 hover:bg-yellow-600"} text-white font-semibold px-5 py-2 rounded-md transition`}
                 >
                   <HiPlus />
-                  {activeTab === "flyers" ? "Create Flyer" : "Create Coupon"}
+                  {activeTab === "flyers" ? t("store.createFlyer") : t("store.createCoupon")}
                 </button>
               )}
             </div>
@@ -597,10 +599,10 @@ export default function StoreDetailPage() {
                   <div className="text-center text-gray-700">
                     <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
                       <HiNewspaper className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
-                      Flyers
+                      {t("store.flyers")}
                     </h2>
                     <p className="text-sm sm:text-base">
-                      No flyers yet. Click "Create Flyer" to add one.
+                      {t("store.noFlyersYet")}
                     </p>
                   </div>
                 )
@@ -616,10 +618,10 @@ export default function StoreDetailPage() {
                 <div className="text-center text-gray-700">
                   <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
                     <HiTag className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
-                    Coupons
+                    {t("store.coupons")}
                   </h2>
                   <p className="text-sm sm:text-base">
-                    No coupons yet. Click "Create Coupon" to add one.
+                    {t("store.noCouponsYet")}
                   </p>
                 </div>
               )}
@@ -634,8 +636,8 @@ export default function StoreDetailPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                {isEditing ? "Edit" : "Create"}{" "}
-                {activeTab === "flyers" ? "Flyer" : "Coupon"}
+                {isEditing ? t("store.edit") : t("store.create")}{" "}
+                {activeTab === "flyers" ? t("store.flyers") : t("store.coupons")}
               </h2>
               <button
                 onClick={() => {

@@ -19,6 +19,7 @@ import WishlistPage from "./pages/Wishlist";
 import RetailerDashboard from "./pages/Retailer/RetailerDashboard";
 import ShoppingList from "./pages/ShoppingList";
 import PDFViewer from "./pages/PDFViewer";
+import FlyerDetail from "./pages/FlyerDetail";
 
 function App() {
   return (
@@ -45,6 +46,7 @@ function App() {
           <Route path="/user-dashboard" element={<UserDashboard />} />
           <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
           <Route path="/pdf-viewer/:flyerId" element={<PDFViewer />} />
+          <Route path="/flyers/:flyerId" element={<FlyerDetail />} />
         </Routes>
       </BrowserRouter>
     </>
