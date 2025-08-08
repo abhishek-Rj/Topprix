@@ -19,6 +19,7 @@ import baseUrl from "../hooks/baseurl";
 import CouponList from "../components/CouponCard";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import useAuthenticate from "@/hooks/authenticationt";
+import { useTranslation } from "react-i18next";
 
 interface Coupon {
   id: string;
@@ -44,6 +45,7 @@ interface Coupon {
 }
 
 export default function CouponPage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -185,7 +187,12 @@ export default function CouponPage() {
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navigation />
       </div>
-      <main id="goto" className={`pt-20 pb-10 ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
+      <main
+        id="goto"
+        className={`pt-20 pb-10 ${
+          userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4">
           {currentPage === 1 ? (
             <>
@@ -193,14 +200,15 @@ export default function CouponPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className={`text-center mb-12 rounded-xl p-4 ${userRole === "ADMIN" ? "bg-blue-100" : "bg-yellow-100"}`}
+                className={`text-center mb-12 rounded-xl p-4 ${
+                  userRole === "ADMIN" ? "bg-blue-100" : "bg-yellow-100"
+                }`}
               >
                 <h1 className="text-4xl pt-6 sm:text-5xl font-bold text-gray-900 mb-4">
-                  Find the Best Coupons
+                  {t("coupons.title")}
                 </h1>
                 <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  Discover amazing deals and discounts from your favorite
-                  stores. Save more with our exclusive coupons!
+                  {t("coupons.description")}
                 </p>
               </motion.div>
 
@@ -211,18 +219,34 @@ export default function CouponPage() {
                 className="flex flex-wrap justify-center gap-4 mb-8"
               >
                 <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <HiTag className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
+                  <HiTag
+                    className={
+                      userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
+                    }
+                  />
                   <span className="text-gray-700">
-                    {pagination?.totalItems || 0}+ Active Coupons
+                    {pagination?.totalItems || 0}+ {t("coupons.activeCoupons")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <FaStore className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
-                  <span className="text-gray-700">500+ Partner Stores</span>
+                  <FaStore
+                    className={
+                      userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
+                    }
+                  />
+                  <span className="text-gray-700">
+                    500+ {t("coupons.partnerStores")}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <HiUser className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
-                  <span className="text-gray-700">1M+ Happy Users</span>
+                  <HiUser
+                    className={
+                      userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
+                    }
+                  />
+                  <span className="text-gray-700">
+                    1M+ {t("coupons.happyUsers")}
+                  </span>
                 </div>
               </motion.div>
             </>
@@ -238,10 +262,14 @@ export default function CouponPage() {
                   <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
                   <input
                     type="text"
-                    placeholder="Search coupons..."
+                    placeholder={t("coupons.searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
+                      userRole === "ADMIN"
+                        ? "focus:ring-blue-500 focus:border-blue-500"
+                        : "focus:ring-yellow-500 focus:border-yellow-500"
+                    }`}
                   />
                 </div>
                 <div className="relative">
@@ -249,9 +277,13 @@ export default function CouponPage() {
                   <select
                     value={selectedCategory}
                     onChange={(e) => handleCategorySelect(e.target.value)}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
+                      userRole === "ADMIN"
+                        ? "focus:ring-blue-500 focus:border-blue-500"
+                        : "focus:ring-yellow-500 focus:border-yellow-500"
+                    }`}
                   >
-                    <option value="all">All Categories</option>
+                    <option value="all">{t("coupons.allCategories")}</option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.name}
@@ -268,17 +300,22 @@ export default function CouponPage() {
                       setSortBy(newSortBy);
                       localStorage.setItem("sortBy", newSortBy);
                     }}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
+                      userRole === "ADMIN"
+                        ? "focus:ring-blue-500 focus:border-blue-500"
+                        : "focus:ring-yellow-500 focus:border-yellow-500"
+                    }`}
                   >
-                    <option value="all">All</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value="all">{t("coupons.all")}</option>
+                    <option value="active">{t("coupons.active")}</option>
+                    <option value="inactive">{t("coupons.inactive")}</option>
                   </select>
                 </div>
                 <div className="text-center sm:text-right">
                   <span className="text-xs sm:text-sm text-gray-600">
-                    Showing {filteredCoupons.length} of {pagination?.total || 0}{" "}
-                    coupons
+                    {t("coupons.showing")} {filteredCoupons.length}{" "}
+                    {t("coupons.of")} {pagination?.total || 0}{" "}
+                    {t("coupons.coupons")}
                   </span>
                 </div>
               </div>
@@ -286,7 +323,11 @@ export default function CouponPage() {
           </div>
 
           {/* Coupon Grid */}
-          <div className={`min-h-[200px] sm:min-h-[300px] rounded-xl p-4 sm:p-5 shadow-inner ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
+          <div
+            className={`min-h-[200px] sm:min-h-[300px] rounded-xl p-4 sm:p-5 shadow-inner ${
+              userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
+            }`}
+          >
             {coupons.length > 0 ? (
               <CouponList
                 coupons={sortedCoupons}
@@ -298,9 +339,7 @@ export default function CouponPage() {
               />
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-600">
-                  No coupons found matching your criteria.
-                </p>
+                <p className="text-gray-600">{t("coupons.noCouponsFound")}</p>
               </div>
             )}
           </div>

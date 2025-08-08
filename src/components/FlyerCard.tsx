@@ -1,13 +1,30 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { HiPencil, HiTrash, HiShoppingCart, HiHeart } from "react-icons/hi";
+import {
+  HiPencil,
+  HiTrash,
+  HiShoppingCart,
+  HiHeart,
+  HiEye,
+} from "react-icons/hi";
 import baseUrl from "@/hooks/baseurl";
 import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
 import ConfirmDeleteDialog from "./confirmDeleteOption";
 import { FiImage } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import FlyerPreviewModal from "./FlyerPreviewModal";
+import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+import { useTranslation } from "react-i18next";
+
+// Set up PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  "pdfjs-dist/build/pdf.worker.min.mjs",
+  import.meta.url
+).toString();
 
 export const FlyerCard = ({
   flyer,
@@ -29,9 +46,32 @@ export const FlyerCard = ({
   const { user, userRole } = useAuthenticate();
   const [showDeleteDialogueBox, setShowDeleteDialogueBox] =
     useState<boolean>(false);
+  const [showPreviewModal, setShowPreviewModal] = useState<boolean>(false);
+  const [pdfLoadError, setPdfLoadError] = useState<boolean>(false);
+  const [pdfWidth, setPdfWidth] = useState<number>(128);
   const navigate = useNavigate();
 
+  // Check if the flyer URL is a PDF
+  const isPdf = flyer?.imageUrl?.toLowerCase().includes(".pdf");
+
   const isAuthorized = userRole === "ADMIN" || userRole === "RETAILER";
+
+  // Set PDF width based on screen size
+  useEffect(() => {
+    const updatePdfWidth = () => {
+      if (typeof window !== "undefined") {
+        if (window.innerWidth > 640) {
+          setPdfWidth(128); // Desktop: use fixed width for sm:w-32
+        } else {
+          setPdfWidth(Math.min(window.innerWidth * 0.8, 300)); // Mobile: responsive width
+        }
+      }
+    };
+
+    updatePdfWidth();
+    window.addEventListener("resize", updatePdfWidth);
+    return () => window.removeEventListener("resize", updatePdfWidth);
+  }, []);
 
   // Fetch user ID from backend when component mounts
   useEffect(() => {
@@ -241,55 +281,110 @@ export const FlyerCard = ({
       <Card
         className="w-full hover:translate-y-1 rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all relative group"
         onClick={() => navigate(`/flyers/${flyer.id}`)}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          setShowPreviewModal(true);
+        }}
       >
         <CardContent className="p-4">
           {/* Mobile Layout - Horizontal */}
           <div className="flex flex-col sm:flex-row gap-4">
-            {/* Image Section */}
+            {/* Image/PDF Section */}
             <div className="relative w-full sm:w-32 h-32 sm:h-24 overflow-hidden rounded-lg flex-shrink-0">
               {flyer.imageUrl ? (
-                <img
-                  src={flyer.imageUrl}
-                  alt={flyer.title}
-                  className="w-full h-full object-cover"
-                />
+                isPdf ? (
+                  // PDF Preview - First Page
+                  <div className="w-full h-full bg-white flex items-center justify-center">
+                    {!pdfLoadError ? (
+                      <Document
+                        file={flyer.imageUrl}
+                        onLoadError={() => setPdfLoadError(true)}
+                        loading={
+                          <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-yellow-600"></div>
+                          </div>
+                        }
+                        error={
+                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                            <FiImage className="w-8 h-8 text-gray-400" />
+                          </div>
+                        }
+                      >
+                        <Page
+                          pageNumber={1}
+                          width={pdfWidth}
+                          renderTextLayer={false}
+                          renderAnnotationLayer={false}
+                          className="pdf-page-card"
+                        />
+                      </Document>
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <FiImage className="w-8 h-8 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  // Regular Image
+                  <img
+                    src={flyer.imageUrl}
+                    alt={flyer.title}
+                    className="w-full h-full object-cover"
+                  />
+                )
               ) : (
                 <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                   <FiImage className="w-8 h-8 text-gray-400" />
                 </div>
               )}
 
-              {/* Action buttons overlay for USER role */}
-              {user && userRole === "USER" && (
-                <div className="absolute top-1 right-1 flex gap-1 opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddToShoppingList(e);
-                    }}
-                    className="p-1 bg-white/90 sm:hover:bg-white text-green-600 sm:hover:text-green-700 rounded-full shadow-sm transition-colors"
-                    title="Add to Shopping List"
-                  >
-                    <HiShoppingCart size={12} />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToWishlist();
-                    }}
-                    className={`p-1 bg-white/90 sm:hover:bg-white rounded-full shadow-sm transition-colors ${
-                      isInWishlist
-                        ? "text-red-500"
-                        : "text-gray-500 sm:hover:text-red-500"
-                    }`}
-                    title={
-                      isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"
-                    }
-                  >
-                    <HiHeart size={12} />
-                  </button>
-                </div>
-              )}
+              {/* Preview button - available for all users */}
+              <div className="absolute top-1 right-1 flex gap-1 opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPreviewModal(true);
+                  }}
+                  className="p-1 bg-white/90 sm:hover:bg-white text-blue-600 sm:hover:text-blue-700 rounded-full shadow-sm transition-colors"
+                  title="Preview Flyer"
+                >
+                  <HiEye size={12} />
+                </button>
+
+                {/* Additional action buttons for authenticated USER role */}
+                {user && userRole === "USER" && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToShoppingList(e);
+                      }}
+                      className="p-1 bg-white/90 sm:hover:bg-white text-green-600 sm:hover:text-green-700 rounded-full shadow-sm transition-colors"
+                      title="Add to Shopping List"
+                    >
+                      <HiShoppingCart size={12} />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToWishlist();
+                      }}
+                      className={`p-1 bg-white/90 sm:hover:bg-white rounded-full shadow-sm transition-colors ${
+                        isInWishlist
+                          ? "text-red-500"
+                          : "text-gray-500 sm:hover:text-red-500"
+                      }`}
+                      title={
+                        isInWishlist
+                          ? "Remove from Wishlist"
+                          : "Add to Wishlist"
+                      }
+                    >
+                      <HiHeart size={12} />
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Content Section */}
@@ -382,6 +477,13 @@ export const FlyerCard = ({
         isLoading={isDeleting}
         itemName="this flyer"
       />
+
+      {/* Flyer Preview Modal */}
+      <FlyerPreviewModal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        flyer={flyer}
+      />
     </>
   );
 };
@@ -399,6 +501,8 @@ const FlyerList = ({
   onEdit?: (flyer: any) => void;
   onDelete?: (flyerId: string) => void;
 }) => {
+  const { t } = useTranslation();
+
   if (!Array.isArray(flyers)) {
     return null;
   }
@@ -423,17 +527,18 @@ const FlyerList = ({
             disabled={!pagination.hasPreviousPage}
             onClick={() => onPageChange(pagination.page - 1)}
           >
-            Previous
+            {t("flyers.previous")}
           </Button>
           <div className="text-sm text-gray-600 translate-y-2">
-            Page {pagination.page} of {pagination.totalPages}
+            {t("flyers.page")} {pagination.page} {t("flyers.of")}{" "}
+            {pagination.totalPages}
           </div>
           <Button
             variant="outline"
             disabled={!pagination.hasNextPage}
             onClick={() => onPageChange(pagination.page + 1)}
           >
-            Next
+            {t("flyers.next")}
           </Button>
         </div>
       )}
@@ -442,3 +547,32 @@ const FlyerList = ({
 };
 
 export default FlyerList;
+
+// CSS for PDF rendering in cards
+const pdfCardStyles = `
+  .pdf-page-card {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .pdf-page-card .react-pdf__Page {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  
+  .pdf-page-card .react-pdf__Page__canvas {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    border-radius: 0.5rem !important;
+  }
+`;
+
+// Inject styles
+if (typeof document !== "undefined") {
+  const styleElement = document.createElement("style");
+  styleElement.textContent = pdfCardStyles;
+  document.head.appendChild(styleElement);
+}

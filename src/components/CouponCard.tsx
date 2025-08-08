@@ -1,12 +1,19 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { HiX, HiPencil, HiTrash, HiShoppingCart, HiHeart } from "react-icons/hi";
+import {
+  HiX,
+  HiPencil,
+  HiTrash,
+  HiShoppingCart,
+  HiHeart,
+} from "react-icons/hi";
 import clsx from "clsx";
 import baseUrl from "@/hooks/baseurl";
 import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
 import ConfirmDeleteDialog from "./confirmDeleteOption";
+import { useTranslation } from "react-i18next";
 
 const DetailRow = ({
   label,
@@ -63,7 +70,7 @@ export const CouponCard = ({
   useEffect(() => {
     const fetchUserId = async () => {
       if (!user?.email) return;
-      
+
       try {
         const response = await fetch(`${baseUrl}user/${user.email}`);
         if (!response.ok) {
@@ -105,15 +112,18 @@ export const CouponCard = ({
       toast.error("User data not available. Please try again.");
       return;
     }
-    
+
     try {
-      const response = await fetch(`${baseUrl}api/users/${userId}/shopping-lists`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "user-email": user?.email || "",
-        },
-      });
+      const response = await fetch(
+        `${baseUrl}api/users/${userId}/shopping-lists`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user?.email || "",
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -134,18 +144,21 @@ export const CouponCard = ({
     }
 
     try {
-      const response = await fetch(`${baseUrl}api/shopping-lists/${selectedListId}/items`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "user-email": user?.email || "",
-        },
-        body: JSON.stringify({
-          name: coupon.title,
-          quantity: quantity,
-          couponItemId: coupon.id,
-        }),
-      });
+      const response = await fetch(
+        `${baseUrl}api/shopping-lists/${selectedListId}/items`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user?.email || "",
+          },
+          body: JSON.stringify({
+            name: coupon.title,
+            quantity: quantity,
+            couponItemId: coupon.id,
+          }),
+        }
+      );
 
       if (response.ok) {
         toast.success("Item added to shopping list successfully");
@@ -181,7 +194,9 @@ export const CouponCard = ({
         },
         body: JSON.stringify({
           name: coupon.title,
-          targetPrice: coupon.discountAmount ? parseFloat(coupon.discountAmount) : undefined,
+          targetPrice: coupon.discountAmount
+            ? parseFloat(coupon.discountAmount)
+            : undefined,
         }),
       });
 
@@ -263,61 +278,67 @@ export const CouponCard = ({
         onClick={() => setShowPreview(true)}
       >
         <CardContent className="p-3 sm:p-4 space-y-3">
-        <div className="w-full rounded-lg shadow-sm overflow-hidden bg-white p-3 sm:p-4 relative">
-          {/* Action buttons overlay for USER role */}
-          {user && userRole === "USER" && (
-            <div className="absolute top-2 right-2 flex gap-1 opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
-              <button
-                onClick={handleAddToShoppingList}
-                className="p-1.5 bg-white/90 sm:hover:bg-white text-green-600 sm:hover:text-green-700 rounded-full shadow-sm transition-colors"
-                title="Add to Shopping List"
-              >
-                <HiShoppingCart size={16} />
-              </button>
-              <button
-                onClick={addToWishlist}
-                className={`p-1.5 bg-white/90 sm:hover:bg-white rounded-full shadow-sm transition-colors ${
-                  isInWishlist ? "text-red-500" : "text-gray-500 sm:hover:text-red-500"
-                }`}
-                title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
-              >
-                <HiHeart size={16} />
-              </button>
-            </div>
-          )}
-          
-          <div className="flex flex-col items-center space-y-2 sm:space-y-3">
-            {/* Title */}
-            <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 truncate text-center line-clamp-2">
-              {coupon.title}
-            </h2>
+          <div className="w-full rounded-lg shadow-sm overflow-hidden bg-white p-3 sm:p-4 relative">
+            {/* Action buttons overlay for USER role */}
+            {user && userRole === "USER" && (
+              <div className="absolute top-2 right-2 flex gap-1 opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
+                <button
+                  onClick={handleAddToShoppingList}
+                  className="p-1.5 bg-white/90 sm:hover:bg-white text-green-600 sm:hover:text-green-700 rounded-full shadow-sm transition-colors"
+                  title="Add to Shopping List"
+                >
+                  <HiShoppingCart size={16} />
+                </button>
+                <button
+                  onClick={addToWishlist}
+                  className={`p-1.5 bg-white/90 sm:hover:bg-white rounded-full shadow-sm transition-colors ${
+                    isInWishlist
+                      ? "text-red-500"
+                      : "text-gray-500 sm:hover:text-red-500"
+                  }`}
+                  title={
+                    isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"
+                  }
+                >
+                  <HiHeart size={16} />
+                </button>
+              </div>
+            )}
 
-            {/* Images */}
-            <div className="flex gap-2 sm:gap-4 justify-center">
-              {coupon.barcodeUrl && (
-                <img
-                  src={coupon.barcodeUrl}
-                  alt="Barcode"
-                  className="w-16 h-16 sm:w-20 md:w-24 object-contain rounded-md shadow"
-                />
-              )}
-              {coupon.qrCodeUrl && (
-                <img
-                  src={coupon.qrCodeUrl}
-                  alt="QR Code"
-                  className="w-16 h-16 sm:w-20 md:w-24 object-contain rounded-md shadow"
-                />
-              )}
-            </div>
+            <div className="flex flex-col items-center space-y-2 sm:space-y-3">
+              {/* Title */}
+              <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 truncate text-center line-clamp-2">
+                {coupon.title}
+              </h2>
 
-            {/* Valid Until */}
-            <span className="text-xs sm:text-sm font-medium text-yellow-600 text-center">
-            {calculateDaysLeft() === 0
-                    ? "Last day" 
-                    : (calculateDaysLeft() < 0) ? "Expired" :  calculateDaysLeft() + " days left"}
-            </span>
+              {/* Images */}
+              <div className="flex gap-2 sm:gap-4 justify-center">
+                {coupon.barcodeUrl && (
+                  <img
+                    src={coupon.barcodeUrl}
+                    alt="Barcode"
+                    className="w-16 h-16 sm:w-20 md:w-24 object-contain rounded-md shadow"
+                  />
+                )}
+                {coupon.qrCodeUrl && (
+                  <img
+                    src={coupon.qrCodeUrl}
+                    alt="QR Code"
+                    className="w-16 h-16 sm:w-20 md:w-24 object-contain rounded-md shadow"
+                  />
+                )}
+              </div>
+
+              {/* Valid Until */}
+              <span className="text-xs sm:text-sm font-medium text-yellow-600 text-center">
+                {calculateDaysLeft() === 0
+                  ? "Last day"
+                  : calculateDaysLeft() < 0
+                  ? "Expired"
+                  : calculateDaysLeft() + " days left"}
+              </span>
+            </div>
           </div>
-        </div>
         </CardContent>
       </Card>
 
@@ -356,9 +377,15 @@ export const CouponCard = ({
                       <button
                         onClick={addToWishlist}
                         className={`p-2 transition-colors ${
-                          isInWishlist ? "text-red-500" : "text-gray-500 sm:hover:text-red-500"
+                          isInWishlist
+                            ? "text-red-500"
+                            : "text-gray-500 sm:hover:text-red-500"
                         }`}
-                        title={isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+                        title={
+                          isInWishlist
+                            ? "Remove from Wishlist"
+                            : "Add to Wishlist"
+                        }
                       >
                         <HiHeart className="w-5 h-5" />
                       </button>
@@ -427,7 +454,9 @@ export const CouponCard = ({
                         value={coupon.isPremium ? "Premium" : "Standard"}
                       />
                       <div className="flex justify-between items-center text-xs sm:text-sm">
-                        <span className="text-gray-600 font-medium">Usage:</span>
+                        <span className="text-gray-600 font-medium">
+                          Usage:
+                        </span>
                         <div className="flex gap-2">
                           {coupon.isOnline && (
                             <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
@@ -573,7 +602,9 @@ export const CouponCard = ({
                           }`}
                         >
                           <HiHeart className="w-5 h-5" />
-                          {isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"}
+                          {isInWishlist
+                            ? "Remove from Wishlist"
+                            : "Add to Wishlist"}
                         </button>
                       </div>
                     </section>
@@ -611,11 +642,15 @@ export const CouponCard = ({
                 </select>
               </div>
               <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">Quantity:</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Quantity:
+                </label>
                 <input
                   type="number"
                   value={quantity}
-                  onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) =>
+                    setQuantity(Math.max(1, parseInt(e.target.value) || 1))
+                  }
                   min="1"
                   className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
@@ -671,6 +706,8 @@ const CouponList = ({
   onEdit?: (coupon: any) => void;
   onDelete?: (couponId: string) => void;
 }) => {
+  const { t } = useTranslation();
+
   if (!Array.isArray(coupons)) {
     return null;
   }
@@ -696,17 +733,18 @@ const CouponList = ({
             disabled={!pagination.hasPreviousPage}
             onClick={() => onPageChange(pagination.page - 1)}
           >
-            Previous
+            {t("coupons.previous")}
           </Button>
           <div className="text-sm text-gray-600 translate-y-2">
-            Page {pagination.page} of {pagination.totalPages}
+            {t("coupons.page")} {pagination.page} {t("coupons.of")}{" "}
+            {pagination.totalPages}
           </div>
           <Button
             variant="outline"
             disabled={!pagination.hasNextPage}
             onClick={() => onPageChange(pagination.page + 1)}
           >
-            Next
+            {t("coupons.next")}
           </Button>
         </div>
       )}

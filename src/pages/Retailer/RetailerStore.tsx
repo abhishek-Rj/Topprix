@@ -1,24 +1,32 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { HiSearch, HiFilter, HiPencil, HiTrash, HiPlus } from "react-icons/hi";
+import { motion } from "framer-motion";
 import Navigation from "../../components/navigation";
+import Footer from "../../components/Footer";
 import Loader from "../../components/loading";
-import useAuthenticate from "../../hooks/authenticationt";
-import baseUrl from "../../hooks/baseurl";
+import useAuthenticate from "@/hooks/authenticationt";
 import { toast } from "react-toastify";
-//@ts-ignore
-import { HiDotsVertical, HiPencil, HiTrash, HiSearch, HiFilter } from "react-icons/hi";
-//@ts-ignore
-import { MdCancel, MdLocalHospital } from "react-icons/md";
-
+import baseUrl from "@/hooks/baseurl";
 import useClickOutside from "@/hooks/useClickOutside";
-import Footer from "@/components/Footer";
+import { useTranslation } from "react-i18next";
 
 interface Store {
   id: string;
   name: string;
   description: string;
-  logo?: string;
-  categories: Array<{ id: string; name: string }>;
+  logo: string;
+  categories: Array<{
+    id: string;
+    name: string;
+  }>;
+  address: string;
+  phone: string;
+  email: string;
+  website: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface PaginationData {
@@ -29,6 +37,7 @@ interface PaginationData {
 }
 
 export default function RetailerStores() {
+  const { t } = useTranslation();
   const userRole = localStorage.getItem("userRole");
   const { user, loading } = useAuthenticate();
   const [stores, setStores] = useState<Store[]>([]);
@@ -36,7 +45,7 @@ export default function RetailerStores() {
     totalCount: 0,
     currentPage: 1,
     totalPages: 1,
-    stores: []
+    stores: [],
   });
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [confirmStoreName, setConfirmStoreName] = useState("");
@@ -45,13 +54,12 @@ export default function RetailerStores() {
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [limit, setLimit] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
-  
+
   const threeDotRef = useRef(null);
 
   useClickOutside(threeDotRef, () => setMenuOpenId(null));
@@ -64,12 +72,13 @@ export default function RetailerStores() {
 
   const buildQueryString = () => {
     const params = new URLSearchParams();
-    
+
     if (searchTerm) params.append("search", searchTerm);
-    if (selectedCategories.length > 0) params.append("categoryIds", selectedCategories.join(","));
+    if (selectedCategories.length > 0)
+      params.append("categoryIds", selectedCategories.join(","));
     if (limit) params.append("limit", limit.toString());
     if (currentPage) params.append("page", currentPage.toString());
-    
+
     return params.toString();
   };
 
@@ -78,7 +87,7 @@ export default function RetailerStores() {
     try {
       const queryString = buildQueryString();
       const url = `${baseUrl}stores${queryString ? `?${queryString}` : ""}`;
-      
+
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -86,35 +95,40 @@ export default function RetailerStores() {
           "user-email": user?.email || "",
         },
       });
-      
+
       const data = await response.json();
 
-      const fetchUser = await fetch(`${baseUrl}user/${localStorage.getItem("userEmail")}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "user-email": user?.email || "",
-        },
-      });
+      const fetchUser = await fetch(
+        `${baseUrl}user/${localStorage.getItem("userEmail")}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user?.email || "",
+          },
+        }
+      );
 
       const userId = (await fetchUser.json()).id;
       if (userRole === "RETAILER") {
-        data.stores = data.stores.filter((store: any) => store?.ownerId === userId);
+        data.stores = data.stores.filter(
+          (store: any) => store?.ownerId === userId
+        );
       }
-      
+
       if (data.stores) {
         setStores(data.stores);
         setPaginationData({
           totalCount: data.totalCount || 0,
           currentPage: data.currentPage || 1,
           totalPages: data.totalPages || 1,
-          stores: data.stores
+          stores: data.stores,
         });
       } else {
         throw new Error("No stores found");
       }
     } catch (error) {
-      toast.error("Failed to fetch stores");
+      toast.error(t("stores.failedToFetchStores"));
       console.error("Error fetching stores:", error);
     } finally {
       setIsLoading(false);
@@ -136,9 +150,9 @@ export default function RetailerStores() {
   };
 
   const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(categoryId) 
-        ? prev.filter(id => id !== categoryId)
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId]
     );
     setCurrentPage(1);
@@ -175,10 +189,10 @@ export default function RetailerStores() {
       });
 
       if (response.ok) {
-        toast.success("Store deleted successfully");
+        toast.success(t("stores.storeDeletedSuccessfully"));
         window.location.reload();
       } else {
-        toast.error("Failed to delete store");
+        toast.error(t("stores.failedToDeleteStore"));
         setConfirmDeleteId(null);
         setStoreToDelete(null);
         setMenuOpenId(null);
@@ -201,29 +215,59 @@ export default function RetailerStores() {
       </div>
     </>
   ) : (
-    <div className={`min-h-screen flex flex-col ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
+    <div
+      className={`min-h-screen flex flex-col ${
+        userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
+      }`}
+    >
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navigation />
       </div>
-      
-      <main className={`flex-1 pt-20 pb-10 ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
-        <div className={`${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"} rounded-2xl p-6 sm:p-8 border ${userRole === "ADMIN" ? "border-blue-100" : "border-yellow-100"} min-h-full`}>
+
+      <main
+        className={`flex-1 pt-20 pb-10 ${
+          userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
+        }`}
+      >
+        <div
+          className={`${
+            userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
+          } rounded-2xl p-6 sm:p-8 border ${
+            userRole === "ADMIN" ? "border-blue-100" : "border-yellow-100"
+          } min-h-full`}
+        >
           <div className="max-w-7xl mx-auto mb-6 sm:mb-8">
-            <div className={`bg-white rounded-2xl shadow-xl hover:shadow-${userRole === "ADMIN" ? "blue" : "yellow"}-200 p-6 sm:p-8 border ${userRole === "ADMIN" ? "border-blue-100" : "border-yellow-100"}`}>
-              <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 ${userRole === "ADMIN" ? "bg-blue-100 border-blue-100" : "bg-yellow-100 border-yellow-100"} border rounded-xl px-4 py-3 shadow-inner`}>
+            <div
+              className={`bg-white rounded-2xl shadow-xl hover:shadow-${
+                userRole === "ADMIN" ? "blue" : "yellow"
+              }-200 p-6 sm:p-8 border ${
+                userRole === "ADMIN" ? "border-blue-100" : "border-yellow-100"
+              }`}
+            >
+              <div
+                className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 ${
+                  userRole === "ADMIN"
+                    ? "bg-blue-100 border-blue-100"
+                    : "bg-yellow-100 border-yellow-100"
+                } border rounded-xl px-4 py-3 shadow-inner`}
+              >
                 <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 text-center sm:text-left w-full sm:w-auto">
                   {userRole === "ADMIN"
-                    ? "All Stores"
+                    ? t("stores.allStores")
                     : userRole === "RETAILER"
-                      ? "Your Stores"
-                      : "Stores"}
+                    ? t("stores.yourStores")
+                    : t("stores.title")}
                 </h1>
                 {(userRole === "RETAILER" || userRole === "ADMIN") && (
                   <button
                     onClick={() => navigate("/stores/create-new-store")}
-                    className={`w-full sm:w-auto px-4 sm:px-5 py-2.5 sm:py-2 text-sm sm:text-base ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-700" : "bg-yellow-500 hover:bg-yellow-700"} hover:scale-105 text-white rounded-md transition`}
+                    className={`w-full sm:w-auto px-4 sm:px-5 py-2.5 sm:py-2 text-sm sm:text-base ${
+                      userRole === "ADMIN"
+                        ? "bg-blue-500 hover:bg-blue-700"
+                        : "bg-yellow-500 hover:bg-yellow-700"
+                    } hover:scale-105 text-white rounded-md transition`}
                   >
-                    + Create New Store
+                    + {t("stores.createNewStore")}
                   </button>
                 )}
               </div>
@@ -231,121 +275,112 @@ export default function RetailerStores() {
               {/* Search and Filters Section */}
               <div className="mb-6 space-y-4">
                 {/* Search Bar */}
-                <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2">
+                <form
+                  onSubmit={handleSearch}
+                  className="flex flex-col sm:flex-row gap-2"
+                >
                   <div className="relative flex-1">
-                    <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <HiSearch
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
                     <input
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search stores..."
+                      placeholder={t("stores.searchPlaceholder")}
                       className="w-full pl-10 pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
                     />
                   </div>
                   <div className="flex gap-2">
                     <button
                       type="submit"
-                      className={`flex-1 sm:flex-none px-4 py-2.5 sm:py-2 text-sm sm:text-base ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-700" : "bg-yellow-500 hover:bg-yellow-700"} text-white rounded-lg transition`}
+                      className={`flex-1 sm:flex-none px-4 py-2.5 sm:py-2 text-sm sm:text-base ${
+                        userRole === "ADMIN"
+                          ? "bg-blue-500 hover:bg-blue-700"
+                          : "bg-yellow-500 hover:bg-yellow-700"
+                      } text-white rounded-lg transition`}
                     >
-                      Search
+                      {t("stores.search")}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowFilters(!showFilters)}
-                      className={`px-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg flex items-center gap-2 text-sm sm:text-base ${showFilters ? (userRole === "ADMIN" ? "bg-blue-100 border-blue-300" : "bg-yellow-100 border-yellow-300") : "bg-white hover:bg-gray-50"}`}
+                      className={`px-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg flex items-center gap-2 text-sm sm:text-base ${
+                        showFilters
+                          ? userRole === "ADMIN"
+                            ? "bg-blue-100 border-blue-300"
+                            : "bg-yellow-100 border-yellow-300"
+                          : "bg-white hover:bg-gray-50"
+                      }`}
                     >
                       <HiFilter size={18} />
-                      <span className="hidden sm:inline">Filters</span>
+                      <span className="hidden sm:inline">
+                        {t("stores.filters")}
+                      </span>
                     </button>
                   </div>
                 </form>
 
                 {/* Filters Panel */}
                 {showFilters && (
-                  <div className={`p-4 border rounded-lg ${userRole === "ADMIN" ? "bg-blue-50 border-blue-200" : "bg-yellow-50 border-yellow-200"}`}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {/* Results per page */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Results per page
-                        </label>
-                        <select
-                          value={limit}
-                          onChange={(e) => setLimit(Number(e.target.value))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value={10}>10</option>
-                          <option value={20}>20</option>
-                          <option value={50}>50</option>
-                          <option value={100}>100</option>
-                        </select>
-                      </div>
-                    </div>
-                    {/* Clear filters button */}
-                    <div className="mt-4 flex justify-end">
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="bg-gray-50 rounded-lg p-4 space-y-4"
+                  >
+                    <div className="flex flex-wrap gap-2">
                       <button
                         onClick={clearFilters}
-                        className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                        className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
                       >
-                        Clear Filters
+                        {t("stores.clearFilters")}
                       </button>
                     </div>
-                  </div>
+                  </motion.div>
                 )}
               </div>
 
-              {/* Results Summary */}
-              <div className="mb-4 flex justify-between items-center">
-                {isLoading && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-                    Loading...
-                  </div>
-                )}
-              </div>
-
+              {/* Stores Grid */}
               {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-                  {Array.from({ length: limit }, (_, i) => (
-                    <div
-                      key={i}
-                      className="relative aspect-square bg-white rounded-xl sm:rounded-2xl shadow-lg animate-pulse"
-                    >
-                      <div className="h-1/2 bg-gray-200 rounded-t-xl sm:rounded-t-2xl"></div>
-                      <div className="h-1/2 p-3 sm:p-4 space-y-2">
-                        <div className="h-4 bg-gray-200 rounded"></div>
-                        <div className="h-3 bg-gray-200 rounded w-3/4"></div>
-                        <div className="flex gap-1">
-                          <div className="h-6 bg-gray-200 rounded-full w-16"></div>
-                          <div className="h-6 bg-gray-200 rounded-full w-20"></div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-center py-12">
+                  <Loader />
                 </div>
               ) : stores.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                   {stores.map((store) => (
-                    <div
+                    <motion.div
                       key={store.id}
-                      className={`relative bg-white rounded-xl sm:rounded-2xl shadow-lg group overflow-hidden hover:scale-[1.02] transition-all duration-300 hover:ring-2 ${userRole === "ADMIN" ? "hover:ring-blue-400" : "hover:ring-yellow-400"} w-full sm:aspect-square h-auto sm:h-auto min-h-[200px] sm:min-h-0`}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className={`bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border ${
+                        userRole === "ADMIN"
+                          ? "border-blue-100"
+                          : "border-yellow-100"
+                      } overflow-hidden group relative`}
                     >
-                      {/* Dropdown Menu */}
-                      {(userRole === "RETAILER" || userRole === "ADMIN") && (
-                        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20">
+                      {/* Action Menu */}
+                      {(userRole === "ADMIN" || userRole === "RETAILER") && (
+                        <div className="absolute top-2 right-2 z-10">
                           <button
-                            className="text-gray-500 hover:text-gray-700 bg-white/80 p-1 rounded-full backdrop-blur-sm"
-                            onClick={() => {
+                            ref={threeDotRef}
+                            onClick={() =>
                               setMenuOpenId(
                                 menuOpenId === store.id ? null : store.id
-                              );
-                            }}
+                              )
+                            }
+                            className="p-1 bg-white/80 hover:bg-white rounded-full shadow-sm transition-colors"
                           >
-                            {menuOpenId === store.id ? (
-                              <MdCancel className="text-red-600" size={20} />
-                            ) : (
-                              <HiDotsVertical size={20} />
-                            )}
+                            <HiPencil
+                              className={
+                                userRole === "ADMIN"
+                                  ? "text-blue-600"
+                                  : "text-yellow-600"
+                              }
+                              size={16}
+                            />
                           </button>
 
                           {menuOpenId === store.id && (
@@ -354,8 +389,14 @@ export default function RetailerStores() {
                                 onClick={() => handleEdit(store.id)}
                                 className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
                               >
-                                <HiPencil className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
-                                Edit Details
+                                <HiPencil
+                                  className={
+                                    userRole === "ADMIN"
+                                      ? "text-blue-600"
+                                      : "text-yellow-600"
+                                  }
+                                />
+                                {t("stores.editDetails")}
                               </button>
                               {userRole === "ADMIN" && (
                                 <button
@@ -363,7 +404,7 @@ export default function RetailerStores() {
                                   className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
                                 >
                                   <HiTrash className="text-red-500" />
-                                  Delete
+                                  {t("stores.delete")}
                                 </button>
                               )}
                             </div>
@@ -378,7 +419,11 @@ export default function RetailerStores() {
                       >
                         {/* Logo/Image Section */}
                         <div
-                          className={`h-32 sm:h-1/2 relative ${userRole === "ADMIN" ? "bg-gradient-to-br from-blue-100 to-blue-200" : "bg-gradient-to-br from-yellow-100 to-yellow-200"}`}
+                          className={`h-32 sm:h-1/2 relative ${
+                            userRole === "ADMIN"
+                              ? "bg-gradient-to-br from-blue-100 to-blue-200"
+                              : "bg-gradient-to-br from-yellow-100 to-yellow-200"
+                          }`}
                           style={{
                             backgroundImage: store.logo
                               ? `url(${store.logo})`
@@ -389,7 +434,13 @@ export default function RetailerStores() {
                         >
                           {!store.logo && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <span className={`text-2xl sm:text-3xl lg:text-4xl ${userRole === "ADMIN" ? "text-blue-600/50" : "text-yellow-600/50"}`}>
+                              <span
+                                className={`text-2xl sm:text-3xl lg:text-4xl ${
+                                  userRole === "ADMIN"
+                                    ? "text-blue-600/50"
+                                    : "text-yellow-600/50"
+                                }`}
+                              >
                                 {store.name.charAt(0).toUpperCase()}
                               </span>
                             </div>
@@ -398,13 +449,18 @@ export default function RetailerStores() {
                         </div>
 
                         {/* Content Section */}
-                        <div className={`flex-1 p-3 sm:p-3 lg:p-4 flex flex-col justify-between ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
+                        <div
+                          className={`flex-1 p-3 sm:p-3 lg:p-4 flex flex-col justify-between ${
+                            userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
+                          }`}
+                        >
                           <div>
                             <h2 className="text-base sm:text-base lg:text-lg xl:text-xl font-bold text-gray-900 mb-2 sm:mb-2 line-clamp-1">
                               {store.name}
                             </h2>
                             <p className="text-sm sm:text-sm text-gray-600 mb-2 sm:mb-2 lg:mb-3 line-clamp-3 sm:line-clamp-2">
-                              {store.description || "No description available."}
+                              {store.description ||
+                                t("stores.noDescriptionAvailable")}
                             </p>
                           </div>
 
@@ -414,7 +470,11 @@ export default function RetailerStores() {
                               (cat: any, idx: number) => (
                                 <span
                                   key={cat.id || idx}
-                                  className={`${userRole === "ADMIN" ? "bg-blue-100 text-blue-800" : "bg-yellow-100 text-yellow-800"} px-2 sm:px-1.5 lg:px-2 py-1 sm:py-0.5 rounded-full text-xs font-medium`}
+                                  className={`${
+                                    userRole === "ADMIN"
+                                      ? "bg-blue-100 text-blue-800"
+                                      : "bg-yellow-100 text-yellow-800"
+                                  } px-2 sm:px-1.5 lg:px-2 py-1 sm:py-0.5 rounded-full text-xs font-medium`}
                                 >
                                   #{cat.name}
                                 </span>
@@ -423,87 +483,60 @@ export default function RetailerStores() {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center text-gray-600 text-sm sm:text-base lg:text-lg py-12 sm:py-16">
                   {searchTerm || selectedCategories.length > 0 ? (
                     <div>
-                      <p>No stores found matching your criteria.</p>
+                      <p>{t("stores.noStoresFound")}</p>
                       <button
                         onClick={clearFilters}
                         className="mt-2 px-4 py-2 text-blue-600 hover:text-blue-800 underline text-sm sm:text-base"
                       >
-                        Clear filters
+                        {t("stores.clearFilters")}
                       </button>
                     </div>
                   ) : (
-                    "You haven't created any stores yet."
+                    t("stores.noStoresYet")
                   )}
                 </div>
               )}
 
               {/* Pagination Controls */}
               {paginationData.totalPages > 1 && (
-                <div className="mt-8 flex justify-center">
-                  <div className="flex flex-col sm:flex-row items-center gap-2">
-                    {/* Previous Page */}
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-2 rounded-md border text-sm sm:text-base ${
-                        currentPage === 1
-                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                          : `${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-700" : "bg-yellow-500 hover:bg-yellow-700"} text-white hover:scale-105 transition`
-                      }`}
-                    >
-                      Previous
-                    </button>
-
-                    {/* Page Numbers */}
-                    <div className="flex items-center gap-1 flex-wrap justify-center">
-                      {Array.from({ length: Math.min(5, paginationData.totalPages) }, (_, i) => {
-                        let pageNum;
-                        if (paginationData.totalPages <= 5) {
-                          pageNum = i + 1;
-                        } else if (currentPage <= 3) {
-                          pageNum = i + 1;
-                        } else if (currentPage >= paginationData.totalPages - 2) {
-                          pageNum = paginationData.totalPages - 4 + i;
-                        } else {
-                          pageNum = currentPage - 2 + i;
-                        }
-
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => handlePageChange(pageNum)}
-                            className={`px-3 py-2 rounded-md border text-sm sm:text-base ${
-                              currentPage === pageNum
-                                ? `${userRole === "ADMIN" ? "bg-blue-500 text-white" : "bg-yellow-500 text-white"}`
-                                : "bg-white text-gray-700 hover:bg-gray-50"
-                            } transition`}
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Next Page */}
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === paginationData.totalPages}
-                      className={`px-3 py-2 rounded-md border text-sm sm:text-base ${
-                        currentPage === paginationData.totalPages
-                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                          : `${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-700" : "bg-yellow-500 hover:bg-yellow-700"} text-white hover:scale-105 transition`
-                      }`}
-                    >
-                      Next
-                    </button>
-                  </div>
+                <div className="flex justify-center items-center gap-4 mt-8">
+                  <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                      currentPage === 1
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : userRole === "ADMIN"
+                        ? "bg-blue-500 text-white hover:bg-blue-600"
+                        : "bg-yellow-500 text-white hover:bg-yellow-600"
+                    }`}
+                  >
+                    {t("stores.previous")}
+                  </button>
+                  <span className="text-sm text-gray-600">
+                    {t("stores.page")} {currentPage} {t("stores.of")}{" "}
+                    {paginationData.totalPages}
+                  </span>
+                  <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === paginationData.totalPages}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                      currentPage === paginationData.totalPages
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        : userRole === "ADMIN"
+                        ? "bg-blue-500 text-white hover:bg-blue-600"
+                        : "bg-yellow-500 text-white hover:bg-yellow-600"
+                    }`}
+                  >
+                    {t("stores.next")}
+                  </button>
                 </div>
               )}
             </div>
@@ -516,18 +549,23 @@ export default function RetailerStores() {
         <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-4 sm:p-6">
             <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
-              Confirm Delete
+              {t("stores.confirmDelete")}
             </h3>
             <p className="text-xs sm:text-sm text-gray-600 mb-2">
-              Type <span className="font-bold">{storeToDelete.name}</span> to
-              confirm deletion.
+              {t("stores.confirmDeleteText")}{" "}
+              <span className="font-bold">{storeToDelete.name}</span>{" "}
+              {t("stores.toConfirmDeletion")}
             </p>
             <input
               type="text"
               value={confirmStoreName}
               onChange={(e) => setConfirmStoreName(e.target.value)}
-              className={`w-full border border-gray-300 px-3 py-2 rounded-md mb-4 focus:outline-none focus:ring-2 ${userRole === "ADMIN" ? "focus:ring-blue-500" : "focus:ring-yellow-500"}`}
-              placeholder="Enter store name"
+              className={`w-full border border-gray-300 px-3 py-2 rounded-md mb-4 focus:outline-none focus:ring-2 ${
+                userRole === "ADMIN"
+                  ? "focus:ring-blue-500"
+                  : "focus:ring-yellow-500"
+              }`}
+              placeholder={t("stores.enterStoreName")}
             />
             <div className="flex flex-col sm:flex-row justify-end gap-3">
               <button
@@ -537,13 +575,13 @@ export default function RetailerStores() {
                 }}
                 className="w-full sm:w-auto px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
               >
-                Cancel
+                {t("stores.cancel")}
               </button>
               <button
                 onClick={confirmDelete}
                 className="w-full sm:w-auto px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
               >
-                Delete
+                {t("stores.deleteStore")}
               </button>
             </div>
           </div>

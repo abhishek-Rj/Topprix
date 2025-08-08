@@ -17,6 +17,7 @@ import FlyerList from "@/components/FlyerCard";
 import Loader from "@/components/loading";
 import useAuthenticate from "@/hooks/authenticationt";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 //@ts-ignore
 interface Flyer {
@@ -31,6 +32,7 @@ interface Flyer {
 }
 
 export default function FlyerPage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [flyers, setFlyers] = useState<any[]>([]);
   const [pagination, setPagination] = useState<any>(null);
@@ -176,12 +178,24 @@ export default function FlyerPage() {
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navigation />
       </div>
-      <div className={`min-h-screen pt-16 ${userRole === "ADMIN" ? "bg-gradient-to-b from-blue-50 to-white" : "bg-gradient-to-b from-yellow-50 to-white"}`}>
+      <div
+        className={`min-h-screen pt-16 ${
+          userRole === "ADMIN"
+            ? "bg-gradient-to-b from-blue-50 to-white"
+            : "bg-gradient-to-b from-yellow-50 to-white"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Hero Section - Only show on first page */}
           {pagination && pagination.currentPage === 1 && (
             <div className="relative pt-24 pb-16">
-              <div className={`absolute inset-0 rounded-3xl -z-10 ${userRole === "ADMIN" ? "bg-gradient-to-r from-blue-400/20 to-blue-600/20" : "bg-gradient-to-r from-yellow-400/20 to-yellow-600/20"}`} />
+              <div
+                className={`absolute inset-0 rounded-3xl -z-10 ${
+                  userRole === "ADMIN"
+                    ? "bg-gradient-to-r from-blue-400/20 to-blue-600/20"
+                    : "bg-gradient-to-r from-yellow-400/20 to-yellow-600/20"
+                }`}
+              />
               <div className="text-center max-w-4xl mx-auto">
                 <motion.h1
                   initial={{ opacity: 0, y: 20 }}
@@ -189,8 +203,7 @@ export default function FlyerPage() {
                   transition={{ duration: 0.5 }}
                   className="text-5xl md:text-6xl font-bold text-gray-900 mb-6"
                 >
-                  Latest
-                  <span className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"}> Flyers</span>
+                  {t("flyers.title")}
                 </motion.h1>
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
@@ -198,8 +211,7 @@ export default function FlyerPage() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="text-xl text-gray-600 mb-8"
                 >
-                  Discover the latest deals and promotions from your favorite
-                  stores. Stay updated with our collection of current flyers.
+                  {t("flyers.description")}
                 </motion.p>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -208,77 +220,47 @@ export default function FlyerPage() {
                   className="flex flex-wrap justify-center gap-4 mb-8"
                 >
                   <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                    <HiNewspaper className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
-                    <span className="text-gray-700">500+ Active Flyers</span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                    <FaStore className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
-                    <span className="text-gray-700">200+ Partner Stores</span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                    <HiUser className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
-                    <span className="text-gray-700">50K+ Monthly Views</span>
-                  </div>
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.6 }}
-                  className="relative max-w-2xl mx-auto"
-                >
-                  <div className="relative">
-                    <HiSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-                    <input
-                      type="text"
-                      placeholder="Search for stores, categories, or deals..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className={`w-full pl-12 pr-4 py-4 bg-white rounded-full shadow-lg focus:ring-2 focus:border text-lg ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    <HiNewspaper
+                      className={
+                        userRole === "ADMIN"
+                          ? "text-blue-600"
+                          : "text-yellow-600"
+                      }
                     />
-                    <button className={`absolute right-2 top-1/2 transform -translate-y-1/2 text-white px-6 py-2 rounded-full hover:transition ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-600" : "bg-yellow-500 hover:bg-yellow-600"}`}>
-                      Search
-                    </button>
+                    <span className="text-gray-700">
+                      500+ {t("flyers.activeFlyers")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
+                    <FaStore
+                      className={
+                        userRole === "ADMIN"
+                          ? "text-blue-600"
+                          : "text-yellow-600"
+                      }
+                    />
+                    <span className="text-gray-700">
+                      200+ {t("flyers.partnerStores")}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
+                    <HiUser
+                      className={
+                        userRole === "ADMIN"
+                          ? "text-blue-600"
+                          : "text-yellow-600"
+                      }
+                    />
+                    <span className="text-gray-700">
+                      50K+ {t("flyers.monthlyViews")}
+                    </span>
                   </div>
                 </motion.div>
               </div>
             </div>
           )}
 
-          {/* Popular Categories - Only show on first page */}
-          {pagination && pagination.currentPage === 1 && (
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                Popular Categories
-              </h2>
-              <div className="flex flex-wrap gap-2 mb-4">
-                <button
-                  onClick={() => handleCategorySelect("all")}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                    selectedCategory === "all"
-                      ? userRole === "ADMIN" ? "bg-blue-500 text-white" : "bg-yellow-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  All
-                </button>
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    onClick={() => handleCategorySelect(category.id)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                      selectedCategory === category.id
-                        ? userRole === "ADMIN" ? "bg-blue-500 text-white" : "bg-yellow-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {category.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Filters and Search */}
+          {/* Search and Filters Section */}
           {pagination && pagination.currentPage === 1 ? (
             <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -286,10 +268,14 @@ export default function FlyerPage() {
                   <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
                   <input
                     type="text"
-                    placeholder="Search flyers..."
+                    placeholder={t("flyers.searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
+                      userRole === "ADMIN"
+                        ? "focus:ring-blue-500 focus:border-blue-500"
+                        : "focus:ring-yellow-500 focus:border-yellow-500"
+                    }`}
                   />
                 </div>
                 <div className="relative">
@@ -297,7 +283,11 @@ export default function FlyerPage() {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
+                      userRole === "ADMIN"
+                        ? "focus:ring-blue-500 focus:border-blue-500"
+                        : "focus:ring-yellow-500 focus:border-yellow-500"
+                    }`}
                   >
                     {/* Add category options here */}
                   </select>
@@ -307,16 +297,23 @@ export default function FlyerPage() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
+                      userRole === "ADMIN"
+                        ? "focus:ring-blue-500 focus:border-blue-500"
+                        : "focus:ring-yellow-500 focus:border-yellow-500"
+                    }`}
                   >
-                    <option value="all">All Flyers</option>
-                    <option value="active">Active Flyers</option>
-                    <option value="inactive">Inactive Flyers</option>
+                    <option value="all">{t("flyers.allFlyers")}</option>
+                    <option value="active">{t("flyers.activeFlyers")}</option>
+                    <option value="inactive">
+                      {t("flyers.inactiveFlyers")}
+                    </option>
                   </select>
                 </div>
                 <div className="text-center sm:text-right">
                   <span className="text-xs sm:text-sm text-gray-600">
-                    Showing {flyers.length} of {filteredFlyers.length} flyers
+                    {t("flyers.showing")} {flyers.length} {t("flyers.of")}{" "}
+                    {filteredFlyers.length} {t("flyers.flyers")}
                   </span>
                 </div>
               </div>
@@ -330,10 +327,14 @@ export default function FlyerPage() {
                     <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
                     <input
                       type="text"
-                      placeholder="Search flyers..."
+                      placeholder={t("flyers.searchPlaceholder")}
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                      className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
+                        userRole === "ADMIN"
+                          ? "focus:ring-blue-500 focus:border-blue-500"
+                          : "focus:ring-yellow-500 focus:border-yellow-500"
+                      }`}
                     />
                   </div>
                   <div className="relative">
@@ -341,7 +342,11 @@ export default function FlyerPage() {
                     <select
                       value={selectedCategory}
                       onChange={(e) => setSelectedCategory(e.target.value)}
-                      className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                      className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
+                        userRole === "ADMIN"
+                          ? "focus:ring-blue-500 focus:border-blue-500"
+                          : "focus:ring-yellow-500 focus:border-yellow-500"
+                      }`}
                     >
                       {categories.map((category: any) => (
                         <option key={category.id} value={category.id}>
@@ -355,16 +360,23 @@ export default function FlyerPage() {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"}`}
+                      className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
+                        userRole === "ADMIN"
+                          ? "focus:ring-blue-500 focus:border-blue-500"
+                          : "focus:ring-yellow-500 focus:border-yellow-500"
+                      }`}
                     >
-                      <option value="all">All Flyers</option>
-                      <option value="active">Active Flyers</option>
-                      <option value="inactive">Inactive Flyers</option>
+                      <option value="all">{t("flyers.allFlyers")}</option>
+                      <option value="active">{t("flyers.activeFlyers")}</option>
+                      <option value="inactive">
+                        {t("flyers.inactiveFlyers")}
+                      </option>
                     </select>
                   </div>
                   <div className="text-center sm:text-right">
                     <span className="text-xs sm:text-sm text-gray-600">
-                      Showing {flyers.length} of {filteredFlyers.length} flyers
+                      {t("flyers.showing")} {flyers.length} {t("flyers.of")}{" "}
+                      {filteredFlyers.length} {t("flyers.flyers")}
                     </span>
                   </div>
                 </div>
@@ -373,7 +385,11 @@ export default function FlyerPage() {
           )}
 
           {/* Flyer Grid */}
-          <div className={`min-h-[200px] sm:min-h-[300px] rounded-xl p-4 sm:p-5 shadow-inner ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
+          <div
+            className={`min-h-[200px] sm:min-h-[300px] rounded-xl p-4 sm:p-5 shadow-inner ${
+              userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
+            }`}
+          >
             {loading ? (
               <div className="flex items-center justify-center h-full">
                 <Loader />
@@ -389,13 +405,17 @@ export default function FlyerPage() {
             ) : (
               <div className="text-center text-gray-700">
                 <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
-                  <HiNewspaper className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
-                  No Flyers Found
+                  <HiNewspaper
+                    className={
+                      userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
+                    }
+                  />
+                  {t("flyers.noFlyersFound")}
                 </h2>
                 <p className="text-sm sm:text-base">
                   {searchQuery
-                    ? "No flyers match your search criteria."
-                    : "No flyers available at the moment."}
+                    ? t("flyers.noFlyersMatch")
+                    : t("flyers.noFlyersAvailable")}
                 </p>
               </div>
             )}

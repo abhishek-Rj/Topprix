@@ -1,7 +1,10 @@
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { HiMail } from "react-icons/hi";
+import { useTranslation } from "react-i18next";
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-gray-900 text-gray-300 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -10,8 +13,7 @@ export default function Footer() {
           <div>
             <h3 className="text-2xl font-bold text-white mb-4">Topprix</h3>
             <p className="text-gray-400 mb-4">
-              Your one-stop destination for the best deals, coupons, and flyers
-              from your favorite stores.
+              {t("footer.companyDescription")}
             </p>
             <div className="flex space-x-4">
               <a
@@ -44,7 +46,7 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">
-              Quick Links
+              {t("footer.quickLinks")}
             </h4>
             <ul className="space-y-2">
               <li>
@@ -52,7 +54,7 @@ export default function Footer() {
                   href="/explore/coupons"
                   className="text-gray-400 hover:text-yellow-500 transition"
                 >
-                  Explore Coupons
+                  {t("footer.exploreCoupons")}
                 </a>
               </li>
               <li>
@@ -60,7 +62,7 @@ export default function Footer() {
                   href="/explore/flyers"
                   className="text-gray-400 hover:text-yellow-500 transition"
                 >
-                  Browse Flyers
+                  {t("footer.browseFlyers")}
                 </a>
               </li>
               <li>
@@ -68,7 +70,7 @@ export default function Footer() {
                   href="/create-store"
                   className="text-gray-400 hover:text-yellow-500 transition"
                 >
-                  Create Store
+                  {t("footer.createStore")}
                 </a>
               </li>
               <li>
@@ -76,7 +78,7 @@ export default function Footer() {
                   href="/about"
                   className="text-gray-400 hover:text-yellow-500 transition"
                 >
-                  About Us
+                  {t("footer.aboutUs")}
                 </a>
               </li>
             </ul>
@@ -85,7 +87,7 @@ export default function Footer() {
           {/* Categories */}
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">
-              Categories
+              {t("footer.categories")}
             </h4>
             <ul className="space-y-2">
               <li>
@@ -93,7 +95,7 @@ export default function Footer() {
                   href="/category/fashion"
                   className="text-gray-400 hover:text-yellow-500 transition"
                 >
-                  Fashion
+                  {t("footer.fashion")}
                 </a>
               </li>
               <li>
@@ -101,7 +103,7 @@ export default function Footer() {
                   href="/category/electronics"
                   className="text-gray-400 hover:text-yellow-500 transition"
                 >
-                  Electronics
+                  {t("footer.electronics")}
                 </a>
               </li>
               <li>
@@ -109,7 +111,7 @@ export default function Footer() {
                   href="/category/food"
                   className="text-gray-400 hover:text-yellow-500 transition"
                 >
-                  Food & Dining
+                  {t("footer.foodDining")}
                 </a>
               </li>
               <li>
@@ -117,7 +119,7 @@ export default function Footer() {
                   href="/category/home"
                   className="text-gray-400 hover:text-yellow-500 transition"
                 >
-                  Home & Living
+                  {t("footer.homeLiving")}
                 </a>
               </li>
             </ul>
@@ -126,17 +128,17 @@ export default function Footer() {
           {/* Newsletter */}
           <div>
             <h4 className="text-lg font-semibold text-white mb-4">
-              Stay Updated
+              {t("footer.stayUpdated")}
             </h4>
             <p className="text-gray-400 mb-4">
-              Subscribe to our newsletter for the latest deals and updates.
+              {t("footer.newsletterDescription")}
             </p>
             <form className="flex gap-2">
               <div className="relative flex-1">
                 <HiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                 <input
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={t("footer.emailPlaceholder")}
                   className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 />
               </div>
@@ -144,7 +146,7 @@ export default function Footer() {
                 type="submit"
                 className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition"
               >
-                Subscribe
+                {t("footer.subscribe")}
               </button>
             </form>
           </div>
@@ -154,26 +156,26 @@ export default function Footer() {
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-sm">
-              © 2024 Topprix. All rights reserved.
+              {t("footer.allRightsReserved")}
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a
                 href="/privacy"
                 className="text-gray-400 hover:text-yellow-500 text-sm transition"
               >
-                Privacy Policy
+                {t("footer.privacyPolicy")}
               </a>
               <a
                 href="/terms"
                 className="text-gray-400 hover:text-yellow-500 text-sm transition"
               >
-                Terms of Service
+                {t("footer.termsOfService")}
               </a>
               <a
                 href="/contact"
                 className="text-gray-400 hover:text-yellow-500 text-sm transition"
               >
-                Contact Us
+                {t("footer.contactUs")}
               </a>
             </div>
           </div>
