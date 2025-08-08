@@ -15,14 +15,18 @@ import {
   FiGlobe,
   FiHash,
   FiCamera,
+  FiSave,
+  FiX,
 } from "react-icons/fi";
 import ReactCrop, { Crop } from "react-image-crop";
 import "react-image-crop/dist/ReactCrop.css";
 import Footer from "../../components/Footer";
 import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
 import { storage } from "../../context/firebaseProvider";
+import { useTranslation } from "react-i18next";
 
 export default function EditStore() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const { user, userRole, loading } = useAuthenticate();
   const [store, setStore] = useState<any>(null);
@@ -149,7 +153,6 @@ export default function EditStore() {
           type: "image/jpeg",
         });
         setLogo(file);
-        setLogoPreview(URL.createObjectURL(file));
         setShowCropModal(false);
         setImageSrc(null);
       } catch (error) {
@@ -162,9 +165,11 @@ export default function EditStore() {
     setShowCropModal(false);
     setImageSrc(null);
     // Reset the file input
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const fileInput = document.querySelector(
+      'input[type="file"]'
+    ) as HTMLInputElement;
     if (fileInput) {
-      fileInput.value = '';
+      fileInput.value = "";
     }
   };
 
@@ -178,7 +183,6 @@ export default function EditStore() {
           type: "image/jpeg",
         });
         setLogo(file);
-        setLogoPreview(URL.createObjectURL(file));
         setShowCropModal(false);
         setImageSrc(null);
       } catch (error) {
@@ -262,30 +266,70 @@ export default function EditStore() {
   }
 
   return (
-    <div className={`min-h-screen ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
+    <div
+      className={`min-h-screen ${
+        userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
+      }`}
+    >
       <Navigation />
       <main className="pt-20 pb-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`bg-white rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl max-w-5xl mx-auto p-4 sm:p-6 md:p-10 transition-all duration-300 ${userRole === "ADMIN" ? "hover:shadow-blue-200" : "hover:shadow-yellow-200"}`}>
-            <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 ${userRole === "ADMIN" ? "bg-blue-100 border-blue-100" : "bg-yellow-100 border-yellow-100"} border rounded-xl px-4 py-3 shadow-inner`}>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Edit Store Details
-              </h1>
-              <p className="text-sm text-gray-700">
-                Update your store information below
-              </p>
+          <div
+            className={`bg-white rounded-xl sm:rounded-2xl shadow-xl sm:shadow-2xl max-w-5xl mx-auto p-4 sm:p-6 md:p-10 transition-all duration-300 ${
+              userRole === "ADMIN"
+                ? "hover:shadow-blue-200"
+                : "hover:shadow-yellow-200"
+            }`}
+          >
+            {/* Header */}
+            <div
+              className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 ${
+                userRole === "ADMIN"
+                  ? "bg-blue-100 border-blue-100"
+                  : "bg-yellow-100 border-yellow-100"
+              } border rounded-xl px-4 py-3 shadow-inner`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-full ${
+                    userRole === "ADMIN" ? "bg-blue-500" : "bg-yellow-500"
+                  } text-white`}
+                >
+                  <FaStore className="w-6 h-6" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    {t("store.editStore")}
+                  </h1>
+                  <p className="text-sm text-gray-700">
+                    Update your store information below
+                  </p>
+                </div>
+              </div>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Logo and Basic Info Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Logo Upload */}
-                <div className={`flex flex-col items-center ${userRole === "ADMIN" ? "bg-blue-50/50 border-blue-100" : "bg-yellow-50/50 border-yellow-100"} p-4 rounded-xl border`}>
+                <div
+                  className={`flex flex-col items-center ${
+                    userRole === "ADMIN"
+                      ? "bg-blue-50/50 border-blue-100"
+                      : "bg-yellow-50/50 border-yellow-100"
+                  } p-4 rounded-xl border`}
+                >
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
                     Store Logo
                   </label>
                   <div className="relative group">
-                    <div className={`w-28 h-28 rounded-full overflow-hidden border-2 ${userRole === "ADMIN" ? "border-blue-500" : "border-yellow-500"} bg-gray-100 flex items-center justify-center`}>
+                    <div
+                      className={`w-28 h-28 rounded-full overflow-hidden border-2 ${
+                        userRole === "ADMIN"
+                          ? "border-blue-500"
+                          : "border-yellow-500"
+                      } bg-gray-100 flex items-center justify-center`}
+                    >
                       {logoPreview ? (
                         <img
                           src={logoPreview}
@@ -324,7 +368,11 @@ export default function EditStore() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Store Name"
-                        className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"} transition-all group-hover:shadow-md`}
+                        className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${
+                          userRole === "ADMIN"
+                            ? "focus:ring-blue-500 focus:border-blue-500"
+                            : "focus:ring-yellow-500 focus:border-yellow-500"
+                        } transition-all group-hover:shadow-md`}
                         required
                       />
                     </div>
@@ -343,7 +391,11 @@ export default function EditStore() {
                         onChange={(e) => setDescription(e.target.value)}
                         rows={3}
                         placeholder="Describe your store"
-                        className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"} transition-all group-hover:shadow-md`}
+                        className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${
+                          userRole === "ADMIN"
+                            ? "focus:ring-blue-500 focus:border-blue-500"
+                            : "focus:ring-yellow-500 focus:border-yellow-500"
+                        } transition-all group-hover:shadow-md`}
                       />
                     </div>
                   </div>
@@ -365,7 +417,11 @@ export default function EditStore() {
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="Street Address"
-                      className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"} transition-all group-hover:shadow-md`}
+                      className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${
+                        userRole === "ADMIN"
+                          ? "focus:ring-blue-500 focus:border-blue-500"
+                          : "focus:ring-yellow-500 focus:border-yellow-500"
+                      } transition-all group-hover:shadow-md`}
                       required
                     />
                   </div>
@@ -385,7 +441,11 @@ export default function EditStore() {
                         value={zipCode}
                         onChange={(e) => setZipCode(e.target.value)}
                         placeholder="ZIP Code"
-                        className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"} transition-all group-hover:shadow-md`}
+                        className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${
+                          userRole === "ADMIN"
+                            ? "focus:ring-blue-500 focus:border-blue-500"
+                            : "focus:ring-yellow-500 focus:border-yellow-500"
+                        } transition-all group-hover:shadow-md`}
                         required
                       />
                     </div>
@@ -402,7 +462,11 @@ export default function EditStore() {
                       <select
                         value={country}
                         onChange={(e) => setCountry(e.target.value)}
-                        className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${userRole === "ADMIN" ? "focus:ring-blue-500 focus:border-blue-500" : "focus:ring-yellow-500 focus:border-yellow-500"} transition-all group-hover:shadow-md appearance-none`}
+                        className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${
+                          userRole === "ADMIN"
+                            ? "focus:ring-blue-500 focus:border-blue-500"
+                            : "focus:ring-yellow-500 focus:border-yellow-500"
+                        } transition-all group-hover:shadow-md appearance-none`}
                         required
                       >
                         <option value="">Select country</option>
@@ -463,7 +527,13 @@ export default function EditStore() {
               {/* Crop Modal */}
               {showCropModal && imageSrc && (
                 <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50 p-4">
-                  <div className={`bg-white/95 backdrop-blur-md rounded-lg p-4 sm:p-6 max-w-2xl w-full mx-4 shadow-2xl border ${userRole === "ADMIN" ? "border-blue-100" : "border-yellow-100"}`}>
+                  <div
+                    className={`bg-white/95 backdrop-blur-md rounded-lg p-4 sm:p-6 max-w-2xl w-full mx-4 shadow-2xl border ${
+                      userRole === "ADMIN"
+                        ? "border-blue-100"
+                        : "border-yellow-100"
+                    }`}
+                  >
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
                       Crop Your Logo
                     </h3>
@@ -500,7 +570,11 @@ export default function EditStore() {
                       <button
                         type="button"
                         onClick={handleCropComplete}
-                        className={`w-full sm:w-auto px-4 py-2 ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-600" : "bg-yellow-500 hover:bg-yellow-600"} text-white rounded-md transition-colors`}
+                        className={`w-full sm:w-auto px-4 py-2 ${
+                          userRole === "ADMIN"
+                            ? "bg-blue-500 hover:bg-blue-600"
+                            : "bg-yellow-500 hover:bg-yellow-600"
+                        } text-white rounded-md transition-colors`}
                       >
                         Apply Crop
                       </button>
@@ -513,25 +587,38 @@ export default function EditStore() {
                 <button
                   type="button"
                   onClick={() => navigate("/stores")}
-                  className="px-6 py-2 rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className="px-6 py-2 rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200 flex items-center gap-2"
                 >
+                  <FiX className="w-4 h-4" />
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className={`px-6 py-2 ${userRole === "ADMIN" ? "bg-gradient-to-r from-blue-500 to-blue-700" : "bg-gradient-to-r from-yellow-500 to-yellow-700"} text-white font-semibold rounded-md shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`px-6 py-2 ${
+                    userRole === "ADMIN"
+                      ? "bg-gradient-to-r from-blue-500 to-blue-700"
+                      : "bg-gradient-to-r from-yellow-500 to-yellow-700"
+                  } text-white font-semibold rounded-md shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   {submitting ? (
                     <>
-                      <span className={`absolute inset-0 ${userRole === "ADMIN" ? "bg-blue-500" : "bg-yellow-500"} opacity-10 rounded-md blur-xl group-hover:opacity-20 transition-opacity duration-300`}></span>
-                      <span className="z-10">Saving...</span>
+                      <span
+                        className={`absolute inset-0 ${
+                          userRole === "ADMIN" ? "bg-blue-500" : "bg-yellow-500"
+                        } opacity-10 rounded-md blur-xl group-hover:opacity-20 transition-opacity duration-300`}
+                      ></span>
+                      <span className="z-10">Updating...</span>
                     </>
                   ) : (
                     <>
-                      <span className={`absolute inset-0 ${userRole === "ADMIN" ? "bg-blue-300" : "bg-yellow-300"} opacity-10 rounded-md blur-xl group-hover:opacity-20 transition-opacity duration-300`}></span>
-                      <FaStore className="text-lg" />
-                      <span className="z-10">Save Changes</span>
+                      <span
+                        className={`absolute inset-0 ${
+                          userRole === "ADMIN" ? "bg-blue-300" : "bg-yellow-300"
+                        } opacity-10 rounded-md blur-xl group-hover:opacity-20 transition-opacity duration-300`}
+                      ></span>
+                      <FiSave className="text-lg" />
+                      <span className="z-10">Update Store</span>
                     </>
                   )}
                 </button>

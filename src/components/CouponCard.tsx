@@ -7,6 +7,11 @@ import {
   HiTrash,
   HiShoppingCart,
   HiHeart,
+  HiEye,
+  HiTag,
+  HiCalendar,
+  HiExternalLink,
+  HiLocationMarker,
 } from "react-icons/hi";
 import clsx from "clsx";
 import baseUrl from "@/hooks/baseurl";
@@ -43,15 +48,14 @@ const DetailRow = ({
 
 export const CouponCard = ({
   coupon,
-  showlogo,
   onEdit,
   onDelete,
 }: {
   coupon: any;
-  showlogo: boolean;
   onEdit?: (coupon: any) => void;
   onDelete?: (couponId: string) => void;
 }) => {
+  const { t } = useTranslation();
   const [showPreview, setShowPreview] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [store, setStore] = useState<any>(null);
@@ -88,183 +92,208 @@ export const CouponCard = ({
   }, [user?.email]);
 
   const calculateDaysLeft = () => {
+    const startDate = new Date(coupon.startDate);
     const endDate = new Date(coupon.endDate);
     const today = new Date();
-    const diffTime = endDate.getTime() - today.getTime();
+
+    // Reset time to start of day for accurate comparison
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const startOfStartDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate()
+    );
+    const startOfEndDate = new Date(
+      endDate.getFullYear(),
+      endDate.getMonth(),
+      endDate.getDate()
+    );
+
+    // Check if it's before start date
+    if (startOfToday < startOfStartDate) {
+      const diffTime = startOfStartDate.getTime() - startOfToday.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return { status: "soon", days: diffDays };
+    }
+
+    // Check if it's expired (after end date)
+    if (startOfToday > startOfEndDate) {
+      const diffTime = startOfToday.getTime() - startOfEndDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return { status: "expired", days: diffDays };
+    }
+
+    // Check if it's the last day
+    if (startOfToday.getTime() === startOfEndDate.getTime()) {
+      return { status: "last-day", days: 0 };
+    }
+
+    // It's active (between start and end date)
+    const diffTime = startOfEndDate.getTime() - startOfToday.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
+    return { status: "active", days: diffDays };
+  };
+
+  const getDateBadge = () => {
+    const dateInfo = calculateDaysLeft();
+
+    switch (dateInfo.status) {
+      case "soon":
+        return {
+          text: t("store.soonDays", { days: dateInfo.days }),
+          className: "bg-blue-100 text-blue-800 border-blue-200",
+        };
+      case "active":
+        return {
+          text: t("store.daysLeftText", { days: dateInfo.days }),
+          className: "bg-green-100 text-green-800 border-green-200",
+        };
+      case "last-day":
+        return {
+          text: t("store.lastDayText"),
+          className: "bg-orange-100 text-orange-800 border-orange-200",
+        };
+      case "expired":
+        return {
+          text: t("store.expiredText"),
+          className: "bg-red-100 text-red-800 border-red-200",
+        };
+      default:
+        return {
+          text: "Unknown",
+          className: "bg-gray-100 text-gray-800 border-gray-200",
+        };
+    }
   };
 
   useEffect(() => {
     const fetchStore = async () => {
       const res = await fetch(`${baseUrl}store/${coupon.storeId}`);
-      const data = await res.json();
-      setStore(data);
+      if (res.ok) {
+        const storeData = await res.json();
+        setStore(storeData);
+      }
     };
-
-    if (coupon?.storeId) {
-      fetchStore();
-    }
-  }, [coupon?.storeId]);
+    fetchStore();
+  }, [coupon.storeId]);
 
   const fetchShoppingLists = async () => {
-    if (!userId) {
-      toast.error("User data not available. Please try again.");
-      return;
-    }
+    if (!userId) return;
 
     try {
-      const response = await fetch(
-        `${baseUrl}api/users/${userId}/shopping-lists`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "user-email": user?.email || "",
-          },
-        }
-      );
-
+      const response = await fetch(`${baseUrl}shopping-lists/${userId}`);
       if (response.ok) {
         const data = await response.json();
         setShoppingLists(data.shoppingLists || []);
-      } else {
-        throw new Error("Failed to fetch shopping lists");
       }
     } catch (error) {
       console.error("Error fetching shopping lists:", error);
-      toast.error("Failed to fetch shopping lists");
     }
   };
 
   const addToShoppingList = async () => {
-    if (!selectedListId || !userId) {
+    if (!userId || !selectedListId) {
       toast.error("Please select a shopping list");
       return;
     }
 
     try {
       const response = await fetch(
-        `${baseUrl}api/shopping-lists/${selectedListId}/items`,
+        `${baseUrl}shopping-lists/${selectedListId}/items`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "user-email": user?.email || "",
           },
           body: JSON.stringify({
-            name: coupon.title,
+            couponId: coupon.id,
             quantity: quantity,
-            couponItemId: coupon.id,
           }),
         }
       );
 
       if (response.ok) {
-        toast.success("Item added to shopping list successfully");
+        toast.success("Coupon added to shopping list");
         setShowShoppingListModal(false);
         setSelectedListId("");
         setQuantity(1);
       } else {
-        throw new Error("Failed to add item to shopping list");
+        toast.error("Failed to add coupon to shopping list");
       }
     } catch (error) {
-      console.error("Error adding item to shopping list:", error);
-      toast.error("Failed to add item to shopping list");
+      console.error("Error adding to shopping list:", error);
+      toast.error("Failed to add coupon to shopping list");
     }
   };
 
   const addToWishlist = async () => {
-    if (!user) {
-      toast.error("Please login to add items to wishlist");
-      return;
-    }
-
     if (!userId) {
-      toast.error("User data not available. Please try again.");
+      toast.error("Please log in to add to wishlist");
       return;
     }
 
     try {
-      const response = await fetch(`${baseUrl}api/users/${userId}/wishlist`, {
-        method: "POST",
+      const response = await fetch(`${baseUrl}wishlist/${userId}/coupons`, {
+        method: isInWishlist ? "DELETE" : "POST",
         headers: {
           "Content-Type": "application/json",
-          "user-email": user?.email || "",
         },
-        body: JSON.stringify({
-          name: coupon.title,
-          targetPrice: coupon.discountAmount
-            ? parseFloat(coupon.discountAmount)
-            : undefined,
-        }),
+        body: isInWishlist
+          ? undefined
+          : JSON.stringify({ couponId: coupon.id }),
       });
 
       if (response.ok) {
-        toast.success("Added to wishlist successfully!");
+        setIsInWishlist(!isInWishlist);
+        toast.success(
+          isInWishlist
+            ? "Coupon removed from wishlist"
+            : "Coupon added to wishlist"
+        );
       } else {
-        throw new Error("Failed to add to wishlist");
+        toast.error("Failed to update wishlist");
       }
     } catch (error) {
-      console.error("Error adding to wishlist:", error);
-      toast.error("Failed to add to wishlist");
+      console.error("Error updating wishlist:", error);
+      toast.error("Failed to update wishlist");
     }
   };
 
   const handleDelete = async () => {
+    if (!onDelete) return;
+
     setIsDeleting(true);
-    if (!isAuthorized) {
-      toast.error("You are not authorized to delete coupons");
-      return;
-    }
-
     try {
-      const response = await fetch(`${baseUrl}coupons/${coupon.id}`, {
-        method: "DELETE",
-        headers: {
-          "user-email": user?.email || "",
-        },
-      });
-
-      if (response.ok) {
-        toast.success("Coupon deleted successfully");
-        if (onDelete) {
-          onDelete(coupon.id);
-        }
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
-      } else {
-        throw new Error("Failed to delete coupon");
-      }
+      await onDelete(coupon.id);
+      setShowDeleteDialogueBox(false);
     } catch (error) {
-      toast.error("Error deleting coupon");
+      console.error("Error deleting coupon:", error);
+      toast.error("Failed to delete coupon");
     } finally {
       setIsDeleting(false);
-      setShowDeleteDialogueBox(false);
     }
   };
 
   const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent opening preview modal
-    if (!isAuthorized) {
-      toast.error("You are not authorized to edit coupons");
-      return;
-    }
+    e.stopPropagation();
     if (onEdit) {
       onEdit(coupon);
     }
   };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent opening preview modal
+    e.stopPropagation();
     setShowDeleteDialogueBox(true);
   };
 
   const handleAddToShoppingList = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!user) {
-      toast.error("Please login to add items to shopping list");
+    if (!userId) {
+      toast.error("Please log in to add to shopping list");
       return;
     }
     fetchShoppingLists();
@@ -274,70 +303,76 @@ export const CouponCard = ({
   return (
     <>
       <Card
-        className="w-full hover:translate-y-1 rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all relative group"
+        className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:scale-105 cursor-pointer ${
+          calculateDaysLeft().status === "expired"
+            ? "opacity-60 grayscale"
+            : "hover:shadow-xl"
+        }`}
         onClick={() => setShowPreview(true)}
       >
-        <CardContent className="p-3 sm:p-4 space-y-3">
-          <div className="w-full rounded-lg shadow-sm overflow-hidden bg-white p-3 sm:p-4 relative">
-            {/* Action buttons overlay for USER role */}
-            {user && userRole === "USER" && (
-              <div className="absolute top-2 right-2 flex gap-1 opacity-0 sm:group-hover:opacity-100 transition-opacity z-10">
-                <button
-                  onClick={handleAddToShoppingList}
-                  className="p-1.5 bg-white/90 sm:hover:bg-white text-green-600 sm:hover:text-green-700 rounded-full shadow-sm transition-colors"
-                  title="Add to Shopping List"
-                >
-                  <HiShoppingCart size={16} />
-                </button>
-                <button
-                  onClick={addToWishlist}
-                  className={`p-1.5 bg-white/90 sm:hover:bg-white rounded-full shadow-sm transition-colors ${
-                    isInWishlist
-                      ? "text-red-500"
-                      : "text-gray-500 sm:hover:text-red-500"
-                  }`}
-                  title={
-                    isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"
-                  }
-                >
-                  <HiHeart size={16} />
-                </button>
-              </div>
-            )}
-
-            <div className="flex flex-col items-center space-y-2 sm:space-y-3">
-              {/* Title */}
-              <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 truncate text-center line-clamp-2">
-                {coupon.title}
-              </h2>
-
-              {/* Images */}
-              <div className="flex gap-2 sm:gap-4 justify-center">
-                {coupon.barcodeUrl && (
-                  <img
-                    src={coupon.barcodeUrl}
-                    alt="Barcode"
-                    className="w-16 h-16 sm:w-20 md:w-24 object-contain rounded-md shadow"
-                  />
-                )}
-                {coupon.qrCodeUrl && (
-                  <img
-                    src={coupon.qrCodeUrl}
-                    alt="QR Code"
-                    className="w-16 h-16 sm:w-20 md:w-24 object-contain rounded-md shadow"
-                  />
-                )}
-              </div>
-
-              {/* Valid Until */}
-              <span className="text-xs sm:text-sm font-medium text-yellow-600 text-center">
-                {calculateDaysLeft() === 0
-                  ? "Last day"
-                  : calculateDaysLeft() < 0
-                  ? "Expired"
-                  : calculateDaysLeft() + " days left"}
-              </span>
+        <CardContent className="p-4 sm:p-6">
+          {/* Header with Actions */}
+          <div className="flex items-center justify-end mb-4">
+            <div className="flex items-center gap-1 sm:gap-2">
+              {user && userRole === "USER" && (
+                <>
+                  <button
+                    onClick={handleAddToShoppingList}
+                    className="p-1.5 sm:p-2 text-green-600 sm:hover:text-green-700 transition-colors rounded-full hover:bg-green-50"
+                    title="Add to Shopping List"
+                  >
+                    <HiShoppingCart className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={addToWishlist}
+                    className={`p-1.5 sm:p-2 transition-colors rounded-full hover:bg-red-50 ${
+                      isInWishlist
+                        ? "text-red-500"
+                        : "text-gray-500 sm:hover:text-red-500"
+                    }`}
+                    title={
+                      isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"
+                    }
+                  >
+                    <HiHeart size={16} />
+                  </button>
+                </>
+              )}
             </div>
+          </div>
+
+          <div className="flex flex-col items-center space-y-2 sm:space-y-3">
+            {/* Title */}
+            <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 truncate text-center line-clamp-2">
+              {coupon.title}
+            </h2>
+
+            {/* Images */}
+            <div className="flex gap-2 sm:gap-4 justify-center">
+              {coupon.barcodeUrl && (
+                <img
+                  src={coupon.barcodeUrl}
+                  alt="Barcode"
+                  className="w-16 h-16 sm:w-20 md:w-24 object-contain rounded-md shadow"
+                />
+              )}
+              {coupon.qrCodeUrl && (
+                <img
+                  src={coupon.qrCodeUrl}
+                  alt="QR Code"
+                  className="w-16 h-16 sm:w-20 md:w-24 object-contain rounded-md shadow"
+                />
+              )}
+            </div>
+
+            {/* Valid Until */}
+            <span
+              className={`text-xs sm:text-sm font-medium px-2 py-1 rounded-full border ${
+                getDateBadge().className
+              }`}
+            >
+              {getDateBadge().text}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -349,20 +384,11 @@ export const CouponCard = ({
             <div className="p-6">
               {/* Store Header */}
               <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-4">
-                  {store.logo && (
-                    <img
-                      src={store.logo}
-                      alt={store.name}
-                      className="w-12 h-12 rounded-xl object-cover shadow-md"
-                    />
-                  )}
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      {store.name}
-                    </h2>
-                    <p className="text-sm text-gray-600">{store.address}</p>
-                  </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {store.name}
+                  </h2>
+                  <p className="text-sm text-gray-600">{store.address}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   {user && userRole === "USER" && (
@@ -447,7 +473,10 @@ export const CouponCard = ({
                       />
                       <DetailRow
                         label="Status"
-                        value={calculateDaysLeft() > 0 ? "Active" : "Expired"}
+                        value={
+                          calculateDaysLeft().status.charAt(0).toUpperCase() +
+                          calculateDaysLeft().status.slice(1)
+                        }
                       />
                       <DetailRow
                         label="Type"
@@ -501,114 +530,94 @@ export const CouponCard = ({
 
                 {/* Right Column */}
                 <div className="space-y-6">
-                  {/* Store Details Section */}
+                  {/* Store Information */}
                   <section>
-                    <h3 className="text-xl font-bold text-yellow-600 mb-4 border-b border-yellow-100 pb-2">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
                       Store Information
                     </h3>
-                    <div className="bg-yellow-50/70 rounded-2xl p-5 sm:p-6 shadow-inner space-y-4">
-                      <div className="flex items-center gap-4">
-                        {store.logo && (
-                          <img
-                            src={store.logo}
-                            alt={store.name}
-                            className="w-16 h-16 rounded-xl object-cover shadow-md"
-                          />
-                        )}
-                        <div>
-                          <h4 className="text-lg font-semibold text-gray-800">
-                            {store.name}
-                          </h4>
+                    <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">
+                          {store.name}
+                        </h4>
+                        {store.description && (
                           <p className="text-sm text-gray-600">
-                            {store.address}
+                            {store.description}
                           </p>
+                        )}
+                      </div>
+
+                      {store.address && (
+                        <div className="flex items-start gap-2">
+                          <HiLocationMarker className="w-4 h-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-gray-600">
+                            {store.address}
+                          </span>
                         </div>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600 font-medium">
-                          Store Type:
-                        </span>
-                        <span className="text-gray-800">
-                          {store.type || "Retail"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600 font-medium">
-                          Contact:
-                        </span>
-                        <span className="text-gray-800">
-                          {store.phone || "Not available"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-sm">
-                        <span className="text-gray-600 font-medium">
-                          Email:
-                        </span>
-                        <span className="text-gray-800">
-                          {store.email || "Not available"}
-                        </span>
-                      </div>
+                      )}
+
+                      {store.phone && (
+                        <div className="text-sm text-gray-600">
+                          <span className="font-medium">Phone: </span>
+                          {store.phone}
+                        </div>
+                      )}
+
+                      {store.email && (
+                        <div className="text-sm text-gray-600">
+                          <span className="font-medium">Email: </span>
+                          {store.email}
+                        </div>
+                      )}
+
+                      {store.website && (
+                        <div className="text-sm">
+                          <a
+                            href={store.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-yellow-600 hover:text-yellow-700 flex items-center gap-1"
+                          >
+                            Visit Website
+                            <HiExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </section>
 
-                  {/* Coupon Images */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      Coupon Codes
+                  {/* Barcode and QR Code */}
+                  <section>
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+                      Codes
                     </h3>
-                    <div className="flex gap-4 justify-center">
+                    <div className="grid grid-cols-2 gap-4">
                       {coupon.barcodeUrl && (
                         <div className="text-center">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">
+                            Barcode
+                          </h4>
                           <img
                             src={coupon.barcodeUrl}
                             alt="Barcode"
-                            className="w-32 h-32 object-contain rounded-lg shadow"
+                            className="w-full max-w-32 mx-auto object-contain rounded-lg shadow-sm"
                           />
-                          <p className="text-xs text-gray-600 mt-1">Barcode</p>
                         </div>
                       )}
                       {coupon.qrCodeUrl && (
                         <div className="text-center">
+                          <h4 className="text-sm font-medium text-gray-700 mb-2">
+                            QR Code
+                          </h4>
                           <img
                             src={coupon.qrCodeUrl}
                             alt="QR Code"
-                            className="w-32 h-32 object-contain rounded-lg shadow"
+                            className="w-full max-w-32 mx-auto object-contain rounded-lg shadow-sm"
                           />
-                          <p className="text-xs text-gray-600 mt-1">QR Code</p>
                         </div>
                       )}
                     </div>
-                  </div>
-
-                  {user && userRole === "USER" && (
-                    <section>
-                      <h3 className="text-xl font-bold text-green-600 mb-4 border-b border-green-100 pb-2">
-                        Shopping Actions
-                      </h3>
-                      <div className="bg-green-50/70 rounded-2xl p-5 sm:p-6 shadow-inner space-y-3">
-                        <button
-                          onClick={handleAddToShoppingList}
-                          className="w-full bg-green-500 sm:hover:bg-green-600 text-white py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
-                        >
-                          <HiShoppingCart className="w-5 h-5" />
-                          Add to Shopping List
-                        </button>
-                        <button
-                          onClick={addToWishlist}
-                          className={`w-full py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                            isInWishlist
-                              ? "bg-red-500 sm:hover:bg-red-600 text-white"
-                              : "bg-gray-100 sm:hover:bg-gray-200 text-gray-700"
-                          }`}
-                        >
-                          <HiHeart className="w-5 h-5" />
-                          {isInWishlist
-                            ? "Remove from Wishlist"
-                            : "Add to Wishlist"}
-                        </button>
-                      </div>
-                    </section>
-                  )}
+                  </section>
                 </div>
               </div>
             </div>
@@ -618,59 +627,52 @@ export const CouponCard = ({
 
       {/* Shopping List Modal */}
       {showShoppingListModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Add to Shopping List
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Select Shopping List
                 </label>
                 <select
                   value={selectedListId}
                   onChange={(e) => setSelectedListId(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 >
-                  <option value="">Choose a list...</option>
+                  <option value="">Choose a list</option>
                   {shoppingLists.map((list) => (
                     <option key={list.id} value={list.id}>
-                      {list.title}
+                      {list.name}
                     </option>
                   ))}
                 </select>
               </div>
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Quantity:
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Quantity
                 </label>
                 <input
                   type="number"
-                  value={quantity}
-                  onChange={(e) =>
-                    setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                  }
                   min="1"
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  value={quantity}
+                  onChange={(e) => setQuantity(parseInt(e.target.value))}
+                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 />
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">
               <button
-                onClick={() => {
-                  setShowShoppingListModal(false);
-                  setSelectedListId("");
-                  setQuantity(1);
-                }}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md sm:hover:bg-gray-50"
+                onClick={() => setShowShoppingListModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={addToShoppingList}
-                disabled={!selectedListId}
-                className="px-4 py-2 bg-green-500 sm:hover:bg-green-600 disabled:bg-gray-300 text-white rounded-md transition"
+                className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors"
               >
                 Add to List
               </button>
@@ -680,13 +682,15 @@ export const CouponCard = ({
       )}
 
       {/* Delete Confirmation Dialog */}
-      <ConfirmDeleteDialog
-        open={showDeleteDialogueBox}
-        onCancel={() => setShowDeleteDialogueBox(false)}
-        onConfirm={handleDelete}
-        isLoading={isDeleting}
-        itemName="this coupon"
-      />
+      {showDeleteDialogueBox && (
+        <ConfirmDeleteDialog
+          open={showDeleteDialogueBox}
+          onCancel={() => setShowDeleteDialogueBox(false)}
+          onConfirm={handleDelete}
+          isLoading={isDeleting}
+          itemName="this coupon"
+        />
+      )}
     </>
   );
 };
@@ -695,29 +699,23 @@ const CouponList = ({
   coupons,
   pagination,
   onPageChange,
-  showLogo,
   onEdit,
   onDelete,
 }: {
   coupons: any[];
   pagination: any;
   onPageChange: (page: number) => void;
-  showLogo: boolean;
   onEdit?: (coupon: any) => void;
   onDelete?: (couponId: string) => void;
 }) => {
   const { t } = useTranslation();
 
-  if (!Array.isArray(coupons)) {
-    return null;
-  }
-
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-        {coupons.map((coupon: any) => (
+      {/* Coupons Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        {coupons.map((coupon) => (
           <CouponCard
-            showlogo={showLogo}
             key={coupon.id}
             coupon={coupon}
             onEdit={onEdit}
@@ -726,30 +724,30 @@ const CouponList = ({
         ))}
       </div>
 
-      {pagination && (
-        <div className="flex justify-center gap-2 mt-6">
-          <Button
-            variant="outline"
-            disabled={!pagination.hasPreviousPage}
-            onClick={() => onPageChange(pagination.page - 1)}
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-8">
+          <button
+            onClick={() => onPageChange(pagination.currentPage - 1)}
+            disabled={pagination.currentPage === 1}
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t("coupons.previous")}
-          </Button>
-          <div className="text-sm text-gray-600 translate-y-2">
-            {t("coupons.page")} {pagination.page} {t("coupons.of")}{" "}
-            {pagination.totalPages}
-          </div>
-          <Button
-            variant="outline"
-            disabled={!pagination.hasNextPage}
-            onClick={() => onPageChange(pagination.page + 1)}
+            Previous
+          </button>
+          <span className="px-3 py-2 text-sm font-medium text-gray-700">
+            Page {pagination.currentPage} of {pagination.totalPages}
+          </span>
+          <button
+            onClick={() => onPageChange(pagination.currentPage + 1)}
+            disabled={pagination.currentPage === pagination.totalPages}
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t("coupons.next")}
-          </Button>
+            Next
+          </button>
         </div>
       )}
     </div>
   );
 };
 
-export default CouponList;
+export { CouponList };

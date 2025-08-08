@@ -12,7 +12,7 @@ import useAuthenticate from "../../hooks/authenticationt";
 import Loader from "../../components/loading";
 import { Calendar } from "@/components/ui/calendar";
 import useClickOutside from "@/hooks/useClickOutside";
-import CouponList from "@/components/CouponCard";
+import { CouponList } from "@/components/CouponCard";
 import Footer from "@/components/Footer";
 import FlyerList from "@/components/FlyerCard";
 import { useTranslation } from "react-i18next";
@@ -188,7 +188,7 @@ export default function StoreDetailPage() {
     setTitle(flyer.title);
     setDescription(flyer.description);
     setSelectedCategories(categoriesForFlyer.get(flyer.id) || []);
-    
+
     // Handle both image and PDF flyers
     if (flyer.pdfUrl) {
       setFileType("pdf");
@@ -199,7 +199,7 @@ export default function StoreDetailPage() {
       setFlyerImagePreview(flyer.imageUrl);
       setFlyerPdfPreview(null);
     }
-    
+
     setIsPremium(flyer.isPremium);
     setIsSponsored(flyer.isSponsored);
     setStartDate(flyer.startDate ? new Date(flyer.startDate) : undefined);
@@ -223,9 +223,9 @@ export default function StoreDetailPage() {
           setQrCodeFile(file);
           setQrCodePreview(URL.createObjectURL(file));
         }
-              } else {
-          toast.error(t("store.onlyJpgPngAllowed"));
-        }
+      } else {
+        toast.error(t("store.onlyJpgPngAllowed"));
+      }
     } else if (type === "flyer") {
       // Handle both image and PDF files for flyers
       if (["image/jpeg", "image/png"].includes(file.type)) {
@@ -240,9 +240,9 @@ export default function StoreDetailPage() {
         setFlyerPdfPreview(URL.createObjectURL(file));
         setFlyerImage(null);
         setFlyerImagePreview(null);
-              } else {
-          toast.error(t("store.onlyJpgPngPdfAllowed"));
-        }
+      } else {
+        toast.error(t("store.onlyJpgPngPdfAllowed"));
+      }
     }
   };
 
@@ -292,10 +292,7 @@ export default function StoreDetailPage() {
           await uploadBytes(imageRef, flyerImage);
           imageUrl = await getDownloadURL(imageRef);
         } else if (fileType === "pdf" && flyerPdf) {
-          const pdfRef = ref(
-            storage,
-            `flyers/${Date.now()}_${flyerPdf.name}`
-          );
+          const pdfRef = ref(storage, `flyers/${Date.now()}_${flyerPdf.name}`);
           await uploadBytes(pdfRef, flyerPdf);
           pdfUrl = await getDownloadURL(pdfRef);
         }
@@ -305,7 +302,10 @@ export default function StoreDetailPage() {
           description,
           storeId: id,
           categoryIds: selectedCategories,
-          imageUrl: fileType === "image" ? (imageUrl || (isEditing ? selectedFlyer?.imageUrl : null)) : (pdfUrl || (isEditing ? selectedFlyer?.pdfUrl : null)),
+          imageUrl:
+            fileType === "image"
+              ? imageUrl || (isEditing ? selectedFlyer?.imageUrl : null)
+              : pdfUrl || (isEditing ? selectedFlyer?.pdfUrl : null),
           startDate,
           endDate,
           isPremium,
@@ -329,7 +329,9 @@ export default function StoreDetailPage() {
 
         if (!response.ok) {
           throw new Error(
-            isEditing ? t("store.failedToUpdateFlyer") : t("store.failedToCreateFlyer")
+            isEditing
+              ? t("store.failedToUpdateFlyer")
+              : t("store.failedToCreateFlyer")
           );
         }
 
@@ -350,7 +352,9 @@ export default function StoreDetailPage() {
           error
         );
         toast.error(
-          isEditing ? t("store.errorUpdatingFlyer") : t("store.errorCreatingFlyer")
+          isEditing
+            ? t("store.errorUpdatingFlyer")
+            : t("store.errorCreatingFlyer")
         );
       }
     } else {
@@ -360,9 +364,9 @@ export default function StoreDetailPage() {
         !discount ||
         selectedCategories.length === 0 ||
         !startDate ||
-        !endDate
-        || !barcodeFile
-        || !qrCodeFile
+        !endDate ||
+        !barcodeFile ||
+        !qrCodeFile
       ) {
         toast.error(t("store.pleaseFillRequiredFields"));
         setIsSubmitting(false);
@@ -420,7 +424,9 @@ export default function StoreDetailPage() {
 
         if (!response.ok) {
           throw new Error(
-            isEditing ? t("store.failedToUpdateCoupon") : t("store.failedToCreateCoupon")
+            isEditing
+              ? t("store.failedToUpdateCoupon")
+              : t("store.failedToCreateCoupon")
           );
         }
         if (isEditing) {
@@ -443,7 +449,9 @@ export default function StoreDetailPage() {
           error
         );
         toast.error(
-          isEditing ? t("store.errorUpdatingCoupon") : t("store.errorCreatingCoupon")
+          isEditing
+            ? t("store.errorUpdatingCoupon")
+            : t("store.errorCreatingCoupon")
         );
       }
     }
@@ -495,11 +503,19 @@ export default function StoreDetailPage() {
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navigation />
       </div>
-      <main className={`pt-20 pb-10 ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}>
+      <main
+        className={`pt-20 pb-10 ${
+          userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-9xl mx-auto max-h-max overflow-y-auto p-4 sm:p-6">
             {/* Store Header with Name, Description & Edit Button */}
-            <div className={`mb-6 ${userRole === "ADMIN" ? "bg-blue-100" : "bg-yellow-100"} rounded-xl p-4 sm:p-6 shadow-sm`}>
+            <div
+              className={`mb-6 ${
+                userRole === "ADMIN" ? "bg-blue-100" : "bg-yellow-100"
+              } rounded-xl p-4 sm:p-6 shadow-sm`}
+            >
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start sm:items-center">
                 {/* Store Logo */}
                 <div className="w-full sm:w-32 shrink-0">
@@ -507,10 +523,20 @@ export default function StoreDetailPage() {
                     <img
                       src={store.logo}
                       alt={`${store.name} Logo`}
-                      className={`w-full aspect-[4/3] object-cover rounded-md border ${userRole === "ADMIN" ? "border-blue-300" : "border-yellow-300"} shadow-sm`}
+                      className={`w-full aspect-[4/3] object-cover rounded-md border ${
+                        userRole === "ADMIN"
+                          ? "border-blue-300"
+                          : "border-yellow-300"
+                      } shadow-sm`}
                     />
                   ) : (
-                    <div className={`w-full aspect-[4/3] flex items-center justify-center text-2xl font-semibold ${userRole === "ADMIN" ? "text-blue-700 bg-blue-200 border-blue-300" : "text-yellow-700 bg-yellow-200 border-yellow-300"} rounded-md border shadow-sm`}>
+                    <div
+                      className={`w-full aspect-[4/3] flex items-center justify-center text-2xl font-semibold ${
+                        userRole === "ADMIN"
+                          ? "text-blue-700 bg-blue-200 border-blue-300"
+                          : "text-yellow-700 bg-yellow-200 border-yellow-300"
+                      } rounded-md border shadow-sm`}
+                    >
                       {store.name?.charAt(0).toUpperCase() || "S"}
                     </div>
                   )}
@@ -523,13 +549,17 @@ export default function StoreDetailPage() {
                       {store.name}
                     </h1>
                     {(userRole === "ADMIN" || userRole === "RETAILER") && (
-                                          <button
-                      onClick={handleEditStore}
-                      className={`w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-600" : "bg-yellow-500 hover:bg-yellow-600"} text-white rounded-md transition`}
-                    >
-                      <HiPencil />
-                      {t("store.editStore")}
-                    </button>
+                      <button
+                        onClick={handleEditStore}
+                        className={`w-full sm:w-auto flex items-center justify-center gap-2 text-sm px-4 py-2 ${
+                          userRole === "ADMIN"
+                            ? "bg-blue-500 hover:bg-blue-600"
+                            : "bg-yellow-500 hover:bg-yellow-600"
+                        } text-white rounded-md transition`}
+                      >
+                        <HiPencil />
+                        {t("store.editStore")}
+                      </button>
                     )}
                   </div>
 
@@ -549,10 +579,18 @@ export default function StoreDetailPage() {
                     setActiveTab("flyers");
                     localStorage.setItem("lastVisited", "flyers");
                   }}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-l-full border ${userRole === "ADMIN" ? "border-blue-500" : "border-yellow-500"} font-medium transition-all ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-l-full border ${
+                    userRole === "ADMIN"
+                      ? "border-blue-500"
+                      : "border-yellow-500"
+                  } font-medium transition-all ${
                     activeTab === "flyers"
-                      ? userRole === "ADMIN" ? "bg-blue-500 text-white" : "bg-yellow-500 text-white"
-                      : userRole === "ADMIN" ? "bg-white text-blue-600 hover:bg-blue-100" : "bg-white text-yellow-600 hover:bg-yellow-100"
+                      ? userRole === "ADMIN"
+                        ? "bg-blue-500 text-white"
+                        : "bg-yellow-500 text-white"
+                      : userRole === "ADMIN"
+                      ? "bg-white text-blue-600 hover:bg-blue-100"
+                      : "bg-white text-yellow-600 hover:bg-yellow-100"
                   }`}
                 >
                   <HiNewspaper />
@@ -563,10 +601,18 @@ export default function StoreDetailPage() {
                     setActiveTab("coupons");
                     localStorage.setItem("lastVisited", "coupons");
                   }}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-r-full border ${userRole === "ADMIN" ? "border-blue-500" : "border-yellow-500"} font-medium transition-all ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-r-full border ${
+                    userRole === "ADMIN"
+                      ? "border-blue-500"
+                      : "border-yellow-500"
+                  } font-medium transition-all ${
                     activeTab === "coupons"
-                      ? userRole === "ADMIN" ? "bg-blue-500 text-white" : "bg-yellow-500 text-white"
-                      : userRole === "ADMIN" ? "bg-white text-blue-600 hover:bg-blue-100" : "bg-white text-yellow-600 hover:bg-yellow-100"
+                      ? userRole === "ADMIN"
+                        ? "bg-blue-500 text-white"
+                        : "bg-yellow-500 text-white"
+                      : userRole === "ADMIN"
+                      ? "bg-white text-blue-600 hover:bg-blue-100"
+                      : "bg-white text-yellow-600 hover:bg-yellow-100"
                   }`}
                 >
                   <HiTag />
@@ -577,16 +623,26 @@ export default function StoreDetailPage() {
               {(userRole === "ADMIN" || userRole === "RETAILER") && (
                 <button
                   onClick={handleCreate}
-                  className={`w-full sm:w-auto flex items-center justify-center gap-2 ${userRole === "ADMIN" ? "bg-blue-500 hover:bg-blue-600" : "bg-yellow-500 hover:bg-yellow-600"} text-white font-semibold px-5 py-2 rounded-md transition`}
+                  className={`w-full sm:w-auto flex items-center justify-center gap-2 ${
+                    userRole === "ADMIN"
+                      ? "bg-blue-500 hover:bg-blue-600"
+                      : "bg-yellow-500 hover:bg-yellow-600"
+                  } text-white font-semibold px-5 py-2 rounded-md transition`}
                 >
                   <HiPlus />
-                  {activeTab === "flyers" ? t("store.createFlyer") : t("store.createCoupon")}
+                  {activeTab === "flyers"
+                    ? t("store.createFlyer")
+                    : t("store.createCoupon")}
                 </button>
               )}
             </div>
 
             {/* Tab Content Area */}
-            <div className={`min-h-[200px] sm:min-h-[300px] ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"} rounded-xl p-4 sm:p-5 shadow-inner`}>
+            <div
+              className={`min-h-[200px] sm:min-h-[300px] ${
+                userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
+              } rounded-xl p-4 sm:p-5 shadow-inner`}
+            >
               {activeTab === "flyers" ? (
                 flyers ? (
                   <FlyerList
@@ -598,7 +654,13 @@ export default function StoreDetailPage() {
                 ) : (
                   <div className="text-center text-gray-700">
                     <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
-                      <HiNewspaper className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
+                      <HiNewspaper
+                        className={
+                          userRole === "ADMIN"
+                            ? "text-blue-600"
+                            : "text-yellow-600"
+                        }
+                      />
                       {t("store.flyers")}
                     </h2>
                     <p className="text-sm sm:text-base">
@@ -608,7 +670,6 @@ export default function StoreDetailPage() {
                 )
               ) : coupons ? (
                 <CouponList
-                  showLogo={false}
                   coupons={coupons}
                   pagination={pagination}
                   onPageChange={onPagination}
@@ -617,7 +678,13 @@ export default function StoreDetailPage() {
               ) : (
                 <div className="text-center text-gray-700">
                   <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
-                    <HiTag className={userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"} />
+                    <HiTag
+                      className={
+                        userRole === "ADMIN"
+                          ? "text-blue-600"
+                          : "text-yellow-600"
+                      }
+                    />
                     {t("store.coupons")}
                   </h2>
                   <p className="text-sm sm:text-base">
@@ -637,7 +704,9 @@ export default function StoreDetailPage() {
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 {isEditing ? t("store.edit") : t("store.create")}{" "}
-                {activeTab === "flyers" ? t("store.flyers") : t("store.coupons")}
+                {activeTab === "flyers"
+                  ? t("store.flyers")
+                  : t("store.coupons")}
               </h2>
               <button
                 onClick={() => {
@@ -691,7 +760,7 @@ export default function StoreDetailPage() {
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
                         Flyer File <span className="text-red-600">*</span>
                       </label>
-                      
+
                       {/* File Type Toggle */}
                       <div className="flex gap-2 mb-3">
                         <button
@@ -721,12 +790,16 @@ export default function StoreDetailPage() {
                       {/* File Input */}
                       <input
                         type="file"
-                        accept={fileType === "image" ? "image/png, image/jpeg" : "application/pdf"}
+                        accept={
+                          fileType === "image"
+                            ? "image/png, image/jpeg"
+                            : "application/pdf"
+                        }
                         onChange={(e) => handleFileChange(e, "flyer")}
                         className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
                         required
                       />
-                      
+
                       {/* Preview Section */}
                       {flyerImagePreview && (
                         <div className="relative inline-block mt-2 h-16">
@@ -747,12 +820,14 @@ export default function StoreDetailPage() {
                           </button>
                         </div>
                       )}
-                      
+
                       {flyerPdfPreview && (
                         <div className="relative inline-block mt-2 h-16">
                           <div className="h-full w-12 bg-red-100 rounded shadow flex items-center justify-center">
                             <div className="text-center">
-                              <div className="text-red-600 text-xs font-bold">PDF</div>
+                              <div className="text-red-600 text-xs font-bold">
+                                PDF
+                              </div>
                               <div className="text-red-600 text-xs">
                                 {flyerPdf?.name?.substring(0, 10)}...
                               </div>
@@ -840,7 +915,10 @@ export default function StoreDetailPage() {
                         onChange={(e) => setIsPremium(e.target.checked)}
                         className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
                       />
-                      <label htmlFor="isPremium" className="text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="isPremium"
+                        className="text-sm font-medium text-gray-700"
+                      >
                         Premium Flyer
                       </label>
                     </div>
@@ -852,7 +930,10 @@ export default function StoreDetailPage() {
                         onChange={(e) => setIsSponsored(e.target.checked)}
                         className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
                       />
-                      <label htmlFor="isSponsored" className="text-sm font-medium text-gray-700">
+                      <label
+                        htmlFor="isSponsored"
+                        className="text-sm font-medium text-gray-700"
+                      >
                         Sponsored Flyer
                       </label>
                     </div>

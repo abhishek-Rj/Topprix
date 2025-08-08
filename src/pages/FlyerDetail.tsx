@@ -5,6 +5,10 @@ import {
   HiX,
   HiChevronLeft,
   HiChevronRight,
+  HiCalendar,
+  HiLocationMarker,
+  HiTag,
+  HiExternalLink,
 } from "react-icons/hi";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -12,6 +16,8 @@ import "react-pdf/dist/Page/TextLayer.css";
 import { toast } from "react-toastify";
 import baseUrl from "@/hooks/baseurl";
 import Loader from "@/components/loading";
+import { useTranslation } from "react-i18next";
+import { FaStore } from "react-icons/fa";
 
 // Set up PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -20,11 +26,14 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 ).toString();
 
 export default function FlyerDetail() {
+  const { t } = useTranslation();
   const { flyerId } = useParams();
   const navigate = useNavigate();
   const [flyer, setFlyer] = useState<any>(null);
+  const [store, setStore] = useState<any>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [isLoadingPdf, setIsLoadingPdf] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Disable zoom functionality
   useEffect(() => {
@@ -115,6 +124,15 @@ export default function FlyerDetail() {
         }
         const data = await response.json();
         setFlyer(data);
+
+        // Fetch store data if available
+        if (data.storeId) {
+          const storeResponse = await fetch(`${baseUrl}store/${data.storeId}`);
+          if (storeResponse.ok) {
+            const storeData = await storeResponse.json();
+            setStore(storeData);
+          }
+        }
       } catch (err) {
         console.error("Error fetching flyer:", err);
         toast.error("Failed to load flyer");
@@ -124,6 +142,97 @@ export default function FlyerDetail() {
 
     fetchFlyer();
   }, [flyerId, navigate]);
+
+  const calculateDaysLeft = () => {
+    if (!flyer?.startDate || !flyer?.endDate)
+      return { status: "unknown", days: 0 };
+
+    const startDate = new Date(flyer.startDate);
+    const endDate = new Date(flyer.endDate);
+    const today = new Date();
+
+    // Reset time to start of day for accurate comparison
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const startOfStartDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate()
+    );
+    const startOfEndDate = new Date(
+      endDate.getFullYear(),
+      endDate.getMonth(),
+      endDate.getDate()
+    );
+
+    // Check if it's before start date
+    if (startOfToday < startOfStartDate) {
+      const diffTime = startOfStartDate.getTime() - startOfToday.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return { status: "soon", days: diffDays };
+    }
+
+    // Check if it's expired (after end date)
+    if (startOfToday > startOfEndDate) {
+      const diffTime = startOfToday.getTime() - startOfEndDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return { status: "expired", days: diffDays };
+    }
+
+    // Check if it's the last day
+    if (startOfToday.getTime() === startOfEndDate.getTime()) {
+      return { status: "last-day", days: 0 };
+    }
+
+    // It's active (between start and end date)
+    const diffTime = startOfEndDate.getTime() - startOfToday.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return { status: "active", days: diffDays };
+  };
+
+  const getDateBadge = () => {
+    const dateInfo = calculateDaysLeft();
+
+    switch (dateInfo.status) {
+      case "soon":
+        return {
+          text: t("store.soonDays", { days: dateInfo.days }),
+          className: "bg-blue-100 text-blue-800 border-blue-200",
+        };
+      case "active":
+        return {
+          text: t("store.daysLeftText", { days: dateInfo.days }),
+          className: "bg-green-100 text-green-800 border-green-200",
+        };
+      case "last-day":
+        return {
+          text: t("store.lastDayText"),
+          className: "bg-orange-100 text-orange-800 border-orange-200",
+        };
+      case "expired":
+        return {
+          text: t("store.expiredText"),
+          className: "bg-red-100 text-red-800 border-red-200",
+        };
+      default:
+        return {
+          text: "Unknown",
+          className: "bg-gray-100 text-gray-800 border-gray-200",
+        };
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   if (!flyer) {
     return (
@@ -147,7 +256,7 @@ export default function FlyerDetail() {
       }}
     >
       {/* Fixed Header with Navigation and Title */}
-      <div className="fixed top-0 left-0 right-0 bg-gradient-to-r h-12 from-yellow-800 to-yellow-700 text-white shadow-md z-50">
+      <div className="fixed top-0 left-0 right-0 bg-gradient-to-r h-16 from-yellow-800 to-yellow-700 text-white shadow-md z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
           <div className="flex items-center justify-between h-full">
             <button
@@ -158,9 +267,14 @@ export default function FlyerDetail() {
               Back
             </button>
 
-            <h1 className="text-base font-semibold truncate flex-1 text-center mx-4">
-              {flyer.title}
-            </h1>
+            <div className="flex-1 text-center mx-4">
+              <h1 className="text-base font-semibold truncate">
+                {flyer.title}
+              </h1>
+              {store && (
+                <p className="text-xs text-white/80 truncate">{store.name}</p>
+              )}
+            </div>
 
             <button
               onClick={() => navigate(-1)}
@@ -172,8 +286,39 @@ export default function FlyerDetail() {
         </div>
       </div>
 
+      {/* Flyer Information Bar */}
+      <div className="fixed top-16 left-0 right-0 bg-white border-b border-gray-200 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-4">
+              {flyer.category && (
+                <div className="flex items-center gap-1">
+                  <HiTag className="w-4 h-4 text-yellow-600" />
+                  <span className="text-gray-600">{flyer.category}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1">
+                <HiCalendar className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-600">
+                  Valid until: {formatDate(flyer.endDate)}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span
+                className={`text-xs px-2 py-1 rounded-full border ${
+                  getDateBadge().className
+                }`}
+              >
+                {getDateBadge().text}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Main Content Area - Flyer Display */}
-      <div className="pt-12 bg-gray-100 h-screen">
+      <div className="pt-32 bg-gray-100 h-screen">
         {isPdf ? (
           // PDF Display
           <div className="h-full w-full">
@@ -227,7 +372,7 @@ export default function FlyerDetail() {
                       <div className="shadow-lg rounded-lg overflow-hidden bg-white">
                         <Page
                           pageNumber={index + 1}
-                          height={window.innerHeight - 100}
+                          height={window.innerHeight - 140}
                           renderTextLayer={false}
                           renderAnnotationLayer={false}
                         />

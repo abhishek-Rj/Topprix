@@ -136,9 +136,9 @@ export default function AdminDashboard() {
           >
             <div className="p-8 rounded-3xl bg-gradient-to-r from-blue-100/80 to-indigo-100/80">
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-                {t("dashboard.adminTitle")}
+                {t("dashboard.title")}
               </h1>
-              <p className="text-gray-600">{t("dashboard.adminDescription")}</p>
+              <p className="text-gray-600">{t("dashboard.welcome")}</p>
             </div>
           </motion.div>
 

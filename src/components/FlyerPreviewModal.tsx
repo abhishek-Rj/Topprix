@@ -5,6 +5,9 @@ import {
   HiCalendar,
   HiTag,
   HiExternalLink,
+  HiEye,
+  HiHeart,
+  HiShoppingCart,
 } from "react-icons/hi";
 import { FaStore } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+import { useTranslation } from "react-i18next";
 
 // Set up PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -32,6 +36,7 @@ export default function FlyerPreviewModal({
   onClose,
   flyer,
 }: FlyerPreviewModalProps) {
+  const { t } = useTranslation();
   const [store, setStore] = useState<any>(null);
   const [loadingStore, setLoadingStore] = useState(false);
   const [pdfLoadError, setPdfLoadError] = useState<boolean>(false);
@@ -79,12 +84,85 @@ export default function FlyerPreviewModal({
 
   // Calculate days left
   const calculateDaysLeft = () => {
-    if (!flyer?.endDate) return 0;
-    const today = new Date();
+    if (!flyer?.startDate || !flyer?.endDate)
+      return { status: "unknown", days: 0 };
+
+    const startDate = new Date(flyer.startDate);
     const endDate = new Date(flyer.endDate);
-    const diffTime = endDate.getTime() - today.getTime();
+    const today = new Date();
+
+    // Reset time to start of day for accurate comparison
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const startOfStartDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate()
+    );
+    const startOfEndDate = new Date(
+      endDate.getFullYear(),
+      endDate.getMonth(),
+      endDate.getDate()
+    );
+
+    // Check if it's before start date
+    if (startOfToday < startOfStartDate) {
+      const diffTime = startOfStartDate.getTime() - startOfToday.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return { status: "soon", days: diffDays };
+    }
+
+    // Check if it's expired (after end date)
+    if (startOfToday > startOfEndDate) {
+      const diffTime = startOfToday.getTime() - startOfEndDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return { status: "expired", days: diffDays };
+    }
+
+    // Check if it's the last day
+    if (startOfToday.getTime() === startOfEndDate.getTime()) {
+      return { status: "last-day", days: 0 };
+    }
+
+    // It's active (between start and end date)
+    const diffTime = startOfEndDate.getTime() - startOfToday.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
+    return { status: "active", days: diffDays };
+  };
+
+  const getDateBadge = () => {
+    const dateInfo = calculateDaysLeft();
+
+    switch (dateInfo.status) {
+      case "soon":
+        return {
+          text: t("store.soonDays", { days: dateInfo.days }),
+          className: "bg-blue-100 text-blue-800 border-blue-200",
+        };
+      case "active":
+        return {
+          text: t("store.daysLeftText", { days: dateInfo.days }),
+          className: "bg-green-100 text-green-800 border-green-200",
+        };
+      case "last-day":
+        return {
+          text: t("store.lastDayText"),
+          className: "bg-orange-100 text-orange-800 border-orange-200",
+        };
+      case "expired":
+        return {
+          text: t("store.expiredText"),
+          className: "bg-red-100 text-red-800 border-red-200",
+        };
+      default:
+        return {
+          text: "Unknown",
+          className: "bg-gray-100 text-gray-800 border-gray-200",
+        };
+    }
   };
 
   // Format date
@@ -110,12 +188,22 @@ export default function FlyerPreviewModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
+        className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Flyer Preview</h2>
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-yellow-50 to-orange-50">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-yellow-500 text-white">
+              <HiEye className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">
+                {t("flyers.title")} Preview
+              </h2>
+              <p className="text-sm text-gray-600">{flyer.title}</p>
+            </div>
+          </div>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
@@ -128,9 +216,9 @@ export default function FlyerPreviewModal({
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <div className="space-y-6">
             {/* Flyer Image and Title */}
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="md:w-1/2">
-                <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="lg:w-1/2">
+                <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden shadow-lg">
                   {flyer.imageUrl ? (
                     isPdf ? (
                       // PDF Preview - First Page
@@ -180,7 +268,7 @@ export default function FlyerPreviewModal({
                 </div>
               </div>
 
-              <div className="md:w-1/2 space-y-4">
+              <div className="lg:w-1/2 space-y-4">
                 <h3 className="text-xl font-bold text-gray-900">
                   {flyer.title}
                 </h3>
@@ -208,19 +296,11 @@ export default function FlyerPreviewModal({
                     Valid until: {formatDate(flyer.endDate)}
                   </span>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full ${
-                      calculateDaysLeft() <= 0
-                        ? "bg-red-100 text-red-600"
-                        : calculateDaysLeft() <= 3
-                        ? "bg-orange-100 text-orange-600"
-                        : "bg-green-100 text-green-600"
+                    className={`text-xs px-2 py-1 rounded-full border ${
+                      getDateBadge().className
                     }`}
                   >
-                    {calculateDaysLeft() === 0
-                      ? "Last day"
-                      : calculateDaysLeft() < 0
-                      ? "Expired"
-                      : `${calculateDaysLeft()} days left`}
+                    {getDateBadge().text}
                   </span>
                 </div>
               </div>
@@ -240,16 +320,25 @@ export default function FlyerPreviewModal({
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
                 </div>
               ) : store ? (
-                <div className="space-y-3">
-                  <div>
-                    <h5 className="font-semibold text-gray-900">
-                      {store.name}
-                    </h5>
-                    {store.description && (
-                      <p className="text-gray-600 text-sm mt-1">
-                        {store.description}
-                      </p>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                  <div className="flex items-center gap-3">
+                    {store.logo && (
+                      <img
+                        src={store.logo}
+                        alt={store.name}
+                        className="w-12 h-12 rounded-xl object-cover shadow-md"
+                      />
                     )}
+                    <div>
+                      <h5 className="font-semibold text-gray-900">
+                        {store.name}
+                      </h5>
+                      {store.description && (
+                        <p className="text-gray-600 text-sm mt-1">
+                          {store.description}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {store.address && (

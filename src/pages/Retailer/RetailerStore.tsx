@@ -60,9 +60,10 @@ export default function RetailerStores() {
   const [limit, setLimit] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const threeDotRef = useRef(null);
+  const menuRef = useRef(null);
+  const buttonRef = useRef(null);
 
-  useClickOutside(threeDotRef, () => setMenuOpenId(null));
+  useClickOutside([buttonRef, menuRef], () => setMenuOpenId(null));
 
   const navigate = useNavigate();
 
@@ -365,12 +366,13 @@ export default function RetailerStores() {
                       {(userRole === "ADMIN" || userRole === "RETAILER") && (
                         <div className="absolute top-2 right-2 z-10">
                           <button
-                            ref={threeDotRef}
-                            onClick={() =>
+                            ref={buttonRef}
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setMenuOpenId(
                                 menuOpenId === store.id ? null : store.id
-                              )
-                            }
+                              );
+                            }}
                             className="p-1 bg-white/80 hover:bg-white rounded-full shadow-sm transition-colors"
                           >
                             <HiPencil
@@ -384,9 +386,16 @@ export default function RetailerStores() {
                           </button>
 
                           {menuOpenId === store.id && (
-                            <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-50">
+                            <div
+                              ref={menuRef}
+                              className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-50"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <button
-                                onClick={() => handleEdit(store.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEdit(store.id);
+                                }}
                                 className={`flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100`}
                               >
                                 <HiPencil
@@ -400,7 +409,10 @@ export default function RetailerStores() {
                               </button>
                               {userRole === "ADMIN" && (
                                 <button
-                                  onClick={() => handleDeletePrompt(store)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeletePrompt(store);
+                                  }}
                                   className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100"
                                 >
                                   <HiTrash className="text-red-500" />
@@ -419,32 +431,51 @@ export default function RetailerStores() {
                       >
                         {/* Logo/Image Section */}
                         <div
-                          className={`h-32 sm:h-1/2 relative ${
+                          className={`h-32 sm:h-40 relative overflow-hidden ${
                             userRole === "ADMIN"
                               ? "bg-gradient-to-br from-blue-100 to-blue-200"
                               : "bg-gradient-to-br from-yellow-100 to-yellow-200"
                           }`}
-                          style={{
-                            backgroundImage: store.logo
-                              ? `url(${store.logo})`
-                              : "none",
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                          }}
                         >
-                          {!store.logo && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span
-                                className={`text-2xl sm:text-3xl lg:text-4xl ${
-                                  userRole === "ADMIN"
-                                    ? "text-blue-600/50"
-                                    : "text-yellow-600/50"
-                                }`}
-                              >
-                                {store.name.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
-                          )}
+                          {store.logo && store.logo.trim() !== "" ? (
+                            <img
+                              src={store.logo}
+                              alt={`${store.name} logo`}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                // Fallback to showing the first letter if image fails to load
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = "none";
+                                const fallback =
+                                  target.parentElement?.querySelector(
+                                    ".logo-fallback"
+                                  ) as HTMLElement;
+                                if (fallback) {
+                                  fallback.style.display = "flex";
+                                }
+                              }}
+                            />
+                          ) : null}
+
+                          {/* Fallback for when no logo or image fails to load */}
+                          <div
+                            className={`logo-fallback absolute inset-0 flex items-center justify-center ${
+                              store.logo && store.logo.trim() !== ""
+                                ? "hidden"
+                                : "flex"
+                            }`}
+                          >
+                            <span
+                              className={`text-2xl sm:text-3xl lg:text-4xl font-bold ${
+                                userRole === "ADMIN"
+                                  ? "text-blue-600/50"
+                                  : "text-yellow-600/50"
+                              }`}
+                            >
+                              {store.name.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+
                           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                         </div>
 

@@ -50,6 +50,7 @@ export const FlyerCard = ({
   const [pdfLoadError, setPdfLoadError] = useState<boolean>(false);
   const [pdfWidth, setPdfWidth] = useState<number>(128);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Check if the flyer URL is a PDF
   const isPdf = flyer?.imageUrl?.toLowerCase().includes(".pdf");
@@ -209,11 +210,82 @@ export const FlyerCard = ({
   };
 
   const calculateDaysLeft = () => {
+    const startDate = new Date(flyer.startDate);
     const endDate = new Date(flyer.endDate);
     const today = new Date();
-    const diffTime = endDate.getTime() - today.getTime();
+
+    // Reset time to start of day for accurate comparison
+    const startOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+    const startOfStartDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      startDate.getDate()
+    );
+    const startOfEndDate = new Date(
+      endDate.getFullYear(),
+      endDate.getMonth(),
+      endDate.getDate()
+    );
+
+    // Check if it's before start date
+    if (startOfToday < startOfStartDate) {
+      const diffTime = startOfStartDate.getTime() - startOfToday.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return { status: "soon", days: diffDays };
+    }
+
+    // Check if it's expired (after end date)
+    if (startOfToday > startOfEndDate) {
+      const diffTime = startOfToday.getTime() - startOfEndDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return { status: "expired", days: diffDays };
+    }
+
+    // Check if it's the last day
+    if (startOfToday.getTime() === startOfEndDate.getTime()) {
+      return { status: "last-day", days: 0 };
+    }
+
+    // It's active (between start and end date)
+    const diffTime = startOfEndDate.getTime() - startOfToday.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays > 0 ? diffDays : 0;
+    return { status: "active", days: diffDays };
+  };
+
+  const getDateBadge = () => {
+    const dateInfo = calculateDaysLeft();
+
+    switch (dateInfo.status) {
+      case "soon":
+        return {
+          text: t("store.soonDays", { days: dateInfo.days }),
+          className: "bg-blue-100 text-blue-800 border-blue-200",
+        };
+      case "active":
+        return {
+          text: t("store.daysLeftText", { days: dateInfo.days }),
+          className: "bg-green-100 text-green-800 border-green-200",
+        };
+      case "last-day":
+        return {
+          text: t("store.lastDayText"),
+          className: "bg-orange-100 text-orange-800 border-orange-200",
+        };
+      case "expired":
+        return {
+          text: t("store.expiredText"),
+          className: "bg-red-100 text-red-800 border-red-200",
+        };
+      default:
+        return {
+          text: "Unknown",
+          className: "bg-gray-100 text-gray-800 border-gray-200",
+        };
+    }
   };
 
   const handleDelete = async () => {
@@ -393,12 +465,12 @@ export const FlyerCard = ({
                 {flyer.title}
               </h2>
               <div className="flex items-center justify-between">
-                <span className="text-xs sm:text-sm font-medium text-yellow-600">
-                  {calculateDaysLeft() === 0
-                    ? "Last day"
-                    : calculateDaysLeft() < 0
-                    ? "Expired"
-                    : calculateDaysLeft() + " days left"}
+                <span
+                  className={`text-xs sm:text-sm font-medium px-2 py-1 rounded-full border ${
+                    getDateBadge().className
+                  }`}
+                >
+                  {getDateBadge().text}
                 </span>
               </div>
             </div>

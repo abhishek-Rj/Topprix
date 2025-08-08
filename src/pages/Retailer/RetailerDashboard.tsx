@@ -107,11 +107,9 @@ export default function RetailerDashboard() {
           >
             <div className="p-8 rounded-3xl bg-gradient-to-r from-yellow-100/80 to-orange-100/80">
               <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-                {t("dashboard.retailerTitle")}
+                {t("dashboard.title")}
               </h1>
-              <p className="text-gray-600">
-                {t("dashboard.retailerDescription")}
-              </p>
+              <p className="text-gray-600">{t("dashboard.welcome")}</p>
             </div>
           </motion.div>
 

@@ -16,7 +16,7 @@ import { getDoc, doc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
 import baseUrl from "../hooks/baseurl";
-import CouponList from "../components/CouponCard";
+import { CouponList } from "../components/CouponCard";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import useAuthenticate from "@/hooks/authenticationt";
 import { useTranslation } from "react-i18next";
@@ -333,7 +333,6 @@ export default function CouponPage() {
                 coupons={sortedCoupons}
                 pagination={pagination}
                 onPageChange={setCurrentPage}
-                showLogo={true}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />
