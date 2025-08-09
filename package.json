@@ -1,62 +1,62 @@
 {
-    "name": "topprix",
-    "private": true,
-    "homepage": ".",
-    "version": "0.0.0",
-    "type": "module",
-    "scripts": {
-        "dev": "vite",
-        "build": "tsc -b && vite build",
-        "lint": "eslint .",
-        "preview": "vite preview"
-    },
-    "overrides": {
-        "react-pdf": {
-            "pdfjs-dist": "5.3.93"
-        }
-    },
-    "dependencies": {
-        "@radix-ui/react-slot": "^1.2.3",
-        "class-variance-authority": "^0.7.1",
-        "clsx": "^2.1.1",
-        "date-fns": "^3.6.0",
-        "firebase": "^11.10.0",
-        "framer-motion": "^12.12.2",
-        "i18next": "^24.2.3",
-        "lucide-react": "^0.483.0",
-        "motion": "^12.12.2",
-        "pdfjs-dist": "5.3.93",
-        "react": "^19.0.0",
-        "react-day-picker": "^8.10.1",
-        "react-dom": "^19.0.0",
-        "react-i18next": "^15.4.1",
-        "react-icons": "^5.5.0",
-        "react-image-crop": "^11.0.10",
-        "react-is": "^19.1.0",
-        "react-pdf": "^10.0.1",
-        "react-router-dom": "^7.3.0",
-        "react-toastify": "^11.0.5",
-        "react-top-loading-bar": "^3.0.2",
-        "react-typed": "^2.0.12",
-        "recharts": "^3.1.0",
-        "tailwind-merge": "^3.3.0",
-        "tailwindcss-animate": "^1.0.7"
-    },
-    "devDependencies": {
-        "@eslint/js": "^9.21.0",
-        "@types/node": "^22.15.24",
-        "@types/react": "^19.0.10",
-        "@types/react-dom": "^19.0.4",
-        "@vitejs/plugin-react-swc": "^3.8.0",
-        "autoprefixer": "^10.4.21",
-        "eslint": "^9.21.0",
-        "eslint-plugin-react-hooks": "^5.1.0",
-        "eslint-plugin-react-refresh": "^0.4.19",
-        "globals": "^15.15.0",
-        "postcss": "^8.5.3",
-        "tailwindcss": "^3.4.17",
-        "typescript": "~5.7.2",
-        "typescript-eslint": "^8.24.1",
-        "vite": "^6.2.0"
+  "name": "topprix",
+  "private": true,
+  "homepage": ".",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 85",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "overrides": {
+    "react-pdf": {
+      "pdfjs-dist": "5.3.93"
     }
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "firebase": "^11.10.0",
+    "framer-motion": "^12.12.2",
+    "i18next": "^24.2.3",
+    "lucide-react": "^0.483.0",
+    "motion": "^12.12.2",
+    "pdfjs-dist": "5.3.93",
+    "react": "^19.0.0",
+    "react-day-picker": "^8.10.1",
+    "react-dom": "^19.0.0",
+    "react-i18next": "^15.4.1",
+    "react-icons": "^5.5.0",
+    "react-image-crop": "^11.0.10",
+    "react-is": "^19.1.0",
+    "react-pdf": "^10.0.1",
+    "react-router-dom": "^7.3.0",
+    "react-toastify": "^11.0.5",
+    "react-top-loading-bar": "^3.0.2",
+    "react-typed": "^2.0.12",
+    "recharts": "^3.1.0",
+    "tailwind-merge": "^3.3.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.21.0",
+    "@types/node": "^22.15.24",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "@vitejs/plugin-react-swc": "^3.8.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.21.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "eslint-plugin-react-refresh": "^0.4.19",
+    "globals": "^15.15.0",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.7.2",
+    "typescript-eslint": "^8.24.1",
+    "vite": "^6.2.0"
+  }
 }
