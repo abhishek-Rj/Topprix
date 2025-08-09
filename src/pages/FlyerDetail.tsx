@@ -47,11 +47,9 @@ export default function FlyerDetail() {
       }
     };
 
-    // Prevent zoom with mouse wheel
+    // Prevent zoom with mouse wheel and vertical scrolling
     const handleWheel = (e: WheelEvent) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-      }
+      e.preventDefault();
     };
 
     // Prevent zoom with touch gestures
@@ -318,7 +316,7 @@ export default function FlyerDetail() {
       </div>
 
       {/* Main Content Area - Flyer Display */}
-      <div className="pt-32 bg-gray-100 h-screen">
+      <div className="pt-28 bg-gray-100 h-screen">
         {isPdf ? (
           // PDF Display
           <div className="h-full w-full">
