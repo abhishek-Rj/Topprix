@@ -143,7 +143,12 @@ export default function Subscriptions() {
 
       if (subscriptionResponse.ok) {
         const subscriptionData = await subscriptionResponse.json();
-        setCurrentSubscription(subscriptionData);
+        // Ensure the data structure matches the expected interface
+        // The API might return the subscription directly or nested
+        const formattedData = subscriptionData.subscription
+          ? subscriptionData
+          : { subscription: subscriptionData };
+        setCurrentSubscription(formattedData);
       } else {
         // No subscription found or error
         setCurrentSubscription(null);
@@ -296,25 +301,27 @@ export default function Subscriptions() {
                       {t("subscription.status")}:{" "}
                       <span
                         className={
-                          currentSubscription.subscription.status.toLowerCase() ===
+                          currentSubscription.subscription?.status?.toLowerCase() ===
                           "active"
                             ? "text-green-600"
                             : "text-yellow-600"
                         }
                       >
-                        {currentSubscription.subscription.status
-                          .charAt(0)
-                          .toUpperCase() +
-                          currentSubscription.subscription.status
-                            .slice(1)
-                            .toLowerCase()}
+                        {currentSubscription.subscription?.status
+                          ? currentSubscription.subscription?.status
+                              .charAt(0)
+                              .toUpperCase() +
+                            currentSubscription.subscription?.status
+                              .slice(1)
+                              .toLowerCase()
+                          : "Unknown"}
                       </span>
                     </p>
-                    {currentSubscription.subscription.currentPeriodEnd && (
+                    {currentSubscription.subscription?.currentPeriodEnd && (
                       <p className="text-gray-600 text-xs sm:text-sm">
                         {t("subscription.renews")}:{" "}
                         {formatDate(
-                          currentSubscription.subscription.currentPeriodEnd
+                          currentSubscription.subscription?.currentPeriodEnd
                         )}
                       </p>
                     )}
@@ -344,7 +351,7 @@ export default function Subscriptions() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 * index }}
                 className={`bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 ${
-                  currentSubscription?.subscription.pricingPlanId === plan.id
+                  currentSubscription?.subscription?.pricingPlanId === plan.id
                     ? "ring-2 ring-yellow-500 ring-opacity-50"
                     : ""
                 }`}
@@ -359,7 +366,7 @@ export default function Subscriptions() {
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
                       {getPlanIcon(plan.name)}
                     </div>
-                    {currentSubscription?.subscription.pricingPlanId ===
+                    {currentSubscription?.subscription?.pricingPlanId ===
                       plan.id && (
                       <span className="bg-white bg-opacity-20 px-2 py-1 rounded-full text-xs font-medium">
                         {t("subscription.currentPlan")}

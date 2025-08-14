@@ -351,7 +351,11 @@ export const FlyerCard = ({
   return (
     <>
       <Card
-        className="w-full hover:translate-y-1 rounded-lg shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-all relative group"
+        className={`w-full rounded-lg shadow-sm overflow-hidden cursor-pointer transition-all relative group ${
+          calculateDaysLeft().status === "expired"
+            ? "opacity-60 grayscale"
+            : "hover:translate-y-1 hover:shadow-md"
+        }`}
         onClick={() => navigate(`/flyers/${flyer.id}`)}
         onContextMenu={(e) => {
           e.preventDefault();

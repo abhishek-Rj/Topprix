@@ -4,7 +4,7 @@ import Navigation from "../../components/navigation";
 import { HiNewspaper, HiTag, HiPlus, HiPencil, HiX } from "react-icons/hi";
 import baseUrl from "../../hooks/baseurl";
 import { toast } from "react-toastify";
-import CategorySelector from "./CategorySelector";
+import PredefinedCategorySelector from "@/components/PredefinedCategorySelector";
 import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
 import { storage } from "../../context/firebaseProvider";
 import { MdCancel } from "react-icons/md";
@@ -34,6 +34,9 @@ export default function StoreDetailPage() {
   const [coupons, setCoupons] = useState<any>(null);
   const [flyers, setFlyers] = useState<any>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
+    []
+  ); // Keep for backward compatibility, but not actively used
   const [barcodeFile, setBarcodeFile] = useState<File | null>(null);
   const [qrCodeFile, setQrCodeFile] = useState<File | null>(null);
   const [barcodePreview, setBarcodePreview] = useState<string | null>(null);
@@ -699,8 +702,8 @@ export default function StoreDetailPage() {
 
       {/* Create Dialog */}
       {showDialog && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-5xl mx-auto max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <div className="fixed inset-0 backdrop-blur-sm bg-black/40 z-50 flex items-center justify-center p-2 sm:p-4">
+          <div className="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto max-h-[98vh] sm:max-h-[95vh] overflow-y-auto p-3 sm:p-6 lg:p-8">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 {isEditing ? t("store.edit") : t("store.create")}{" "}
@@ -720,93 +723,111 @@ export default function StoreDetailPage() {
             </div>
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               {activeTab === "flyers" ? (
-                // Flyer Form
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Title <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <CategorySelector
-                        selected={selectedCategories}
-                        onChange={setSelectedCategories}
-                      />
-                    </div>
-                  </div>
+                // Flyer Form - Redesigned for better space utilization
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+                  {/* Left Column */}
+                  <div className="space-y-4 sm:space-y-6">
+                    {/* Title and Description */}
+                    <div className="space-y-3 sm:space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Title <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                          placeholder="Enter flyer title"
+                          required
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Description
-                    </label>
-                    <input
-                      type="text"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    />
-                  </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Description
+                        </label>
+                        <textarea
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          rows={3}
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                          placeholder="Describe your flyer"
+                        />
+                      </div>
+                    </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    {/* File Upload Section */}
+                    <div className="space-y-3 sm:space-y-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
                         Flyer File <span className="text-red-600">*</span>
                       </label>
 
                       {/* File Type Toggle */}
-                      <div className="flex gap-2 mb-3">
+                      <div className="flex gap-2 sm:gap-3 mb-3 sm:mb-4">
                         <button
                           type="button"
                           onClick={() => setFileType("image")}
-                          className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                          className={`flex-1 px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-md sm:rounded-lg transition-all ${
                             fileType === "image"
-                              ? "bg-yellow-500 text-white"
+                              ? "bg-yellow-500 text-white shadow-md"
                               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                           }`}
                         >
-                          Image
+                          📷 Image
                         </button>
                         <button
                           type="button"
                           onClick={() => setFileType("pdf")}
-                          className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                          className={`flex-1 px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-md sm:rounded-lg transition-all ${
                             fileType === "pdf"
-                              ? "bg-yellow-500 text-white"
+                              ? "bg-yellow-500 text-white shadow-md"
                               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                           }`}
                         >
-                          PDF
+                          📄 PDF
                         </button>
                       </div>
 
                       {/* File Input */}
-                      <input
-                        type="file"
-                        accept={
-                          fileType === "image"
-                            ? "image/png, image/jpeg"
-                            : "application/pdf"
-                        }
-                        onChange={(e) => handleFileChange(e, "flyer")}
-                        className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
-                        required
-                      />
+                      <div className="border-2 border-dashed border-yellow-300 rounded-md sm:rounded-lg p-4 sm:p-6 text-center hover:border-yellow-400 transition-colors">
+                        <input
+                          type="file"
+                          accept={
+                            fileType === "image"
+                              ? "image/png, image/jpeg"
+                              : "application/pdf"
+                          }
+                          onChange={(e) => handleFileChange(e, "flyer")}
+                          className="hidden"
+                          id="flyer-upload"
+                          required
+                        />
+                        <label
+                          htmlFor="flyer-upload"
+                          className="cursor-pointer block"
+                        >
+                          <div className="text-2xl sm:text-4xl mb-1 sm:mb-2">
+                            📁
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-600">
+                            Click to upload{" "}
+                            {fileType === "image" ? "image" : "PDF"}
+                          </div>
+                          <div className="text-xs text-gray-400 mt-1">
+                            {fileType === "image" ? "PNG, JPG" : "PDF"} files
+                            only
+                          </div>
+                        </label>
+                      </div>
 
                       {/* Preview Section */}
                       {flyerImagePreview && (
-                        <div className="relative inline-block mt-2 h-16">
+                        <div className="relative inline-block">
                           <img
                             src={flyerImagePreview}
                             alt="Flyer Preview"
-                            className="h-full rounded shadow object-contain"
+                            className="h-24 sm:h-32 rounded-md sm:rounded-lg shadow-md object-cover"
                           />
                           <button
                             type="button"
@@ -814,23 +835,21 @@ export default function StoreDetailPage() {
                               setFlyerImagePreview(null);
                               setFlyerImage(null);
                             }}
-                            className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md"
                           >
-                            <MdCancel className="text-lg" />
+                            <MdCancel className="text-xs sm:text-sm" />
                           </button>
                         </div>
                       )}
 
                       {flyerPdfPreview && (
-                        <div className="relative inline-block mt-2 h-16">
-                          <div className="h-full w-12 bg-red-100 rounded shadow flex items-center justify-center">
-                            <div className="text-center">
-                              <div className="text-red-600 text-xs font-bold">
-                                PDF
-                              </div>
-                              <div className="text-red-600 text-xs">
-                                {flyerPdf?.name?.substring(0, 10)}...
-                              </div>
+                        <div className="relative inline-block">
+                          <div className="h-24 w-20 sm:h-32 sm:w-24 bg-red-100 rounded-md sm:rounded-lg shadow-md flex flex-col items-center justify-center">
+                            <div className="text-red-600 text-sm sm:text-lg font-bold">
+                              PDF
+                            </div>
+                            <div className="text-red-600 text-xs text-center px-1 sm:px-2">
+                              {flyerPdf?.name?.substring(0, 10)}...
                             </div>
                           </div>
                           <button
@@ -839,319 +858,401 @@ export default function StoreDetailPage() {
                               setFlyerPdfPreview(null);
                               setFlyerPdf(null);
                             }}
-                            className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
+                            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md"
                           >
-                            <MdCancel className="text-lg" />
+                            <MdCancel className="text-xs sm:text-sm" />
                           </button>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    {/* Start Date */}
-                    <div ref={startRef} className="relative">
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Start Date <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={startDate ? startDate.toLocaleDateString() : ""}
-                        onFocus={() => setShowStartDateCalender(true)}
-                        readOnly
-                        placeholder="Select Start Date"
-                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                        required
+                  {/* Right Column */}
+                  <div className="space-y-4 sm:space-y-6">
+                    {/* Categories */}
+                    <div>
+                      <PredefinedCategorySelector
+                        selectedCategories={selectedCategories}
+                        selectedSubcategories={selectedSubcategories}
+                        onCategoryChange={setSelectedCategories}
+                        onSubcategoryChange={setSelectedSubcategories}
+                        allowMultiple={true}
                       />
-                      {showStartDateCalender && (
-                        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/80 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2">
-                          <Calendar
-                            mode="single"
-                            selected={startDate}
-                            onSelect={(date) => {
-                              setStartDate(date);
-                              setShowStartDateCalender(false);
-                            }}
-                          />
-                        </div>
-                      )}
                     </div>
 
-                    {/* End Date */}
-                    <div ref={endRef} className="relative">
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        End Date <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={endDate ? endDate.toLocaleDateString() : ""}
-                        onFocus={() => setShowEndDateCalender(true)}
-                        readOnly
-                        placeholder="Select End Date"
-                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                        required
-                      />
-                      {showEndDateCalender && (
-                        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/80 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2">
-                          <Calendar
-                            mode="single"
-                            selected={endDate}
-                            onSelect={(date) => {
-                              setEndDate(date);
-                              setShowEndDateCalender(false);
-                            }}
+                    {/* Date Selection */}
+                    <div className="space-y-3 sm:space-y-4">
+                      <h4 className="text-sm font-semibold text-gray-700">
+                        Schedule
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        {/* Start Date */}
+                        <div ref={startRef} className="relative">
+                          <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                            Start Date <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={
+                              startDate ? startDate.toLocaleDateString() : ""
+                            }
+                            onFocus={() => setShowStartDateCalender(true)}
+                            readOnly
+                            placeholder="Select Start Date"
+                            className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer text-sm sm:text-base"
+                            required
                           />
+                          {showStartDateCalender && (
+                            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/90 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2 sm:p-4">
+                              <Calendar
+                                mode="single"
+                                selected={startDate}
+                                onSelect={(date) => {
+                                  setStartDate(date);
+                                  setShowStartDateCalender(false);
+                                }}
+                              />
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="isPremium"
-                        checked={isPremium}
-                        onChange={(e) => setIsPremium(e.target.checked)}
-                        className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
-                      />
-                      <label
-                        htmlFor="isPremium"
-                        className="text-sm font-medium text-gray-700"
-                      >
-                        Premium Flyer
-                      </label>
+                        {/* End Date */}
+                        <div ref={endRef} className="relative">
+                          <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                            End Date <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={endDate ? endDate.toLocaleDateString() : ""}
+                            onFocus={() => setShowEndDateCalender(true)}
+                            readOnly
+                            placeholder="Select End Date"
+                            className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer text-sm sm:text-base"
+                            required
+                          />
+                          {showEndDateCalender && (
+                            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/90 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2 sm:p-4">
+                              <Calendar
+                                mode="single"
+                                selected={endDate}
+                                onSelect={(date) => {
+                                  setEndDate(date);
+                                  setShowEndDateCalender(false);
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id="isSponsored"
-                        checked={isSponsored}
-                        onChange={(e) => setIsSponsored(e.target.checked)}
-                        className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
-                      />
-                      <label
-                        htmlFor="isSponsored"
-                        className="text-sm font-medium text-gray-700"
-                      >
-                        Sponsored Flyer
-                      </label>
+
+                    {/* Flyer Options */}
+                    <div className="space-y-3 sm:space-y-4">
+                      <h4 className="text-sm font-semibold text-gray-700">
+                        Options
+                      </h4>
+                      <div className="space-y-2 sm:space-y-3">
+                        <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-md sm:rounded-lg">
+                          <input
+                            type="checkbox"
+                            id="isPremium"
+                            checked={isPremium}
+                            onChange={(e) => setIsPremium(e.target.checked)}
+                            className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+                          />
+                          <label
+                            htmlFor="isPremium"
+                            className="text-xs sm:text-sm font-medium text-gray-700 cursor-pointer"
+                          >
+                            ⭐ Premium Flyer
+                          </label>
+                        </div>
+                        <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-md sm:rounded-lg">
+                          <input
+                            type="checkbox"
+                            id="isSponsored"
+                            checked={isSponsored}
+                            onChange={(e) => setIsSponsored(e.target.checked)}
+                            className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+                          />
+                          <label
+                            htmlFor="isSponsored"
+                            className="text-xs sm:text-sm font-medium text-gray-700 cursor-pointer"
+                          >
+                            📢 Sponsored Flyer
+                          </label>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </>
+                </div>
               ) : (
-                // Coupon Form
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Title <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Code <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        placeholder="e.g., SAVE20"
-                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                        required
-                      />
-                    </div>
-                  </div>
+                // Coupon Form - Redesigned for better space utilization
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+                  {/* Left Column */}
+                  <div className="space-y-4 sm:space-y-6">
+                    {/* Basic Information */}
+                    <div className="space-y-3 sm:space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                          Title <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={title}
+                          onChange={(e) => setTitle(e.target.value)}
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                          placeholder="Enter coupon title"
+                          required
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Description
-                    </label>
-                    <input
-                      type="text"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                    />
-                  </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                          Code <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={code}
+                          onChange={(e) => setCode(e.target.value)}
+                          placeholder="e.g., SAVE20, DISCOUNT10"
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                          required
+                        />
+                      </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Discount <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={discount}
-                        onChange={(e) => setDiscount(e.target.value)}
-                        placeholder="e.g., 20% off or $10 off"
-                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                        required
-                      />
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                          Discount <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={discount}
+                          onChange={(e) => setDiscount(e.target.value)}
+                          placeholder="e.g., 20% off, $10 off, Buy 1 Get 1"
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                          Description
+                        </label>
+                        <textarea
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          rows={3}
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                          placeholder="Describe the coupon terms and conditions"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <CategorySelector
-                        selected={selectedCategories}
-                        onChange={setSelectedCategories}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    {/* Start Date */}
-                    <div ref={startRef} className="relative">
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Start Date <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={startDate ? startDate.toLocaleDateString() : ""}
-                        onFocus={() => setShowStartDateCalender(true)}
-                        readOnly
-                        placeholder="Select Start Date"
-                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                        required
-                      />
-                      {showStartDateCalender && (
-                        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/80 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2">
-                          <Calendar
-                            mode="single"
-                            selected={startDate}
-                            onSelect={(date) => {
-                              setStartDate(date);
-                              setShowStartDateCalender(false);
-                            }}
-                          />
+
+                    {/* Upload Section */}
+                    <div className="space-y-3 sm:space-y-4">
+                      <h4 className="text-sm font-semibold text-gray-700">
+                        Upload Files
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        {/* Barcode Upload */}
+                        <div className="space-y-2 sm:space-y-3">
+                          <label className="block text-sm font-semibold text-gray-700">
+                            Barcode Image{" "}
+                            <span className="text-red-600">*</span>
+                          </label>
+                          <div className="border-2 border-dashed border-yellow-300 rounded-md sm:rounded-lg p-3 sm:p-4 text-center hover:border-yellow-400 transition-colors">
+                            <input
+                              type="file"
+                              ref={barcodeRef}
+                              accept="image/png, image/jpeg"
+                              onChange={(e) => handleFileChange(e, "barcode")}
+                              className="hidden"
+                              id="barcode-upload"
+                              required
+                            />
+                            <label
+                              htmlFor="barcode-upload"
+                              className="cursor-pointer block"
+                            >
+                              <div className="text-xl sm:text-2xl mb-1">📊</div>
+                              <div className="text-xs text-gray-600">
+                                Upload Barcode
+                              </div>
+                            </label>
+                          </div>
+                          {barcodePreview && (
+                            <div className="relative inline-block">
+                              <img
+                                src={barcodePreview}
+                                alt="Barcode Preview"
+                                className="h-12 sm:h-16 rounded shadow object-contain"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setBarcodePreview(null);
+                                  setBarcodeFile(null);
+                                  if (barcodeRef.current)
+                                    barcodeRef.current.value = "";
+                                }}
+                                className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md"
+                              >
+                                <MdCancel className="text-xs" />
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
 
-                    {/* End Date */}
-                    <div ref={endRef} className="relative">
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        End Date <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={endDate ? endDate.toLocaleDateString() : ""}
-                        onFocus={() => setShowEndDateCalender(true)}
-                        readOnly
-                        placeholder="Select End Date"
-                        className="w-full px-3 sm:px-4 py-2 border hover:scale-105 transition border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                        required
-                      />
-                      {showEndDateCalender && (
-                        <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/80 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2">
-                          <Calendar
-                            mode="single"
-                            selected={endDate}
-                            onSelect={(date) => {
-                              setEndDate(date);
-                              setShowEndDateCalender(false);
-                            }}
-                          />
+                        {/* QR Code Upload */}
+                        <div className="space-y-2 sm:space-y-3">
+                          <label className="block text-sm font-semibold text-gray-700">
+                            QR Code Image{" "}
+                            <span className="text-red-600">*</span>
+                          </label>
+                          <div className="border-2 border-dashed border-yellow-300 rounded-md sm:rounded-lg p-3 sm:p-4 text-center hover:border-yellow-400 transition-colors">
+                            <input
+                              type="file"
+                              ref={qrCodeRef}
+                              accept="image/png, image/jpeg"
+                              onChange={(e) => handleFileChange(e, "qrcode")}
+                              className="hidden"
+                              id="qrcode-upload"
+                              required
+                            />
+                            <label
+                              htmlFor="qrcode-upload"
+                              className="cursor-pointer block"
+                            >
+                              <div className="text-xl sm:text-2xl mb-1">🔲</div>
+                              <div className="text-xs text-gray-600">
+                                Upload QR Code
+                              </div>
+                            </label>
+                          </div>
+                          {qrCodePreview && (
+                            <div className="relative inline-block">
+                              <img
+                                src={qrCodePreview}
+                                alt="QR Code Preview"
+                                className="h-12 sm:h-16 rounded shadow object-contain"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setQrCodePreview(null);
+                                  setQrCodeFile(null);
+                                  if (qrCodeRef.current)
+                                    qrCodeRef.current.value = "";
+                                }}
+                                className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md"
+                              >
+                                <MdCancel className="text-xs" />
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-                    {/* Barcode Upload */}
+                  {/* Right Column */}
+                  <div className="space-y-4 sm:space-y-6">
+                    {/* Categories */}
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Barcode Image <span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        type="file"
-                        ref={barcodeRef}
-                        accept="image/png, image/jpeg"
-                        onChange={(e) => handleFileChange(e, "barcode")}
-                        className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
-                        required
+                      <PredefinedCategorySelector
+                        selectedCategories={selectedCategories}
+                        selectedSubcategories={selectedSubcategories}
+                        onCategoryChange={setSelectedCategories}
+                        onSubcategoryChange={setSelectedSubcategories}
+                        allowMultiple={true}
                       />
-                      {barcodePreview && (
-                        <div className="relative inline-block mt-2 h-16">
-                          <img
-                            src={barcodePreview}
-                            alt="Barcode Preview"
-                            className="h-full rounded shadow object-contain"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setBarcodePreview(null);
-                              setBarcodeFile(null);
-                              if (barcodeRef.current)
-                                barcodeRef.current.value = "";
-                            }}
-                            className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
-                          >
-                            <MdCancel className="text-lg" />
-                          </button>
-                        </div>
-                      )}
                     </div>
 
-                    {/* QR Code Upload */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        QR Code Image <span className="text-red-600">*</span>
-                      </label>
-                      <input
-                        type="file"
-                        ref={qrCodeRef}
-                        accept="image/png, image/jpeg"
-                        onChange={(e) => handleFileChange(e, "qrcode")}
-                        className="block w-full hover:scale-105 transition text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-yellow-600 file:text-white hover:file:bg-yellow-700"
-                        required
-                      />
-                      {qrCodePreview && (
-                        <div className="relative inline-block mt-2 h-16">
-                          <img
-                            src={qrCodePreview}
-                            alt="QR Code Preview"
-                            className="h-full rounded shadow object-contain"
+                    {/* Date Selection */}
+                    <div className="space-y-3 sm:space-y-4">
+                      <h4 className="text-sm font-semibold text-gray-700">
+                        Validity Period
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        {/* Start Date */}
+                        <div ref={startRef} className="relative">
+                          <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                            Start Date <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={
+                              startDate ? startDate.toLocaleDateString() : ""
+                            }
+                            onFocus={() => setShowStartDateCalender(true)}
+                            readOnly
+                            placeholder="Select Start Date"
+                            className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer text-sm sm:text-base"
+                            required
                           />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setQrCodePreview(null);
-                              setQrCodeFile(null);
-                              if (qrCodeRef.current)
-                                qrCodeRef.current.value = "";
-                            }}
-                            className="absolute -top-2 -right-2 bg-white text-red-600 rounded-full p-1 hover:bg-red-100 shadow"
-                          >
-                            <MdCancel className="text-lg" />
-                          </button>
+                          {showStartDateCalender && (
+                            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/90 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2 sm:p-4">
+                              <Calendar
+                                mode="single"
+                                selected={startDate}
+                                onSelect={(date) => {
+                                  setStartDate(date);
+                                  setShowStartDateCalender(false);
+                                }}
+                              />
+                            </div>
+                          )}
                         </div>
-                      )}
+
+                        {/* End Date */}
+                        <div ref={endRef} className="relative">
+                          <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                            End Date <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={endDate ? endDate.toLocaleDateString() : ""}
+                            onFocus={() => setShowEndDateCalender(true)}
+                            readOnly
+                            placeholder="Select End Date"
+                            className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer text-sm sm:text-base"
+                            required
+                          />
+                          {showEndDateCalender && (
+                            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/90 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2 sm:p-4">
+                              <Calendar
+                                mode="single"
+                                selected={endDate}
+                                onSelect={(date) => {
+                                  setEndDate(date);
+                                  setShowEndDateCalender(false);
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </>
+                </div>
               )}
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4 border-t border-gray-200 mt-6">
                 <button
                   type="button"
                   onClick={() => {
                     setShowDialog(false);
                     resetForm();
                   }}
-                  className="px-6 py-2 rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2 text-sm sm:text-base rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200 order-2 sm:order-1"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2 rounded-md hover:scale-105 transition bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2 text-sm sm:text-base rounded-md hover:scale-105 transition bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 order-1 sm:order-2"
                 >
                   {isSubmitting
                     ? isEditing

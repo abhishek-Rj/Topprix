@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "../../components/navigation";
-import CategorySelector from "../Common/CategorySelector";
+import PredefinedCategorySelector from "@/components/PredefinedCategorySelector";
 import useAuthenticate from "../../hooks/authenticationt";
 import Loader from "../../components/loading";
 import baseUrl from "../../hooks/baseurl";
@@ -14,8 +14,6 @@ import {
   FiGlobe,
   FiHash,
   FiCamera,
-  FiPlus,
-  FiCheck,
 } from "react-icons/fi";
 import { FaStore } from "react-icons/fa";
 import { getDownloadURL, ref, uploadBytes } from "@firebase/storage";
@@ -34,6 +32,9 @@ export default function CreateNewStore() {
   const [zipCode, setZipCode] = useState("");
   const [logo, setLogo] = useState<File | null>(null);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
+    []
+  ); // Keep for backward compatibility, but not actively used
   const [isLoading, setIsLoading] = useState(false);
   const { user, userRole, loading } = useAuthenticate();
 
@@ -500,9 +501,12 @@ export default function CreateNewStore() {
 
               {/* Categories */}
               <div>
-                <CategorySelector
-                  selected={selectedCategories}
-                  onChange={setSelectedCategories}
+                <PredefinedCategorySelector
+                  selectedCategories={selectedCategories}
+                  selectedSubcategories={selectedSubcategories}
+                  onCategoryChange={setSelectedCategories}
+                  onSubcategoryChange={setSelectedSubcategories}
+                  allowMultiple={true}
                 />
               </div>
 

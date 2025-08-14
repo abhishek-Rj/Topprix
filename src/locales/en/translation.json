@@ -211,7 +211,10 @@
     "viewAll": "View All",
     "previous": "Previous",
     "next": "Next",
-    "page": "Page"
+    "page": "Page",
+    "category": "Category",
+    "subcategory": "Subcategory",
+    "sortBy": "Sort By"
   },
   "flyers": {
     "title": "Latest Flyers",
@@ -235,7 +238,16 @@
     "viewCoupons": "View Coupons",
     "previous": "Previous",
     "next": "Next",
-    "page": "Page"
+    "page": "Page",
+    "filters": "Filters",
+    "categories": "Categories",
+    "allCategories": "All Categories",
+    "sortBy": "Sort By",
+    "quickActions": "Quick Actions",
+    "clearFilters": "Clear All Filters",
+    "activeFilters": "Active Filters",
+    "category": "Category",
+    "subcategory": "Subcategory"
   },
   "stores": {
     "title": "Stores",

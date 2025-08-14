@@ -211,7 +211,10 @@
     "previous": "Précédent",
     "next": "Suivant",
     "page": "Page",
-    "of": "sur"
+    "of": "sur",
+    "category": "Catégorie",
+    "subcategory": "Sous-catégorie",
+    "sortBy": "Trier par"
   },
   "flyers": {
     "title": "Derniers prospectus",
@@ -236,7 +239,14 @@
     "previous": "Précédent",
     "next": "Suivant",
     "page": "Page",
-    "of": "sur"
+    "of": "sur",
+    "filters": "Filtres",
+    "categories": "Catégories",
+    "allCategories": "Toutes les catégories",
+    "sortBy": "Trier par",
+    "quickActions": "Actions rapides",
+    "clearFilters": "Effacer tous les filtres",
+    "activeFilters": "Filtres actifs"
   },
   "stores": {
     "title": "Magasins",

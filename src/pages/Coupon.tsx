@@ -1,25 +1,17 @@
 import { useState, useEffect } from "react";
-import {
-  HiTag,
-  HiSearch,
-  HiFilter,
-  HiSortAscending,
-  HiUser,
-  HiShoppingCart,
-} from "react-icons/hi";
+import { HiTag, HiUser } from "react-icons/hi";
 import Footer from "../components/Footer";
 import { FaStore } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Navigation from "../components/navigation";
-import { auth, db } from "../context/firebaseProvider";
-import { getDoc, doc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+
 import { toast } from "react-toastify";
 import baseUrl from "../hooks/baseurl";
 import { CouponList } from "../components/CouponCard";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import useAuthenticate from "@/hooks/authenticationt";
 import { useTranslation } from "react-i18next";
+import FloatingSidebar from "@/components/FloatingSidebar";
 
 interface Coupon {
   id: string;
@@ -49,42 +41,68 @@ export default function CouponPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
-  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [sortBy, setSortBy] = useState("all");
-  const [userData, setUserData] = useState<any>({
-    name: "",
-    role: "",
-  });
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const [pagination, setPagination] = useState<any>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Will be set based on screen size
   const itemsPerPage = 12;
   const { userRole } = useAuthenticate();
+  const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
     localStorage.setItem("sortBy", "all");
+  }, []);
+
+  useEffect(() => {
+    const category = searchParams.get("category") || "all";
+    const subcategory = searchParams.get("subcategory") || "all";
+    setSelectedCategory(category);
+    setSelectedSubcategory(subcategory);
+  }, [searchParams]);
+
+  // Set sidebar state based on screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const isDesktop = window.innerWidth >= 768; // md breakpoint
+      setIsSidebarOpen(isDesktop);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  // Fetch categories for name mapping
+  useEffect(() => {
     const fetchCategories = async () => {
       try {
         const response = await fetch(`${baseUrl}categories`);
         if (response.ok) {
           const data = await response.json();
-          setCategories(data.categories);
-        } else {
-          toast.error("Failed to fetch categories");
+          setCategories(data.categories || []);
         }
       } catch (error) {
-        toast.error("Error loading categories");
+        console.error("Error fetching categories:", error);
       }
     };
 
     fetchCategories();
   }, []);
 
-  useEffect(() => {
-    const category = searchParams.get("category") || "all";
-    setSelectedCategory(category);
-  }, [searchParams]);
+  // Helper functions to get names from IDs
+  const getCategoryName = (categoryId: string) => {
+    if (categoryId === "all") return t("coupons.allCategories");
+    const category = categories.find((cat) => cat.id === categoryId);
+    return category?.name || categoryId;
+  };
+
+  const getSubcategoryName = (subcategoryId: string) => {
+    if (subcategoryId === "all") return "";
+    const subcategory = categories.find((cat) => cat.id === subcategoryId);
+    return subcategory?.name || subcategoryId;
+  };
 
   useEffect(() => {
     if (currentPage !== 1) {
@@ -124,26 +142,6 @@ export default function CouponPage() {
     fetchCoupons();
   }, [currentPage, sortBy, selectedCategory]);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const userData = docSnap.data();
-          setUserData({
-            name: userData.name,
-            role: userData.role || "USER",
-          });
-        } else {
-          toast.info("You are not Signed in");
-        }
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const handleEdit = () => {
     // Placeholder for edit functionality
     toast.info("Edit functionality coming soon!");
@@ -154,22 +152,12 @@ export default function CouponPage() {
     toast.info("Delete functionality coming soon!");
   };
 
-  const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
-    setSearchParams({ category });
-  };
-
   const filteredCoupons = (coupons || []).filter((coupon) => {
     if (!coupon) return false;
-    const matchesSearch =
-      (coupon.title?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
-      (coupon.store?.name?.toLowerCase() || "").includes(
-        searchQuery.toLowerCase()
-      );
     const matchesCategories =
       selectedCategory === "all" ||
       coupon.categories.some((cat) => selectedCategory === cat.id);
-    return matchesSearch && matchesCategories;
+    return matchesCategories;
   });
 
   const sortedCoupons = [...filteredCoupons].sort((a, b) => {
@@ -187,11 +175,24 @@ export default function CouponPage() {
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navigation />
       </div>
+
+      {/* Floating Sidebar */}
+      <FloatingSidebar
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        selectedSubcategory={selectedSubcategory}
+        onSubcategoryChange={setSelectedSubcategory}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        userRole={userRole || "USER"}
+      />
       <main
         id="goto"
-        className={`pt-20 pb-10 ${
-          userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"
-        }`}
+        className={`pt-20 pb-10 transition-all duration-300 ${
+          isSidebarOpen ? "md:pl-80" : ""
+        } ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}
       >
         <div className="max-w-7xl mx-auto px-4">
           {currentPage === 1 ? (
@@ -254,70 +255,34 @@ export default function CouponPage() {
             <></>
           )}
 
-          <div className="pt-8">
-            {/* Filters and Search */}
-            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div className="relative">
-                  <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
-                  <input
-                    type="text"
-                    placeholder={t("coupons.searchPlaceholder")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
-                      userRole === "ADMIN"
-                        ? "focus:ring-blue-500 focus:border-blue-500"
-                        : "focus:ring-yellow-500 focus:border-yellow-500"
-                    }`}
-                  />
-                </div>
-                <div className="relative">
-                  <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => handleCategorySelect(e.target.value)}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
-                      userRole === "ADMIN"
-                        ? "focus:ring-blue-500 focus:border-blue-500"
-                        : "focus:ring-yellow-500 focus:border-yellow-500"
-                    }`}
-                  >
-                    <option value="all">{t("coupons.allCategories")}</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="relative">
-                  <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
-                  <select
-                    value={sortBy}
-                    onChange={(e) => {
-                      const newSortBy = e.target.value;
-                      setSortBy(newSortBy);
-                      localStorage.setItem("sortBy", newSortBy);
-                    }}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
-                      userRole === "ADMIN"
-                        ? "focus:ring-blue-500 focus:border-blue-500"
-                        : "focus:ring-yellow-500 focus:border-yellow-500"
-                    }`}
-                  >
-                    <option value="all">{t("coupons.all")}</option>
-                    <option value="active">{t("coupons.active")}</option>
-                    <option value="inactive">{t("coupons.inactive")}</option>
-                  </select>
-                </div>
-                <div className="text-center sm:text-right">
-                  <span className="text-xs sm:text-sm text-gray-600">
-                    {t("coupons.showing")} {filteredCoupons.length}{" "}
-                    {t("coupons.of")} {pagination?.total || 0}{" "}
-                    {t("coupons.coupons")}
+          {/* Results Summary */}
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="text-center sm:text-left">
+                <span className="text-sm text-gray-600">
+                  {t("coupons.showing")} {filteredCoupons.length}{" "}
+                  {t("coupons.of")} {pagination?.total || 0}{" "}
+                  {t("coupons.coupons")}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  {t("coupons.category")}: {getCategoryName(selectedCategory)}
+                </span>
+                {selectedSubcategory !== "all" && (
+                  <span className="text-sm text-gray-600">
+                    | {t("coupons.subcategory")}:{" "}
+                    {getSubcategoryName(selectedSubcategory)}
                   </span>
-                </div>
+                )}
+                <span className="text-sm text-gray-600">
+                  | {t("coupons.sortBy")}:{" "}
+                  {sortBy === "all"
+                    ? t("coupons.all")
+                    : sortBy === "active"
+                    ? t("coupons.active")
+                    : t("coupons.inactive")}
+                </span>
               </div>
             </div>
           </div>

@@ -167,7 +167,10 @@ export default function Profile() {
       );
       if (subscriptionResponse.ok) {
         const subscriptionData = await subscriptionResponse.json();
-        setSubscription(subscriptionData);
+        const formattedData = subscriptionData.subscription
+          ? subscriptionData
+          : { subscription: subscriptionData };
+        setSubscription(formattedData);
       }
     } catch (error) {
       console.error("Error fetching subscription:", error);
@@ -420,7 +423,7 @@ export default function Profile() {
           )}
 
           {/* Subscription Section */}
-          {subscription && (
+          {subscription && subscription.subscription?.pricingPlan && (
             <div className="p-6 border-b border-gray-200">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold text-gray-800">
@@ -428,11 +431,11 @@ export default function Profile() {
                 </h2>
                 <Badge
                   className={`${getSubscriptionStatusColor(
-                    subscription.user.subscriptionStatus
+                    subscription.user?.subscriptionStatus
                   )} flex items-center gap-1`}
                 >
-                  {getSubscriptionIcon(subscription.user.subscriptionStatus)}
-                  {subscription.user.subscriptionStatus}
+                  {getSubscriptionIcon(subscription.user?.subscriptionStatus)}
+                  {subscription.user?.subscriptionStatus}
                 </Badge>
               </div>
 
@@ -442,16 +445,16 @@ export default function Profile() {
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <FiCreditCard className="mr-2 text-purple-600" />
-                      {subscription.subscription.pricingPlan.name} - €
-                      {subscription.subscription.pricingPlan.amount}/
-                      {subscription.subscription.pricingPlan.interval}
+                      {subscription.subscription?.pricingPlan?.name} - €
+                      {subscription.subscription?.pricingPlan?.amount}/
+                      {subscription.subscription?.pricingPlan?.interval}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-purple-600">
-                          {subscription.subscription.pricingPlan.amount}€
+                          {subscription.subscription?.pricingPlan?.amount}€
                         </div>
                         <div className="text-sm text-gray-600">
                           {t("profile.monthlyCost")}
@@ -459,10 +462,8 @@ export default function Profile() {
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-green-600">
-                          {
-                            subscription.subscription.pricingPlan.features
-                              .length
-                          }
+                          {subscription.subscription?.pricingPlan?.features
+                            ?.length || 0}
                         </div>
                         <div className="text-sm text-gray-600">
                           {t("profile.features")}
@@ -470,10 +471,10 @@ export default function Profile() {
                       </div>
                       <div className="text-center">
                         <div className="text-2xl font-bold text-blue-600">
-                          {subscription.user.currentPeriodEnd
+                          {subscription.user?.currentPeriodEnd
                             ? Math.ceil(
                                 (new Date(
-                                  subscription.user.currentPeriodEnd
+                                  subscription.user?.currentPeriodEnd
                                 ).getTime() -
                                   new Date().getTime()) /
                                   (1000 * 60 * 60 * 24)
@@ -503,8 +504,8 @@ export default function Profile() {
                           {t("profile.price")}:
                         </span>
                         <span className="font-semibold">
-                          €{subscription.subscription.pricingPlan.amount}/
-                          {subscription.subscription.pricingPlan.interval}
+                          €{subscription.subscription?.pricingPlan?.amount}/
+                          {subscription.subscription?.pricingPlan?.interval}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -512,7 +513,7 @@ export default function Profile() {
                           {t("profile.currency")}:
                         </span>
                         <span className="font-semibold">
-                          {subscription.subscription.pricingPlan.currency.toUpperCase()}
+                          {subscription.subscription?.pricingPlan?.currency?.toUpperCase()}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
@@ -521,36 +522,36 @@ export default function Profile() {
                         </span>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            subscription.subscription.cancelAtPeriodEnd
+                            subscription.subscription?.cancelAtPeriodEnd
                               ? "bg-red-100 text-red-800"
                               : "bg-green-100 text-green-800"
                           }`}
                         >
-                          {subscription.subscription.cancelAtPeriodEnd
+                          {subscription.subscription?.cancelAtPeriodEnd
                             ? t("profile.willCancel")
                             : t("profile.active")}
                         </span>
                       </div>
-                      {subscription.subscription.currentPeriodStart && (
+                      {subscription.subscription?.currentPeriodStart && (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">
                             {t("profile.currentPeriodStart")}:
                           </span>
                           <span className="font-semibold">
                             {formatSubscriptionDate(
-                              subscription.subscription.currentPeriodStart
+                              subscription.subscription?.currentPeriodStart
                             )}
                           </span>
                         </div>
                       )}
-                      {subscription.subscription.currentPeriodEnd && (
+                      {subscription.subscription?.currentPeriodEnd && (
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">
                             {t("profile.currentPeriodEnd")}:
                           </span>
                           <span className="font-semibold">
                             {formatSubscriptionDate(
-                              subscription.subscription.currentPeriodEnd
+                              subscription.subscription?.currentPeriodEnd
                             )}
                           </span>
                         </div>
@@ -573,7 +574,7 @@ export default function Profile() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {subscription.subscription.pricingPlan.features?.map(
+                    {subscription.subscription?.pricingPlan?.features?.map(
                       (feature: string, index: number) => (
                         <div key={index} className="flex items-center">
                           <FiCheckCircle className="w-4 h-4 text-green-500 mr-2" />

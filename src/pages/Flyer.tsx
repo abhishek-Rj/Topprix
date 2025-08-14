@@ -1,12 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  HiNewspaper,
-  HiSearch,
-  HiFilter,
-  HiSortAscending,
-  HiUser,
-  HiShoppingCart,
-} from "react-icons/hi";
+import { HiNewspaper, HiUser } from "react-icons/hi";
 import { FaStore } from "react-icons/fa";
 import { motion } from "framer-motion";
 import Navigation from "../components/navigation";
@@ -16,8 +9,9 @@ import { toast } from "react-toastify";
 import FlyerList from "@/components/FlyerCard";
 import Loader from "@/components/loading";
 import useAuthenticate from "@/hooks/authenticationt";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import FloatingSidebar from "@/components/FloatingSidebar";
 
 //@ts-ignore
 interface Flyer {
@@ -37,17 +31,62 @@ export default function FlyerPage() {
   const [flyers, setFlyers] = useState<any[]>([]);
   const [pagination, setPagination] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [sortBy, setSortBy] = useState<string>("all");
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Will be set based on screen size
   const { user, userRole } = useAuthenticate();
+  const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
     const category = searchParams.get("category") || "all";
+    const subcategory = searchParams.get("subcategory") || "all";
     setSelectedCategory(category);
+    setSelectedSubcategory(subcategory);
   }, [searchParams]);
+
+  // Set sidebar state based on screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      const isDesktop = window.innerWidth >= 768; // md breakpoint
+      setIsSidebarOpen(isDesktop);
+    };
+
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  // Fetch categories for name mapping
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${baseUrl}categories`);
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data.categories || []);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Helper functions to get names from IDs
+  const getCategoryName = (categoryId: string) => {
+    if (categoryId === "all") return t("flyers.allCategories");
+    const category = categories.find((cat) => cat.id === categoryId);
+    return category?.name || categoryId;
+  };
+
+  const getSubcategoryName = (subcategoryId: string) => {
+    if (subcategoryId === "all") return "";
+    const subcategory = categories.find((cat) => cat.id === subcategoryId);
+    return subcategory?.name || subcategoryId;
+  };
 
   useEffect(() => {
     const fetchFlyers = async () => {
@@ -58,6 +97,11 @@ export default function FlyerPage() {
         // Add category filter if selected
         if (selectedCategory !== "all") {
           url += `&categoryId=${selectedCategory}`;
+        }
+
+        // Add subcategory filter if selected
+        if (selectedSubcategory !== "all") {
+          url += `&subcategoryId=${selectedSubcategory}`;
         }
 
         // Add active/inactive filter
@@ -83,33 +127,7 @@ export default function FlyerPage() {
     };
 
     fetchFlyers();
-  }, [selectedCategory, sortBy]);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${baseUrl}categories`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch categories");
-        }
-        const data = await response.json();
-        setCategories(data.categories);
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        toast.error("Failed to load categories");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
-    setSearchParams({ category });
-  };
+  }, [selectedCategory, selectedSubcategory, sortBy]);
 
   const handlePageChange = async (page: number) => {
     try {
@@ -118,6 +136,10 @@ export default function FlyerPage() {
 
       if (selectedCategory !== "all") {
         url += `&categoryId=${selectedCategory}`;
+      }
+
+      if (selectedSubcategory !== "all") {
+        url += `&subcategoryId=${selectedSubcategory}`;
       }
 
       if (sortBy === "active") {
@@ -169,17 +191,30 @@ export default function FlyerPage() {
     }
   };
 
-  const filteredFlyers = flyers.filter((flyer) =>
-    flyer.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredFlyers = flyers;
 
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navigation />
       </div>
+
+      {/* Floating Sidebar */}
+      <FloatingSidebar
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        selectedSubcategory={selectedSubcategory}
+        onSubcategoryChange={setSelectedSubcategory}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        isOpen={isSidebarOpen}
+        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        userRole={userRole || "USER"}
+      />
       <div
-        className={`min-h-screen pt-16 ${
+        className={`min-h-screen pt-16 transition-all duration-300 ${
+          isSidebarOpen ? "md:pl-80" : ""
+        } ${
           userRole === "ADMIN"
             ? "bg-gradient-to-b from-blue-50 to-white"
             : "bg-gradient-to-b from-yellow-50 to-white"
@@ -260,129 +295,36 @@ export default function FlyerPage() {
             </div>
           )}
 
-          {/* Search and Filters Section */}
-          {pagination && pagination.currentPage === 1 ? (
-            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <div className="relative">
-                  <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
-                  <input
-                    type="text"
-                    placeholder={t("flyers.searchPlaceholder")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
-                      userRole === "ADMIN"
-                        ? "focus:ring-blue-500 focus:border-blue-500"
-                        : "focus:ring-yellow-500 focus:border-yellow-500"
-                    }`}
-                  />
-                </div>
-                <div className="relative">
-                  <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
-                      userRole === "ADMIN"
-                        ? "focus:ring-blue-500 focus:border-blue-500"
-                        : "focus:ring-yellow-500 focus:border-yellow-500"
-                    }`}
-                  >
-                    {/* Add category options here */}
-                  </select>
-                </div>
-                <div className="relative">
-                  <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
-                      userRole === "ADMIN"
-                        ? "focus:ring-blue-500 focus:border-blue-500"
-                        : "focus:ring-yellow-500 focus:border-yellow-500"
-                    }`}
-                  >
-                    <option value="all">{t("flyers.allFlyers")}</option>
-                    <option value="active">{t("flyers.activeFlyers")}</option>
-                    <option value="inactive">
-                      {t("flyers.inactiveFlyers")}
-                    </option>
-                  </select>
-                </div>
-                <div className="text-center sm:text-right">
-                  <span className="text-xs sm:text-sm text-gray-600">
-                    {t("flyers.showing")} {flyers.length} {t("flyers.of")}{" "}
-                    {filteredFlyers.length} {t("flyers.flyers")}
+          {/* Results Summary */}
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div className="text-center sm:text-left">
+                <span className="text-sm text-gray-600">
+                  {t("flyers.showing")} {flyers.length} {t("flyers.of")}{" "}
+                  {filteredFlyers.length} {t("flyers.flyers")}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  {t("flyers.category")}: {getCategoryName(selectedCategory)}
+                </span>
+                {selectedSubcategory !== "all" && (
+                  <span className="text-sm text-gray-600">
+                    | {t("flyers.subcategory")}:{" "}
+                    {getSubcategoryName(selectedSubcategory)}
                   </span>
-                </div>
+                )}
+                <span className="text-sm text-gray-600">
+                  | {t("flyers.sortBy")}:{" "}
+                  {sortBy === "all"
+                    ? t("flyers.allFlyers")
+                    : sortBy === "active"
+                    ? t("flyers.activeFlyers")
+                    : t("flyers.inactiveFlyers")}
+                </span>
               </div>
             </div>
-          ) : (
-            <div className="pt-8">
-              {/* Filters and Search */}
-              <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  <div className="relative">
-                    <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
-                    <input
-                      type="text"
-                      placeholder={t("flyers.searchPlaceholder")}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
-                        userRole === "ADMIN"
-                          ? "focus:ring-blue-500 focus:border-blue-500"
-                          : "focus:ring-yellow-500 focus:border-yellow-500"
-                      }`}
-                    />
-                  </div>
-                  <div className="relative">
-                    <HiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
-                        userRole === "ADMIN"
-                          ? "focus:ring-blue-500 focus:border-blue-500"
-                          : "focus:ring-yellow-500 focus:border-yellow-500"
-                      }`}
-                    >
-                      {categories.map((category: any) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="relative">
-                    <HiSortAscending className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base hidden sm:block" />
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value)}
-                      className={`w-full pl-3 sm:pl-10 pr-3 sm:pr-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border text-sm sm:text-base ${
-                        userRole === "ADMIN"
-                          ? "focus:ring-blue-500 focus:border-blue-500"
-                          : "focus:ring-yellow-500 focus:border-yellow-500"
-                      }`}
-                    >
-                      <option value="all">{t("flyers.allFlyers")}</option>
-                      <option value="active">{t("flyers.activeFlyers")}</option>
-                      <option value="inactive">
-                        {t("flyers.inactiveFlyers")}
-                      </option>
-                    </select>
-                  </div>
-                  <div className="text-center sm:text-right">
-                    <span className="text-xs sm:text-sm text-gray-600">
-                      {t("flyers.showing")} {flyers.length} {t("flyers.of")}{" "}
-                      {filteredFlyers.length} {t("flyers.flyers")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          </div>
 
           {/* Flyer Grid */}
           <div
@@ -413,9 +355,7 @@ export default function FlyerPage() {
                   {t("flyers.noFlyersFound")}
                 </h2>
                 <p className="text-sm sm:text-base">
-                  {searchQuery
-                    ? t("flyers.noFlyersMatch")
-                    : t("flyers.noFlyersAvailable")}
+                  {t("flyers.noFlyersAvailable")}
                 </p>
               </div>
             )}

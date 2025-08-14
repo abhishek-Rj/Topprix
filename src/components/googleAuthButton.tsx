@@ -17,7 +17,7 @@ export default function GoogleAuthButton() {
 
         let userData;
         let isNewUser = false;
-        
+
         if (docSnap.exists()) {
           // User exists - preserve their current role, update name and email
           const existingData = docSnap.data();
@@ -41,31 +41,28 @@ export default function GoogleAuthButton() {
 
         // Only register with backend for new users
         if (isNewUser) {
-        try {
-          const registerUser = await fetch(
-              `${baseUrl}register`,
-            {
+          try {
+            const registerUser = await fetch(`${baseUrl}register`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
               },
-                body: JSON.stringify({
-                  username: user.displayName,
-                  email: user.email,
-                  phone: "", // Google auth doesn't provide phone, so we'll leave it empty
-                  role: "USER",
-                }),
-            }
-          );
+              body: JSON.stringify({
+                username: user.displayName,
+                email: user.email,
+                phone: "", // Google auth doesn't provide phone, so we'll leave it empty
+                role: "USER",
+              }),
+            });
 
-          const data = await registerUser.json();
-          if (data.user) {
-            navigate("/");
-          } else {
-            throw new Error("User registration during db save failed");
-          }
-        } catch (error) {
-          console.error("Error sending user data to server:", error);
+            const data = await registerUser.json();
+            if (data.user) {
+              navigate("/");
+            } else {
+              throw new Error("User registration during db save failed");
+            }
+          } catch (error) {
+            console.error("Error sending user data to server:", error);
           }
         } else {
           // Existing user - directly navigate to home
