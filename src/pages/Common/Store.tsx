@@ -731,28 +731,29 @@ export default function StoreDetailPage() {
                     <div className="space-y-3 sm:space-y-4">
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Title <span className="text-red-500">*</span>
+                          {t("store.title")}{" "}
+                          <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
                           className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
-                          placeholder="Enter flyer title"
+                          placeholder={t("store.enterFlyerTitle")}
                           required
                         />
                       </div>
 
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Description
+                          {t("store.description")}
                         </label>
                         <textarea
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           rows={3}
                           className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
-                          placeholder="Describe your flyer"
+                          placeholder={t("store.describeYourFlyer")}
                         />
                       </div>
                     </div>
@@ -760,7 +761,8 @@ export default function StoreDetailPage() {
                     {/* File Upload Section */}
                     <div className="space-y-3 sm:space-y-4">
                       <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                        Flyer File <span className="text-red-600">*</span>
+                        {t("store.flyerFile")}{" "}
+                        <span className="text-red-600">*</span>
                       </label>
 
                       {/* File Type Toggle */}
@@ -811,12 +813,15 @@ export default function StoreDetailPage() {
                             📁
                           </div>
                           <div className="text-xs sm:text-sm text-gray-600">
-                            Click to upload{" "}
-                            {fileType === "image" ? "image" : "PDF"}
+                            {t("store.clickToUpload")}{" "}
+                            {fileType === "image"
+                              ? t("store.image")
+                              : t("store.pdf")}
                           </div>
                           <div className="text-xs text-gray-400 mt-1">
-                            {fileType === "image" ? "PNG, JPG" : "PDF"} files
-                            only
+                            {fileType === "image" ? "PNG, JPG" : t("store.pdf")}{" "}
+                            {t("store.files")}
+                            {t("store.only")}
                           </div>
                         </label>
                       </div>
@@ -883,13 +888,14 @@ export default function StoreDetailPage() {
                     {/* Date Selection */}
                     <div className="space-y-3 sm:space-y-4">
                       <h4 className="text-sm font-semibold text-gray-700">
-                        Schedule
+                        {t("store.schedule")}
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         {/* Start Date */}
                         <div ref={startRef} className="relative">
                           <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                            Start Date <span className="text-red-500">*</span>
+                            {t("store.startDate")}{" "}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -898,7 +904,7 @@ export default function StoreDetailPage() {
                             }
                             onFocus={() => setShowStartDateCalender(true)}
                             readOnly
-                            placeholder="Select Start Date"
+                            placeholder={t("store.selectStartDate")}
                             className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer text-sm sm:text-base"
                             required
                           />
@@ -919,14 +925,15 @@ export default function StoreDetailPage() {
                         {/* End Date */}
                         <div ref={endRef} className="relative">
                           <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                            End Date <span className="text-red-500">*</span>
+                            {t("store.endDate")}{" "}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
                             value={endDate ? endDate.toLocaleDateString() : ""}
                             onFocus={() => setShowEndDateCalender(true)}
                             readOnly
-                            placeholder="Select End Date"
+                            placeholder={t("store.selectEndDate")}
                             className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer text-sm sm:text-base"
                             required
                           />
@@ -949,7 +956,7 @@ export default function StoreDetailPage() {
                     {/* Flyer Options */}
                     <div className="space-y-3 sm:space-y-4">
                       <h4 className="text-sm font-semibold text-gray-700">
-                        Options
+                        {t("store.options")}
                       </h4>
                       <div className="space-y-2 sm:space-y-3">
                         <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-md sm:rounded-lg">
@@ -964,7 +971,7 @@ export default function StoreDetailPage() {
                             htmlFor="isPremium"
                             className="text-xs sm:text-sm font-medium text-gray-700 cursor-pointer"
                           >
-                            ⭐ Premium Flyer
+                            ⭐ {t("store.premiumFlyer")}
                           </label>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50 rounded-md sm:rounded-lg">
@@ -979,8 +986,45 @@ export default function StoreDetailPage() {
                             htmlFor="isSponsored"
                             className="text-xs sm:text-sm font-medium text-gray-700 cursor-pointer"
                           >
-                            📢 Sponsored Flyer
+                            📢 {t("store.sponsoredFlyer")}
                           </label>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* General Conditions Notice */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="text-blue-600 mt-1">
+                          <svg
+                            className="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-medium text-blue-900 mb-2">
+                            Conditions Générales de Vente
+                          </h3>
+                          <p className="text-xs text-blue-800 mb-3">
+                            En créant ce prospectus, vous acceptez nos{" "}
+                            <a
+                              href="/general-conditions"
+                              className="text-blue-600 hover:underline font-medium"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Conditions Générales de Vente
+                            </a>{" "}
+                            et confirmez que le contenu respecte la législation
+                            en vigueur.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -995,27 +1039,29 @@ export default function StoreDetailPage() {
                     <div className="space-y-3 sm:space-y-4">
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                          Title <span className="text-red-500">*</span>
+                          {t("store.title")}{" "}
+                          <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
                           value={title}
                           onChange={(e) => setTitle(e.target.value)}
                           className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
-                          placeholder="Enter coupon title"
+                          placeholder={t("store.enterCouponTitle")}
                           required
                         />
                       </div>
 
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                          Code <span className="text-red-500">*</span>
+                          {t("store.code")}{" "}
+                          <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
                           value={code}
                           onChange={(e) => setCode(e.target.value)}
-                          placeholder="e.g., SAVE20, DISCOUNT10"
+                          placeholder={t("store.enterCouponCode")}
                           className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
                           required
                         />
@@ -1023,13 +1069,14 @@ export default function StoreDetailPage() {
 
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                          Discount <span className="text-red-500">*</span>
+                          {t("store.discount")}{" "}
+                          <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
                           value={discount}
                           onChange={(e) => setDiscount(e.target.value)}
-                          placeholder="e.g., 20% off, $10 off, Buy 1 Get 1"
+                          placeholder={t("store.enterDiscount")}
                           className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
                           required
                         />
@@ -1037,14 +1084,14 @@ export default function StoreDetailPage() {
 
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                          Description
+                          {t("store.description")}
                         </label>
                         <textarea
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           rows={3}
                           className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
-                          placeholder="Describe the coupon terms and conditions"
+                          placeholder={t("store.describeCouponTerms")}
                         />
                       </div>
                     </div>
@@ -1052,13 +1099,13 @@ export default function StoreDetailPage() {
                     {/* Upload Section */}
                     <div className="space-y-3 sm:space-y-4">
                       <h4 className="text-sm font-semibold text-gray-700">
-                        Upload Files
+                        {t("store.uploadFiles")}
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         {/* Barcode Upload */}
                         <div className="space-y-2 sm:space-y-3">
                           <label className="block text-sm font-semibold text-gray-700">
-                            Barcode Image{" "}
+                            {t("store.barcodeImage")}{" "}
                             <span className="text-red-600">*</span>
                           </label>
                           <div className="border-2 border-dashed border-yellow-300 rounded-md sm:rounded-lg p-3 sm:p-4 text-center hover:border-yellow-400 transition-colors">
@@ -1077,7 +1124,7 @@ export default function StoreDetailPage() {
                             >
                               <div className="text-xl sm:text-2xl mb-1">📊</div>
                               <div className="text-xs text-gray-600">
-                                Upload Barcode
+                                {t("store.uploadBarcode")}
                               </div>
                             </label>
                           </div>
@@ -1233,6 +1280,45 @@ export default function StoreDetailPage() {
                           )}
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* General Conditions Notice for Coupons */}
+              {activeTab === "coupons" && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-start gap-3">
+                    <div className="text-blue-600 mt-1">
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium text-blue-900 mb-2">
+                        Conditions Générales de Vente
+                      </h3>
+                      <p className="text-xs text-blue-800 mb-3">
+                        En créant ce coupon, vous acceptez nos{" "}
+                        <a
+                          href="/general-conditions"
+                          className="text-blue-600 hover:underline font-medium"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          Conditions Générales de Vente
+                        </a>{" "}
+                        et confirmez que le contenu respecte la législation en
+                        vigueur.
+                      </p>
                     </div>
                   </div>
                 </div>

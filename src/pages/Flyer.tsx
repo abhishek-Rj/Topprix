@@ -362,7 +362,7 @@ export default function FlyerPage() {
           </div>
         </div>
       </div>
-      <Footer />
+      <Footer sidebarOpen={isSidebarOpen} />
     </>
   );
 }

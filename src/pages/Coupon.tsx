@@ -309,7 +309,7 @@ export default function CouponPage() {
           </div>
         </div>
       </main>
-      <Footer />
+      <Footer sidebarOpen={isSidebarOpen} />
     </>
   );
 }

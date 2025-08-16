@@ -74,22 +74,21 @@ export default function Signup() {
 
     try {
       // First, check if user already exists in the database
-      const checkUserResponse = await fetch(
-        `${baseUrl}user/${email}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const checkUserResponse = await fetch(`${baseUrl}user/${email}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       if (checkUserResponse.ok) {
         const existingUser = await checkUserResponse.json();
-        
+
         // If user exists, show error message
         if (existingUser) {
-          setError("An account with this email already exists. Please login instead.");
+          setError(
+            "An account with this email already exists. Please login instead."
+          );
           setLoading(false);
           return;
         }
@@ -103,27 +102,24 @@ export default function Signup() {
         password,
         roleRef.current.value
       );
-      
+
       if (!userCredential || !userCredential.user) {
         throw new Error("Failed to create Firebase user");
       }
 
       // Create user in the database
-      const registerUserResponse = await fetch(
-        `${baseUrl}register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            username: name,
-            email,
-            phone,
-            role: roleRef.current.value,
-          }),
-        }
-      );
+      const registerUserResponse = await fetch(`${baseUrl}register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: name,
+          email,
+          phone,
+          role: roleRef.current.value,
+        }),
+      });
 
       const data = await registerUserResponse.json();
       if (!data.user) {
@@ -131,24 +127,28 @@ export default function Signup() {
         try {
           await userCredential.user.delete();
         } catch (deleteErr) {
-          console.error("Error deleting Firebase user after database failure:", deleteErr);
+          console.error(
+            "Error deleting Firebase user after database failure:",
+            deleteErr
+          );
         }
         throw new Error("Failed to register user in database");
       }
 
       toast.success("Account created successfully! Please login.");
       navigate("/login");
-
     } catch (error: any) {
       console.error("Error during sign-up:", error);
-      
+
       // Handle specific Firebase errors
-      if (error.code === 'auth/email-already-in-use') {
-        setError("An account with this email already exists. Please login instead.");
-      } else if (error.code === 'auth/weak-password') {
+      if (error.code === "auth/email-already-in-use") {
+        setError(
+          "An account with this email already exists. Please login instead."
+        );
+      } else if (error.code === "auth/weak-password") {
         setPasswordError(true);
         setError("Password is too weak. Please choose a stronger password.");
-      } else if (error.code === 'auth/invalid-email') {
+      } else if (error.code === "auth/invalid-email") {
         setEmailError(true);
         setError("Please enter a valid email address.");
       } else {
@@ -222,7 +222,11 @@ export default function Signup() {
           </p>
 
           <form className="mt-6 space-y-4" onSubmit={handleSignUp}>
-            {error && <p className="text-red-600 bg-red-300 rounded-md text-sm p-2">{error}</p>}
+            {error && (
+              <p className="text-red-600 bg-red-300 rounded-md text-sm p-2">
+                {error}
+              </p>
+            )}
 
             <div className="relative">
               <MdOutlinePerson className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
@@ -275,6 +279,75 @@ export default function Signup() {
               </select>
             </div>
 
+            {/* Privacy Policy Checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="privacy-policy"
+                required
+                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+              />
+              <label htmlFor="privacy-policy" className="text-xs text-gray-600">
+                J'accepte la{" "}
+                <a
+                  href="/privacy"
+                  className="text-yellow-600 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Politique de Confidentialité
+                </a>
+              </label>
+            </div>
+
+            {/* Terms and Conditions Checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="terms-conditions"
+                required
+                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+              />
+              <label
+                htmlFor="terms-conditions"
+                className="text-xs text-gray-600"
+              >
+                J'accepte les{" "}
+                <a
+                  href="/terms"
+                  className="text-yellow-600 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Conditions Générales d'Utilisation
+                </a>
+              </label>
+            </div>
+
+            {/* General Conditions Checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="general-conditions"
+                required
+                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+              />
+              <label
+                htmlFor="general-conditions"
+                className="text-xs text-gray-600"
+              >
+                J'accepte les{" "}
+                <a
+                  href="/general-conditions"
+                  className="text-yellow-600 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Conditions Générales de Vente
+                </a>
+              </label>
+            </div>
+
             <button
               type="submit"
               className={`w-full hover:scale-105 transition-transform  py-2 text-white font-semibold rounded-md 
@@ -302,6 +375,19 @@ export default function Signup() {
 
           <GoogleAuthButton />
           <FacebookAuthButton />
+
+          {/* Privacy Policy Link */}
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-500">
+              En créant un compte, vous acceptez notre{" "}
+              <a
+                href="/privacy"
+                className="text-yellow-600 hover:underline hover:text-yellow-700 transition-colors"
+              >
+                Politique de Confidentialité
+              </a>
+            </p>
+          </div>
         </div>
       </div>
       <div id="recaptcha-container"></div>

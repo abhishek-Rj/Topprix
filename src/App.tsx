@@ -20,6 +20,11 @@ import RetailerDashboard from "./pages/Retailer/RetailerDashboard";
 import ShoppingList from "./pages/ShoppingList";
 import PDFViewer from "./pages/PDFViewer";
 import FlyerDetail from "./pages/FlyerDetail";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Terms from "./pages/Terms";
+import GeneralConditions from "./pages/GeneralConditions";
+import AboutUs from "./pages/AboutUs";
+import LegalNotices from "./pages/LegalNotices";
 
 function App() {
   return (
@@ -47,6 +52,11 @@ function App() {
           <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
           <Route path="/pdf-viewer/:flyerId" element={<PDFViewer />} />
           <Route path="/flyers/:flyerId" element={<FlyerDetail />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/general-conditions" element={<GeneralConditions />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/legal-notices" element={<LegalNotices />} />
         </Routes>
       </BrowserRouter>
     </>

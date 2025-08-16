@@ -176,7 +176,7 @@ export default function FloatingSidebar({
       {/* Mobile Toggle Button */}
       <button
         onClick={onToggle}
-        className={`fixed top-24 left-4 z-40 md:hidden p-3 rounded-full shadow-lg transition-all duration-300 ${
+        className={`fixed top-20 left-4 z-30 md:hidden p-3 rounded-full shadow-lg transition-all duration-300 ${
           colors.bg
         } text-white hover:scale-110 ${isOpen ? "rotate-180" : ""}`}
       >
@@ -204,7 +204,7 @@ export default function FloatingSidebar({
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: isMobile ? -300 : 0, opacity: isMobile ? 0 : 1 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className={`fixed left-0 top-0 h-full z-50 bg-white shadow-2xl border-r ${
+            className={`fixed left-0 top-16 h-[calc(100vh-4rem)] z-40 bg-white shadow-2xl border-r ${
               colors.border
             } w-80 transform transition-transform duration-300 ease-in-out ${
               isMobile ? "" : "md:translate-x-0"
@@ -392,7 +392,7 @@ export default function FloatingSidebar({
       {/* Desktop Toggle Button */}
       <button
         onClick={onToggle}
-        className={`fixed top-24 z-40 hidden md:block p-3 rounded-full shadow-lg transition-all duration-300 ${
+        className={`fixed top-20 z-30 hidden md:block p-3 rounded-full shadow-lg transition-all duration-300 ${
           isOpen ? "left-[21rem] rotate-180" : "left-4"
         } ${colors.bg} text-white hover:scale-110`}
         title={isOpen ? "Hide Filters" : "Show Filters"}

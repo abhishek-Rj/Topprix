@@ -2,11 +2,20 @@ import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { HiMail } from "react-icons/hi";
 import { useTranslation } from "react-i18next";
 
-export default function Footer() {
+interface FooterProps {
+  sidebarOpen?: boolean;
+}
+
+export default function Footer({ sidebarOpen = false }: FooterProps) {
   const { t } = useTranslation();
 
   return (
-    <footer className="bg-gray-900 text-gray-300 mt-auto">
+    // Footer slides with sidebar - same behavior as main content
+    <footer
+      className={`bg-gray-900 text-gray-300 mt-auto transition-all duration-300 ease-in-out ${
+        sidebarOpen ? "md:pl-80" : ""
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
@@ -160,6 +169,12 @@ export default function Footer() {
             </p>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a
+                href="/about"
+                className="text-gray-400 hover:text-yellow-500 text-sm transition"
+              >
+                À Propos
+              </a>
+              <a
                 href="/privacy"
                 className="text-gray-400 hover:text-yellow-500 text-sm transition"
               >
@@ -170,6 +185,18 @@ export default function Footer() {
                 className="text-gray-400 hover:text-yellow-500 text-sm transition"
               >
                 {t("footer.termsOfService")}
+              </a>
+              <a
+                href="/general-conditions"
+                className="text-gray-400 hover:text-yellow-500 text-sm transition"
+              >
+                Conditions Générales de Vente
+              </a>
+              <a
+                href="/legal-notices"
+                className="text-gray-400 hover:text-yellow-500 text-sm transition"
+              >
+                Mentions Légales
               </a>
               <a
                 href="/contact"

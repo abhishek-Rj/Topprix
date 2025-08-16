@@ -73,12 +73,12 @@ const Navigation = () => {
   return (
     <>
       <header
-        className={`fixed w-full z-50 transition-all duration-300 ${
-          isScrolled 
-            ? "bg-white shadow-md py-2" 
-            : userRole === "ADMIN" 
-              ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-4" 
-              : "bg-yellow-50 py-4"
+        className={`fixed w-full z-[60] transition-all duration-300 ${
+          isScrolled
+            ? "bg-white shadow-md py-2"
+            : userRole === "ADMIN"
+            ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-4"
+            : "bg-yellow-50 py-4"
         }`}
       >
         <div className="container mx-auto px-4">
@@ -92,11 +92,11 @@ const Navigation = () => {
               />
               <span
                 className={`text-2xl font-bold ${
-                  isScrolled 
-                    ? "text-yellow-600" 
+                  isScrolled
+                    ? "text-yellow-600"
                     : userRole === "ADMIN"
-                      ? "text-white"
-                      : "text-yellow-600"
+                    ? "text-white"
+                    : "text-yellow-600"
                 }`}
               >
                 Topprix
@@ -114,10 +114,10 @@ const Navigation = () => {
                         ? "text-white border-b-2 border-white pb-1"
                         : "text-yellow-600 border-b-2 border-yellow-600 pb-1"
                       : isScrolled
-                        ? "text-gray-800 hover:text-yellow-600"
-                        : userRole === "ADMIN"
-                          ? "text-blue-100 hover:text-white"
-                          : "text-gray-800 hover:text-yellow-600"
+                      ? "text-gray-800 hover:text-yellow-600"
+                      : userRole === "ADMIN"
+                      ? "text-blue-100 hover:text-white"
+                      : "text-gray-800 hover:text-yellow-600"
                   }`}
                 >
                   {link.name}
@@ -128,13 +128,15 @@ const Navigation = () => {
             <div className="hidden md:flex items-center space-x-6">
               {/* Language Selector */}
               <div className="relative group">
-                <button className={`font-medium text-sm ${
-                  isScrolled 
-                    ? "text-gray-600 hover:text-yellow-600" 
-                    : userRole === "ADMIN"
+                <button
+                  className={`font-medium text-sm ${
+                    isScrolled
+                      ? "text-gray-600 hover:text-yellow-600"
+                      : userRole === "ADMIN"
                       ? "text-blue-100 hover:text-white"
                       : "text-gray-600 hover:text-yellow-600"
-                }`}>
+                  }`}
+                >
                   {i18n.language === "en" ? "EN" : i18n.language.toUpperCase()}
                 </button>
                 <div className="absolute right-0 mt-2 w-28 bg-white rounded-lg shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
@@ -163,18 +165,22 @@ const Navigation = () => {
 
               {user ? (
                 <div className="relative group">
-                  <button className={`flex items-center space-x-1 ${
-                    isScrolled 
-                      ? "text-gray-600 hover:text-yellow-600" 
-                      : userRole === "ADMIN"
+                  <button
+                    className={`flex items-center space-x-1 ${
+                      isScrolled
+                        ? "text-gray-600 hover:text-yellow-600"
+                        : userRole === "ADMIN"
                         ? "text-blue-100 hover:text-white"
                         : "text-gray-600 hover:text-yellow-600"
-                  }`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
-                      userRole === "ADMIN"
-                        ? "bg-white text-blue-600"
-                        : "bg-yellow-200 text-yellow-800"
-                    }`}>
+                    }`}
+                  >
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+                        userRole === "ADMIN"
+                          ? "bg-white text-blue-600"
+                          : "bg-yellow-200 text-yellow-800"
+                      }`}
+                    >
                       {user.displayName
                         ? user.displayName.charAt(0).toUpperCase()
                         : user.email.charAt(0).toUpperCase()}
@@ -203,7 +209,7 @@ const Navigation = () => {
                       onClick={async () => {
                         try {
                           await userLogout();
-                          navigate('/login');
+                          navigate("/login");
                         } catch (error) {
                           console.error("Error signing out:", error);
                         }
@@ -218,12 +224,13 @@ const Navigation = () => {
                 <Link
                   to="/login"
                   className={`flex items-center text-sm font-medium ${
-                    isScrolled 
-                      ? "text-gray-600 hover:text-yellow-600" 
+                    isScrolled
+                      ? "text-gray-600 hover:text-yellow-600"
                       : userRole === "ADMIN"
-                        ? "text-blue-100 hover:text-white"
-                        : "text-gray-600 hover:text-yellow-600"
-                  }`}>
+                      ? "text-blue-100 hover:text-white"
+                      : "text-gray-600 hover:text-yellow-600"
+                  }`}
+                >
                   <FiUser className="mr-1" />
                   {t("signIn")}
                 </Link>
@@ -244,22 +251,22 @@ const Navigation = () => {
           </div>
 
           {/* Mobile menu */}
-      {isMenuOpen && (
+          {isMenuOpen && (
             <div className="md:hidden mt-4 pb-4">
               <nav className="flex flex-col space-y-2">
-            {navLinks.map((link: any) => (
-              <Link
-                key={link.path}
-                to={link.path}
+                {navLinks.map((link: any) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
                     className={`text-sm font-medium py-2 px-4 rounded-md ${
-                  location.pathname === link.path
+                      location.pathname === link.path
                         ? "bg-yellow-100 text-yellow-700"
                         : "text-gray-700 hover:bg-yellow-50"
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
+                    }`}
+                  >
+                    {link.name}
+                  </Link>
+                ))}
               </nav>
             </div>
           )}

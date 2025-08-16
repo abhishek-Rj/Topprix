@@ -22,7 +22,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useAuthenticate();
-  
+
   useEffect(() => {
     if (user) {
       navigate("/");
@@ -70,7 +70,7 @@ export default function Login() {
       }
 
       const checkForUserResponse = await checkForUser.json();
-      
+
       // Check if user exists
       if (!checkForUserResponse) {
         setError("User not found. Please check your email or sign up.");
@@ -81,10 +81,10 @@ export default function Login() {
       // If user exists in database, proceed with Firebase login
       try {
         const userCredential = await logInWithEmailandPassword(email, password);
-        
+
         if (userCredential) {
-            toast.success("Login successful!");
-            navigate("/");
+          toast.success("Login successful!");
+          navigate("/");
         } else {
           setError("Invalid email or password. Please try again.");
           setLoading(false);
@@ -92,25 +92,26 @@ export default function Login() {
         }
       } catch (firebaseError: any) {
         console.error("Firebase login error:", firebaseError);
-        
+
         // Handle specific Firebase auth errors
-        if (firebaseError.code === 'auth/user-not-found') {
+        if (firebaseError.code === "auth/user-not-found") {
           setError("User not found. Please check your email or sign up.");
-        } else if (firebaseError.code === 'auth/wrong-password') {
+        } else if (firebaseError.code === "auth/wrong-password") {
           setError("Incorrect password. Please try again.");
-        } else if (firebaseError.code === 'auth/too-many-requests') {
+        } else if (firebaseError.code === "auth/too-many-requests") {
           setError("Too many failed attempts. Please try again later.");
-        } else if (firebaseError.code === 'auth/user-disabled') {
+        } else if (firebaseError.code === "auth/user-disabled") {
           setError("This account has been disabled. Please contact support.");
-        } else if (firebaseError.code === 'auth/invalid-email') {
+        } else if (firebaseError.code === "auth/invalid-email") {
           setError("Invalid email format. Please check your email address.");
         } else {
-          setError("Login failed. Please check your credentials and try again.");
+          setError(
+            "Login failed. Please check your credentials and try again."
+          );
         }
         setLoading(false);
         return;
       }
-
     } catch (error) {
       console.error("Error during login:", error);
       setError("Network error. Please check your connection and try again.");
@@ -182,7 +183,11 @@ export default function Login() {
           </p>
 
           <form className="mt-6 space-y-4" onSubmit={handleSignUp}>
-            {error && <p className="text-red-600 bg-red-200 p-2 rounded-md text-sm">{error}</p>}
+            {error && (
+              <p className="text-red-600 bg-red-200 p-2 rounded-md text-sm">
+                {error}
+              </p>
+            )}
 
             <div className="relative">
               <FiMail className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
@@ -204,6 +209,75 @@ export default function Login() {
                 placeholder={t("password")}
                 className={passwordError ? "border-red-500" : ""}
               />
+            </div>
+
+            {/* Privacy Policy Checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="privacy-policy"
+                required
+                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+              />
+              <label htmlFor="privacy-policy" className="text-xs text-gray-600">
+                J'accepte la{" "}
+                <a
+                  href="/privacy"
+                  className="text-yellow-600 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Politique de Confidentialité
+                </a>
+              </label>
+            </div>
+
+            {/* Terms and Conditions Checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="terms-conditions"
+                required
+                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+              />
+              <label
+                htmlFor="terms-conditions"
+                className="text-xs text-gray-600"
+              >
+                J'accepte les{" "}
+                <a
+                  href="/terms"
+                  className="text-yellow-600 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Conditions Générales d'Utilisation
+                </a>
+              </label>
+            </div>
+
+            {/* General Conditions Checkbox */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="general-conditions"
+                required
+                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+              />
+              <label
+                htmlFor="general-conditions"
+                className="text-xs text-gray-600"
+              >
+                J'accepte les{" "}
+                <a
+                  href="/general-conditions"
+                  className="text-yellow-600 hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Conditions Générales de Vente
+                </a>
+              </label>
             </div>
 
             <button
@@ -233,6 +307,19 @@ export default function Login() {
 
           <GoogleAuthButton />
           <FacebookAuthButton />
+
+          {/* Privacy Policy Link */}
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-500">
+              En vous connectant, vous acceptez notre{" "}
+              <a
+                href="/privacy"
+                className="text-yellow-600 hover:underline hover:text-yellow-700 transition-colors"
+              >
+                Politique de Confidentialité
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

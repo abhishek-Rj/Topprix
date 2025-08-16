@@ -4,7 +4,7 @@ import Navigation from "../../components/navigation";
 import Loader from "../../components/loading";
 import useAuthenticate from "../../hooks/authenticationt";
 import baseUrl from "../../hooks/baseurl";
-import CategorySelector from "../Common/CategorySelector";
+import PredefinedCategorySelector from "../../components/PredefinedCategorySelector";
 import { toast } from "react-toastify";
 import { FaStore } from "react-icons/fa";
 import {
@@ -36,6 +36,9 @@ export default function EditStore() {
   const [country, setCountry] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
+    []
+  );
   const [logo, setLogo] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -72,15 +75,14 @@ export default function EditStore() {
           setName(data.name || "");
           setDescription(data.description || "");
 
-          // Parse address components
           const addressParts = (data.address || "").split(", ");
           setAddress(addressParts.slice(0, -2).join(", ") || "");
           setZipCode(addressParts[addressParts.length - 2] || "");
           setCountry(addressParts[addressParts.length - 1] || "");
 
-          setSelectedCategories(
-            (data.categories || []).map((cat: any) => cat.id)
-          );
+          const categoryIds = (data.categories || []).map((cat: any) => cat.id);
+          setSelectedCategories(categoryIds);
+          setSelectedSubcategories(categoryIds);
           setLogoPreview(data.logo || null);
         } else {
           toast.error("Store not found");
@@ -164,7 +166,6 @@ export default function EditStore() {
   const handleCropCancel = () => {
     setShowCropModal(false);
     setImageSrc(null);
-    // Reset the file input
     const fileInput = document.querySelector(
       'input[type="file"]'
     ) as HTMLInputElement;
@@ -176,7 +177,6 @@ export default function EditStore() {
   const handleCropSkip = async () => {
     if (imageSrc) {
       try {
-        // Convert the original image to a file without cropping
         const response = await fetch(imageSrc);
         const blob = await response.blob();
         const file = new File([blob], "original-logo.jpg", {
@@ -281,7 +281,6 @@ export default function EditStore() {
                 : "hover:shadow-yellow-200"
             }`}
           >
-            {/* Header */}
             <div
               className={`flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-8 ${
                 userRole === "ADMIN"
@@ -309,9 +308,7 @@ export default function EditStore() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Logo and Basic Info Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Logo Upload */}
                 <div
                   className={`flex flex-col items-center ${
                     userRole === "ADMIN"
@@ -320,7 +317,7 @@ export default function EditStore() {
                   } p-4 rounded-xl border`}
                 >
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
-                    Store Logo
+                    {t("store.storeLogo")}
                   </label>
                   <div className="relative group">
                     <div
@@ -350,14 +347,16 @@ export default function EditStore() {
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
                   </div>
-                  <p className="mt-2 text-xs text-gray-500">Click to upload</p>
+                  <p className="mt-2 text-xs text-gray-500">
+                    {t("store.clickToUpload")}
+                  </p>
                 </div>
 
-                {/* Store Name and Description */}
                 <div className="md:col-span-2 space-y-4">
                   <div className="group relative">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Store Name <span className="text-red-500">*</span>
+                      {t("store.storeName")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -367,7 +366,7 @@ export default function EditStore() {
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Store Name"
+                        placeholder={t("store.storeName")}
                         className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${
                           userRole === "ADMIN"
                             ? "focus:ring-blue-500 focus:border-blue-500"
@@ -380,7 +379,7 @@ export default function EditStore() {
 
                   <div className="group relative">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Description
+                      {t("store.description")}
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-4 text-gray-400">
@@ -390,7 +389,7 @@ export default function EditStore() {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={3}
-                        placeholder="Describe your store"
+                        placeholder={t("store.describeYourStore")}
                         className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${
                           userRole === "ADMIN"
                             ? "focus:ring-blue-500 focus:border-blue-500"
@@ -402,11 +401,10 @@ export default function EditStore() {
                 </div>
               </div>
 
-              {/* Location Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="group relative">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Address <span className="text-red-500">*</span>
+                    {t("store.address")} <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -416,7 +414,7 @@ export default function EditStore() {
                       type="text"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
-                      placeholder="Street Address"
+                      placeholder={t("store.address")}
                       className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${
                         userRole === "ADMIN"
                           ? "focus:ring-blue-500 focus:border-blue-500"
@@ -430,7 +428,8 @@ export default function EditStore() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="group relative">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      ZIP Code <span className="text-red-500">*</span>
+                      {t("store.zipCode")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -440,7 +439,7 @@ export default function EditStore() {
                         type="text"
                         value={zipCode}
                         onChange={(e) => setZipCode(e.target.value)}
-                        placeholder="ZIP Code"
+                        placeholder={t("store.zipCode")}
                         className={`w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 ${
                           userRole === "ADMIN"
                             ? "focus:ring-blue-500 focus:border-blue-500"
@@ -453,7 +452,8 @@ export default function EditStore() {
 
                   <div className="group relative">
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Country <span className="text-red-500">*</span>
+                      {t("store.country")}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
@@ -469,7 +469,7 @@ export default function EditStore() {
                         } transition-all group-hover:shadow-md appearance-none`}
                         required
                       >
-                        <option value="">Select country</option>
+                        <option value="">{t("store.selectCountry")}</option>
                         <optgroup label="North America">
                           <option value="US">🇺🇸 United States</option>
                           <option value="CA">🇨🇦 Canada</option>
@@ -516,15 +516,18 @@ export default function EditStore() {
                 </div>
               </div>
 
-              {/* Categories */}
               <div>
-                <CategorySelector
-                  selected={selectedCategories}
-                  onChange={setSelectedCategories}
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  {t("store.categories")}
+                </label>
+                <PredefinedCategorySelector
+                  selectedCategories={selectedCategories}
+                  onCategoryChange={setSelectedCategories}
+                  selectedSubcategories={selectedSubcategories}
+                  onSubcategoryChange={setSelectedSubcategories}
                 />
               </div>
 
-              {/* Crop Modal */}
               {showCropModal && imageSrc && (
                 <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50 p-4">
                   <div
@@ -535,7 +538,7 @@ export default function EditStore() {
                     }`}
                   >
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
-                      Crop Your Logo
+                      {t("store.cropYourLogo")}
                     </h3>
                     <div className="mb-4">
                       <ReactCrop
@@ -565,7 +568,7 @@ export default function EditStore() {
                         onClick={handleCropSkip}
                         className="w-full sm:w-auto px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                       >
-                        Skip Crop
+                        {t("store.skipCrop")}
                       </button>
                       <button
                         type="button"
@@ -576,12 +579,86 @@ export default function EditStore() {
                             : "bg-yellow-500 hover:bg-yellow-600"
                         } text-white rounded-md transition-colors`}
                       >
-                        Apply Crop
+                        {t("store.applyCrop")}
                       </button>
                     </div>
                   </div>
                 </div>
               )}
+
+              {/* Privacy Policy Notice */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="text-blue-600 mt-1">
+                    <svg
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-blue-900 mb-2">
+                      Protection de vos données
+                    </h3>
+                    <p className="text-xs text-blue-800 mb-3">
+                      En modifiant votre magasin, vos données sont traitées
+                      conformément à notre{" "}
+                      <a
+                        href="/privacy"
+                        className="text-blue-600 hover:underline font-medium"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Politique de Confidentialité
+                      </a>
+                      .
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* General Conditions Notice */}
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="text-green-600 mt-1">
+                    <svg
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-green-900 mb-2">
+                      Conditions Générales de Vente
+                    </h3>
+                    <p className="text-xs text-green-800 mb-3">
+                      En modifiant votre magasin, vous acceptez nos{" "}
+                      <a
+                        href="/general-conditions"
+                        className="text-green-600 hover:underline font-medium"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Conditions Générales de Vente
+                      </a>{" "}
+                      et confirmez que le contenu respecte la législation en
+                      vigueur.
+                    </p>
+                  </div>
+                </div>
+              </div>
 
               <div className="flex justify-end gap-4 pt-4">
                 <button
