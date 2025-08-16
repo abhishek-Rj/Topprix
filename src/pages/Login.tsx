@@ -23,11 +23,12 @@ export default function Login() {
   const { t } = useTranslation();
   const { user } = useAuthenticate();
 
-  useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, [user]);
+  // Only redirect after successful login, not automatically
+  // useEffect(() => {
+  //   if (user) {
+  //     navigate("/");
+  //   }
+  // }, [user, navigate]);
 
   const validateEmail = (email: string): boolean => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -120,6 +121,53 @@ export default function Login() {
     }
   };
 
+  // If user is already logged in, show a different message
+  if (user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-yellow-50 p-4">
+        <div className="max-w-md w-full bg-white rounded-xl shadow-xl p-8 text-center">
+          <div className="mb-6">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-8 h-8 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              {t("profile.alreadyLoggedIn")}
+            </h2>
+            <p className="text-gray-600 mb-6">
+              {t("profile.alreadyLoggedInMessage")}
+            </p>
+          </div>
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate("/")}
+              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white font-semibold py-3 px-4 rounded-md transition-colors"
+            >
+              {t("profile.goToHome")}
+            </button>
+            <button
+              onClick={() => navigate("/profile")}
+              className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-3 px-4 rounded-md transition-colors"
+            >
+              {t("profile.viewProfile")}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-yellow-50 p-4">
       <div className="max-w-5xl w-full flex flex-col md:flex-row gap-6">
@@ -172,6 +220,29 @@ export default function Login() {
         </div>
 
         <div className="w-full md:w-1/2 p-8 bg-white rounded-xl shadow-xl">
+          {/* Back Button */}
+          <div className="mb-4">
+            <button
+              onClick={() => window.history.back()}
+              className="flex items-center text-gray-600 hover:text-gray-800 transition-colors"
+            >
+              <svg
+                className="w-4 h-4 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              {t("back")}
+            </button>
+          </div>
+
           <h2 className="text-2xl font-bold text-gray-800 text-center">
             {t("login")}
           </h2>
@@ -211,75 +282,6 @@ export default function Login() {
               />
             </div>
 
-            {/* Privacy Policy Checkbox */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="privacy-policy"
-                required
-                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
-              />
-              <label htmlFor="privacy-policy" className="text-xs text-gray-600">
-                J'accepte la{" "}
-                <a
-                  href="/privacy"
-                  className="text-yellow-600 hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Politique de Confidentialité
-                </a>
-              </label>
-            </div>
-
-            {/* Terms and Conditions Checkbox */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="terms-conditions"
-                required
-                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
-              />
-              <label
-                htmlFor="terms-conditions"
-                className="text-xs text-gray-600"
-              >
-                J'accepte les{" "}
-                <a
-                  href="/terms"
-                  className="text-yellow-600 hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Conditions Générales d'Utilisation
-                </a>
-              </label>
-            </div>
-
-            {/* General Conditions Checkbox */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="general-conditions"
-                required
-                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
-              />
-              <label
-                htmlFor="general-conditions"
-                className="text-xs text-gray-600"
-              >
-                J'accepte les{" "}
-                <a
-                  href="/general-conditions"
-                  className="text-yellow-600 hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Conditions Générales de Vente
-                </a>
-              </label>
-            </div>
-
             <button
               type="submit"
               className={`w-full hover:scale-105 transition-transform py-2 text-white font-semibold rounded-md 
@@ -307,19 +309,6 @@ export default function Login() {
 
           <GoogleAuthButton />
           <FacebookAuthButton />
-
-          {/* Privacy Policy Link */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              En vous connectant, vous acceptez notre{" "}
-              <a
-                href="/privacy"
-                className="text-yellow-600 hover:underline hover:text-yellow-700 transition-colors"
-              >
-                Politique de Confidentialité
-              </a>
-            </p>
-          </div>
         </div>
       </div>
     </div>

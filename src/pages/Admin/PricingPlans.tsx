@@ -21,8 +21,8 @@ import { motion } from "framer-motion";
 import Footer from "../../components/Footer";
 
 interface PricingPlan {
-    id: string;
-    name: string;
+  id: string;
+  name: string;
   description: string;
   amount: number;
   currency: string;
@@ -52,7 +52,7 @@ export default function PricingPlans() {
     interval: "month",
     features: [""],
   });
-  
+
   if (userRole !== "ADMIN") {
     navigate("/not-found");
     return null;
@@ -65,7 +65,7 @@ export default function PricingPlans() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "user-email": localStorage.getItem('userEmail') || "",
+          "user-email": localStorage.getItem("userEmail") || "",
         },
       });
 
@@ -137,13 +137,16 @@ export default function PricingPlans() {
 
     try {
       setDeletingPlanId(planToDelete.id);
-      const response = await fetch(`${baseUrl}api/pricing-plans/${planToDelete.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          "user-email": localStorage.getItem('userEmail') || "",
-        },
-      });
+      const response = await fetch(
+        `${baseUrl}api/pricing-plans/${planToDelete.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": localStorage.getItem("userEmail") || "",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to delete pricing plan");
@@ -183,13 +186,13 @@ export default function PricingPlans() {
         amount: parseFloat(formData.amount),
         currency: formData.currency,
         interval: formData.interval,
-        features: formData.features.filter(feature => feature.trim() !== ""),
+        features: formData.features.filter((feature) => feature.trim() !== ""),
       };
 
-      const url = editingPlan 
+      const url = editingPlan
         ? `${baseUrl}api/pricing-plans/${editingPlan.id}`
         : `${baseUrl}api/pricing-plans`;
-      
+
       const method = editingPlan ? "PUT" : "POST";
 
       const response = await fetch(url, {
@@ -206,13 +209,13 @@ export default function PricingPlans() {
       }
 
       const data = await response.json();
-      
+
       if (editingPlan) {
         toast.success("Pricing plan updated successfully");
       } else {
         toast.success("Pricing plan created successfully");
       }
-      
+
       resetForm();
       fetchPricingPlans();
     } catch (error) {
@@ -224,31 +227,31 @@ export default function PricingPlans() {
   };
 
   const addFeature = () => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       features: [...prev.features, ""],
     }));
   };
 
   const removeFeature = (index: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       features: prev.features.filter((_, i) => i !== index),
     }));
   };
 
   const updateFeature = (index: number, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      features: prev.features.map((feature, i) => 
+      features: prev.features.map((feature, i) =>
         i === index ? value : feature
       ),
     }));
   };
 
   const formatCurrency = (amount: number, currency: string) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: currency.toUpperCase(),
     }).format(amount);
   };
@@ -297,7 +300,7 @@ export default function PricingPlans() {
             className="flex justify-between items-center mb-8"
           >
             <div className="text-sm text-gray-600">
-              {plans.length} plan{plans.length !== 1 ? 's' : ''} available
+              {plans.length} plan{plans.length !== 1 ? "s" : ""} available
             </div>
             <button
               onClick={() => setShowForm(true)}
@@ -367,7 +370,10 @@ export default function PricingPlans() {
                       Features:
                     </h4>
                     {plan.features.map((feature, featureIndex) => (
-                      <div key={featureIndex} className="flex items-center gap-2">
+                      <div
+                        key={featureIndex}
+                        className="flex items-center gap-2"
+                      >
                         <FiCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
                         <span className="text-sm text-gray-600">{feature}</span>
                       </div>
@@ -378,12 +384,14 @@ export default function PricingPlans() {
                 <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-500">Status:</span>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      plan.isActive 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {plan.isActive ? 'Active' : 'Inactive'}
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        plan.isActive
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {plan.isActive ? "Active" : "Inactive"}
                     </span>
                   </div>
                 </div>
@@ -404,7 +412,8 @@ export default function PricingPlans() {
                   No Pricing Plans Yet
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Create your first pricing plan to start offering subscription options to retailers.
+                  Create your first pricing plan to start offering subscription
+                  options to retailers.
                 </p>
                 <button
                   onClick={() => setShowForm(true)}
@@ -431,7 +440,9 @@ export default function PricingPlans() {
             <div className="p-6 border-b border-gray-200">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-900">
-                  {editingPlan ? 'Edit Pricing Plan' : 'Create New Pricing Plan'}
+                  {editingPlan
+                    ? "Edit Pricing Plan"
+                    : "Create New Pricing Plan"}
                 </h2>
                 <button
                   onClick={resetForm}
@@ -452,7 +463,9 @@ export default function PricingPlans() {
                   <input
                     type="text"
                     value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, name: e.target.value }))
+                    }
                     placeholder="e.g., Premium Retailer"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     required
@@ -465,7 +478,12 @@ export default function PricingPlans() {
                   </label>
                   <textarea
                     value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        description: e.target.value,
+                      }))
+                    }
                     placeholder="Describe what this plan offers"
                     rows={3}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -489,7 +507,12 @@ export default function PricingPlans() {
                       step="0.01"
                       min="0"
                       value={formData.amount}
-                      onChange={(e) => setFormData(prev => ({ ...prev, amount: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          amount: e.target.value,
+                        }))
+                      }
                       placeholder="29.99"
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       required
@@ -507,7 +530,12 @@ export default function PricingPlans() {
                     </span>
                     <select
                       value={formData.currency}
-                      onChange={(e) => setFormData(prev => ({ ...prev, currency: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          currency: e.target.value,
+                        }))
+                      }
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none"
                     >
                       <option value="eur">EUR (€)</option>
@@ -528,7 +556,12 @@ export default function PricingPlans() {
                     </span>
                     <select
                       value={formData.interval}
-                      onChange={(e) => setFormData(prev => ({ ...prev, interval: e.target.value }))}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          interval: e.target.value,
+                        }))
+                      }
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none"
                     >
                       <option value="month">Monthly</option>
@@ -598,7 +631,7 @@ export default function PricingPlans() {
                   ) : (
                     <>
                       <FiSettings className="w-4 h-4" />
-                      {editingPlan ? 'Update Plan' : 'Create Plan'}
+                      {editingPlan ? "Update Plan" : "Create Plan"}
                     </>
                   )}
                 </button>
@@ -624,17 +657,17 @@ export default function PricingPlans() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">
-                    Delete Pricing Plan
+                    {t("subscription.deletePlanTitle")}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    This action cannot be undone
+                    {t("subscription.deletePlanSubtitle")}
                   </p>
                 </div>
               </div>
 
               <div className="mb-6">
                 <p className="text-gray-700 mb-3">
-                  Are you sure you want to delete the pricing plan:
+                  {t("subscription.deletePlanConfirm")}
                 </p>
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-1">
@@ -645,11 +678,41 @@ export default function PricingPlans() {
                   </p>
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium text-gray-900">
-                      {formatCurrency(planToDelete.amount, planToDelete.currency)}
+                      {formatCurrency(
+                        planToDelete.amount,
+                        planToDelete.currency
+                      )}
                     </span>
                     <span className="text-gray-500">
-                      per {planToDelete.interval}
+                      {t("subscription.per")} {planToDelete.interval}
                     </span>
+                  </div>
+                </div>
+
+                {/* Warning Message */}
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg
+                        className="w-3 h-3 text-amber-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <h5 className="font-medium text-amber-800 mb-1">
+                        {t("subscription.deletePlanWarning")}
+                      </h5>
+                      <p className="text-sm text-amber-700">
+                        {t("subscription.deletePlanMessage")}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -660,7 +723,7 @@ export default function PricingPlans() {
                   disabled={deletingPlanId === planToDelete.id}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
                 >
-                  Cancel
+                  {t("subscription.deletePlanCancel")}
                 </button>
                 <button
                   onClick={confirmDelete}
@@ -670,12 +733,12 @@ export default function PricingPlans() {
                   {deletingPlanId === planToDelete.id ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Deleting...
+                      {t("subscription.deletePlanDeleting")}
                     </>
                   ) : (
                     <>
                       <FiTrash2 className="w-4 h-4" />
-                      Delete Plan
+                      {t("subscription.deletePlanDelete")}
                     </>
                   )}
                 </button>
@@ -687,4 +750,4 @@ export default function PricingPlans() {
       <Footer />
     </div>
   );
-} 
+}

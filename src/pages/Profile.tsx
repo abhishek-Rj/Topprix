@@ -371,7 +371,9 @@ export default function Profile() {
               </span>
             </div>
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-3xl font-bold">{user?.name || "User"}</h1>
+              <h1 className="text-3xl font-bold">
+                {user?.name || t("profile.user")}
+              </h1>
               <p
                 className={`mt-1 ${
                   user?.role === "ADMIN" ? "text-blue-100" : "text-yellow-100"
@@ -387,10 +389,10 @@ export default function Profile() {
                 >
                   <FiTag className="mr-1" />
                   {user?.role === "ADMIN"
-                    ? "Admin"
+                    ? t("profile.admin")
                     : user?.role === "RETAILER"
-                    ? "Retailer"
-                    : "Customer"}
+                    ? t("profile.retailer")
+                    : t("profile.customer")}
                 </span>
                 {accountCreatedDate && (
                   <span
@@ -695,10 +697,10 @@ export default function Profile() {
                   <FiTag className="text-gray-400 mr-2" />
                   <span className="text-gray-800">
                     {user?.role === "ADMIN"
-                      ? "Admin"
+                      ? t("profile.admin")
                       : user?.role === "RETAILER"
-                      ? "Retailer"
-                      : "Customer"}
+                      ? t("profile.retailer")
+                      : t("profile.customer")}
                   </span>
                 </div>
               </div>
