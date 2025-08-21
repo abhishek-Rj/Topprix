@@ -51,6 +51,7 @@
     "yourStores": "Vos magasins",
     "yourFlyers": "Vos prospectus",
     "yourCoupons": "Vos coupons",
+    "createStore": "Créer votre magasin",
     "settings": "Paramètres"
   },
   "back": "Retour",
@@ -103,7 +104,19 @@
     "alreadyLoggedIn": "Vous êtes déjà connecté !",
     "alreadyLoggedInMessage": "Vous êtes actuellement connecté à votre compte.",
     "goToHome": "Aller à l'accueil",
-    "viewProfile": "Voir mon profil"
+    "viewProfile": "Voir mon profil",
+    "accountDeletionDisabled": "Suppression de compte non disponible",
+    "accountDeletionMobileOnly": "Pour des raisons de sécurité, la suppression de compte n'est disponible que via notre application mobile.",
+    "whyMobileApp": "Pourquoi l'application mobile ?",
+    "mobileAppBenefits": [
+      "Vérification d'identité renforcée",
+      "Confirmation en deux étapes",
+      "Processus de sécurité avancé",
+      "Support client intégré"
+    ],
+    "understood": "Compris",
+    "webDeletionDisabled": "🔒 Web deletion disabled",
+    "mobileAppNotice": "Pour des raisons de sécurité, la suppression de compte n'est disponible que via notre application mobile. Téléchargez l'app pour gérer votre compte en toute sécurité."
   },
   "subscription": {
     "title": "Plans d'abonnement",
@@ -208,6 +221,7 @@
     "platformStats": "Statistiques de la plateforme",
     "userDistribution": "Répartition des utilisateurs",
     "topStores": "Meilleurs magasins",
+    "allStores": "Tous les magasins",
     "storePerformance": "Performance des magasins",
     "pending": "En attente"
   },
@@ -331,6 +345,12 @@
     "wishlist": "Liste de souhaits",
     "remove": "Supprimer",
     "cancel": "Annuler",
+    "cropYourLogo": "Recadrer votre logo",
+    "adjustCropArea": "Ajustez la zone de recadrage pour obtenir le meilleur résultat",
+    "dragToAdjustCrop": "Faites glisser les coins pour ajuster la zone de recadrage",
+    "resetCrop": "Réinitialiser",
+    "skipCrop": "Ignorer le recadrage",
+    "applyCrop": "Appliquer le recadrage",
     "updating": "Mise à jour...",
     "creating": "Création...",
     "update": "Mettre à jour",

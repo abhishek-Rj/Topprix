@@ -140,9 +140,18 @@ export default function FloatingSidebar({
   };
 
   const handleCategorySelect = (categoryId: string) => {
-    onCategoryChange(categoryId);
-    // Reset subcategory when category changes
-    onSubcategoryChange("all");
+    // If it's a main category name (not an ID), pass it directly
+    if (groupedCategories[categoryId]) {
+      // This is a main category, select it directly
+      onCategoryChange(categoryId);
+      // Reset subcategory selection
+      onSubcategoryChange("all");
+    } else {
+      // This is a direct category ID
+      onCategoryChange(categoryId);
+      // Reset subcategory when category changes
+      onSubcategoryChange("all");
+    }
   };
 
   const handleSubcategorySelect = (subcategoryId: string) => {
@@ -270,11 +279,22 @@ export default function FloatingSidebar({
                           className="border border-gray-200 rounded-lg"
                         >
                           <button
-                            onClick={() =>
-                              toggleCategoryExpansion(mainCategory)
-                            }
+                            onClick={() => {
+                              // If main category is already selected, expand it
+                              if (selectedCategory === mainCategory) {
+                                toggleCategoryExpansion(mainCategory);
+                              } else {
+                                // Select the main category and expand it
+                                handleCategorySelect(mainCategory);
+                                if (
+                                  !expandedCategories.includes(mainCategory)
+                                ) {
+                                  toggleCategoryExpansion(mainCategory);
+                                }
+                              }
+                            }}
                             className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-between ${
-                              expandedCategories.includes(mainCategory)
+                              selectedCategory === mainCategory
                                 ? `${colors.bgLight} ${colors.text} font-medium`
                                 : "text-gray-700 hover:bg-gray-50"
                             }`}

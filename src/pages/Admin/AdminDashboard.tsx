@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import {
   FiShield,
   FiUsers,
@@ -15,7 +16,10 @@ import {
   FiClock,
   FiMapPin,
   FiStar,
+  FiTag,
 } from "react-icons/fi";
+import baseUrl from "../../hooks/baseurl";
+import useAuthenticate from "../../hooks/authenticationt";
 import {
   BarChart,
   Bar,
@@ -121,6 +125,74 @@ const recentActivity = [
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
+  const { user } = useAuthenticate();
+  const [dashboardData, setDashboardData] = useState({
+    totalStores: 0,
+    totalFlyers: 0,
+    totalCoupons: 0,
+    activeFlyers: 0,
+    loading: true,
+  });
+  const [allStores, setAllStores] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      if (!user?.email) return;
+
+      try {
+        // Fetch stores count
+        const storesResponse = await fetch(`${baseUrl}stores`, {
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user.email,
+          },
+        });
+        const storesData = await storesResponse.json();
+        const totalStores = storesData.stores?.length || 0;
+
+        // Fetch flyers count
+        const flyersResponse = await fetch(`${baseUrl}flyers?limit=1000`, {
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user.email,
+          },
+        });
+        const flyersData = await flyersResponse.json();
+        const totalFlyers = flyersData.flyers?.length || 0;
+
+        // Fetch coupons count
+        const couponsResponse = await fetch(`${baseUrl}coupons?limit=1000`, {
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user.email,
+          },
+        });
+        const couponsData = await couponsResponse.json();
+        const totalCoupons = couponsData.coupons?.length || 0;
+
+        // Calculate active flyers (assuming flyers with active status)
+        const activeFlyers =
+          flyersData.flyers?.filter((flyer: any) => flyer.active === true)
+            .length || 0;
+
+        setDashboardData({
+          totalStores,
+          totalFlyers,
+          totalCoupons,
+          activeFlyers,
+          loading: false,
+        });
+
+        // Set all stores for the Store Performance section
+        setAllStores(storesData.stores || []);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        setDashboardData((prev) => ({ ...prev, loading: false }));
+      }
+    };
+
+    fetchDashboardData();
+  }, [user?.email]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -149,18 +221,22 @@ export default function AdminDashboard() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
           >
-            <Card className="bg-white/80 backdrop-blur-sm border-blue-200">
+            <Card className="bg-white/80 backdrop-blur-sm border-green-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  {t("dashboard.totalRevenue")}
+                  {t("dashboard.activeFlyers")}
                 </CardTitle>
-                <FiDollarSign className="h-4 w-4 text-blue-600" />
+                <FiEye className="h-4 w-4 text-green-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">$142,350</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {dashboardData.loading
+                    ? "..."
+                    : dashboardData.activeFlyers.toLocaleString()}
+                </div>
                 <p className="text-xs text-green-600 flex items-center mt-1">
                   <FiTrendingUp className="w-3 h-3 mr-1" />
-                  +12.5% {t("dashboard.fromLastMonth")}
+                  Active Now
                 </p>
               </CardContent>
             </Card>
@@ -168,15 +244,19 @@ export default function AdminDashboard() {
             <Card className="bg-white/80 backdrop-blur-sm border-indigo-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  {t("dashboard.totalCustomers")}
+                  {t("dashboard.totalStores")}
                 </CardTitle>
-                <FiUsers className="h-4 w-4 text-indigo-600" />
+                <FiDatabase className="h-4 w-4 text-indigo-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">2,847</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {dashboardData.loading
+                    ? "..."
+                    : dashboardData.totalStores.toLocaleString()}
+                </div>
                 <p className="text-xs text-green-600 flex items-center mt-1">
                   <FiTrendingUp className="w-3 h-3 mr-1" />
-                  +8.2% {t("dashboard.fromLastMonth")}
+                  Total Stores
                 </p>
               </CardContent>
             </Card>
@@ -184,15 +264,19 @@ export default function AdminDashboard() {
             <Card className="bg-white/80 backdrop-blur-sm border-purple-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  {t("dashboard.totalStores")}
+                  {t("dashboard.totalFlyers")}
                 </CardTitle>
-                <FiDatabase className="h-4 w-4 text-purple-600" />
+                <FiEye className="h-4 w-4 text-purple-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">156</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {dashboardData.loading
+                    ? "..."
+                    : dashboardData.totalFlyers.toLocaleString()}
+                </div>
                 <p className="text-xs text-green-600 flex items-center mt-1">
                   <FiTrendingUp className="w-3 h-3 mr-1" />
-                  +15.3% {t("dashboard.fromLastMonth")}
+                  Total Flyers
                 </p>
               </CardContent>
             </Card>
@@ -200,15 +284,19 @@ export default function AdminDashboard() {
             <Card className="bg-white/80 backdrop-blur-sm border-blue-200">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  {t("dashboard.activeStores")}
+                  {t("dashboard.totalCoupons")}
                 </CardTitle>
-                <FiActivity className="h-4 w-4 text-blue-600" />
+                <FiTag className="h-4 w-4 text-blue-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-gray-900">142</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  {dashboardData.loading
+                    ? "..."
+                    : dashboardData.totalCoupons.toLocaleString()}
+                </div>
                 <p className="text-xs text-green-600 flex items-center mt-1">
                   <FiTrendingUp className="w-3 h-3 mr-1" />
-                  +5.1% {t("dashboard.fromLastMonth")}
+                  Total Coupons
                 </p>
               </CardContent>
             </Card>
@@ -308,54 +396,68 @@ export default function AdminDashboard() {
             >
               <Card className="bg-white/80 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle>{t("dashboard.topStores")}</CardTitle>
-                  <CardDescription>
-                    Best performing stores this month
-                  </CardDescription>
+                  <CardTitle>{t("dashboard.allStores")}</CardTitle>
+                  <CardDescription>All stores on the platform</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {topStores.map((store, index) => (
-                      <div
-                        key={store.name}
-                        className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                      >
-                        <div className="flex items-center space-x-4">
-                          <div className="flex-shrink-0">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                              <span className="text-blue-600 font-semibold">
-                                {index + 1}
+                    {dashboardData.loading ? (
+                      <div className="text-center py-8 text-gray-500">
+                        {t("dashboard.loading")}
+                      </div>
+                    ) : allStores.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500">
+                        {t("dashboard.noStores")}
+                      </div>
+                    ) : (
+                      allStores.map((store, index) => (
+                        <div
+                          key={store.id || store.name || index}
+                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div className="flex-shrink-0">
+                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span className="text-blue-600 font-semibold">
+                                  {index + 1}
+                                </span>
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">
+                                {store.name ||
+                                  store.storeName ||
+                                  "Unnamed Store"}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {store.address ||
+                                  store.location ||
+                                  "Location not specified"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Badge
+                              variant={
+                                store.status === "active" || store.isActive
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
+                              {store.status === "active" || store.isActive
+                                ? t("dashboard.active")
+                                : t("dashboard.inactive")}
+                            </Badge>
+                            <div className="flex items-center">
+                              <FiMapPin className="w-4 h-4 text-gray-400" />
+                              <span className="ml-1 text-sm text-gray-600">
+                                {store.city || store.region || "N/A"}
                               </span>
                             </div>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">
-                              {store.name}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              ${store.revenue.toLocaleString()}
-                            </p>
-                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge
-                            variant={
-                              store.status === "active"
-                                ? "default"
-                                : "secondary"
-                            }
-                          >
-                            {t(`dashboard.${store.status}`)}
-                          </Badge>
-                          <div className="flex items-center">
-                            <FiStar className="w-4 h-4 text-yellow-400 fill-current" />
-                            <span className="ml-1 text-sm text-gray-600">
-                              {store.rating}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </CardContent>
               </Card>

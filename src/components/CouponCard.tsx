@@ -725,7 +725,7 @@ const CouponList = ({
       </div>
 
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
+      {pagination && (
         <div className="flex justify-center items-center gap-2 mt-8">
           <button
             onClick={() => onPageChange(pagination.currentPage - 1)}
@@ -739,8 +739,8 @@ const CouponList = ({
           </span>
           <button
             onClick={() => onPageChange(pagination.currentPage + 1)}
-            disabled={pagination.currentPage === pagination.totalPages}
-            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!pagination.hasNextPage}
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
             Next
           </button>

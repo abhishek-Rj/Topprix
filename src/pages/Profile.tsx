@@ -23,6 +23,8 @@ import {
   FiCalendar,
   FiStar,
   FiZap,
+  FiEye,
+  FiSettings,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import userLogout from "@/hooks/userLogout";
@@ -102,12 +104,14 @@ export default function Profile() {
   );
   const [subscriptionLoading, setSubscriptionLoading] =
     useState<boolean>(false);
+  const [showAuthPreview, setShowAuthPreview] = useState<boolean>(false);
 
   useEffect(() => {
     if (loading) return;
 
     if (!authUser) {
-      navigate("/login");
+      setShowAuthPreview(true);
+      setLoader(false);
       return;
     }
 
@@ -325,6 +329,95 @@ export default function Profile() {
     navigate("/admin/pricing-plans");
   };
 
+  // Authentication Preview Modal Component
+  const AuthPreviewModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <FiUser className="text-white text-2xl mr-3" />
+              <h2 className="text-xl font-bold text-white">
+                {t("navigation.profile")}
+              </h2>
+            </div>
+            <button
+              onClick={() => setShowAuthPreview(false)}
+              className="text-white hover:text-gray-200 transition-colors"
+            >
+              <FiX size={24} />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6">
+          <div className="text-center mb-6">
+            <FiSettings className="mx-auto text-6xl text-gray-300 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              Connexion Requise
+            </h3>
+            <p className="text-gray-600 text-sm leading-relaxed">
+              Pour accéder à votre profil personnel et gérer vos informations de
+              compte, vous devez être connecté.
+            </p>
+          </div>
+
+          {/* Features Preview */}
+          <div className="bg-blue-50 rounded-lg p-4 mb-6">
+            <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
+              <FiEye className="mr-2 text-blue-600" />
+              Fonctionnalités du Profil :
+            </h4>
+            <ul className="text-sm text-gray-600 space-y-2">
+              <li className="flex items-center">
+                <FiUser className="mr-2 text-blue-500 text-xs" />
+                Gérez vos informations personnelles
+              </li>
+              <li className="flex items-center">
+                <FiShield className="mr-2 text-green-500 text-xs" />
+                Contrôlez vos paramètres de sécurité
+              </li>
+              <li className="flex items-center">
+                <FiCreditCard className="mr-2 text-purple-500 text-xs" />
+                Suivez vos abonnements (Retailers)
+              </li>
+            </ul>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate("/login")}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center"
+            >
+              <FiUser className="mr-2" />
+              Se Connecter
+            </button>
+
+            <button
+              onClick={() => navigate("/signup")}
+              className="w-full bg-white hover:bg-gray-50 text-gray-700 font-medium py-3 px-4 rounded-lg border border-gray-300 transition-colors"
+            >
+              Créer un Compte
+            </button>
+
+            <button
+              onClick={() => {
+                setShowAuthPreview(false);
+                navigate("/");
+              }}
+              className="w-full text-gray-500 hover:text-gray-700 font-medium py-2 px-4 transition-colors text-sm"
+            >
+              Retourner à l'accueil
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (loader) {
     return (
       <div
@@ -349,6 +442,7 @@ export default function Profile() {
       }`}
     >
       <Navigation />
+      {showAuthPreview && <AuthPreviewModal />}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         {/* Profile Header */}
         <div
@@ -748,40 +842,79 @@ export default function Profile() {
                 <FiLogOut className="mr-2" />
                 {t("signOut")}
               </button>
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="flex items-center justify-center px-4 py-2 border border-red-300 rounded-md text-red-700 hover:bg-red-50 transition-colors"
-              >
-                <TiDelete className="mr-2" />
-                {t("profile.deleteAccount")}
-              </button>
+              <div className="relative">
+                <button
+                  disabled
+                  className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-gray-500 bg-gray-100 cursor-not-allowed transition-colors"
+                  title="Account deletion is only available through our mobile application"
+                >
+                  <TiDelete className="mr-2" />
+                  {t("profile.deleteAccount")}
+                </button>
+                <div className="absolute -bottom-8 left-0 right-0 text-center">
+                  <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded border shadow-sm">
+                    🔒 Web deletion disabled
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile App Notice */}
+            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <FiShield className="text-blue-600 mt-0.5" />
+                </div>
+                <div className="ml-3">
+                  <h4 className="text-sm font-medium text-blue-800">
+                    Suppression de compte
+                  </h4>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Pour des raisons de sécurité, la suppression de compte n'est
+                    disponible que via notre application mobile. Téléchargez
+                    l'app pour gérer votre compte en toute sécurité.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* Mobile App Notice Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {t("profile.confirmDeleteTitle")}
-            </h3>
-            <p className="text-gray-600 mb-6">
-              {t("profile.confirmDeleteText")}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="text-center mb-6">
+              <FiShield className="mx-auto text-6xl text-blue-500 mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Suppression de compte non disponible
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Pour des raisons de sécurité, la suppression de compte n'est
+                disponible que via notre application mobile.
+              </p>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
+                <FiShield className="mr-2 text-blue-600" />
+                Pourquoi l'application mobile ?
+              </h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• Vérification d'identité renforcée</li>
+                <li>• Confirmation en deux étapes</li>
+                <li>• Processus de sécurité avancé</li>
+                <li>• Support client intégré</li>
+              </ul>
+            </div>
+
+            <div className="flex justify-center">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
-                {t("profile.cancel")}
-              </button>
-              <button
-                onClick={handleOnClickDelete}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-              >
-                {t("profile.confirmDeleteButton")}
+                Compris
               </button>
             </div>
           </div>

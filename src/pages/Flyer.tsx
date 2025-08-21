@@ -27,17 +27,20 @@ interface Flyer {
 
 export default function FlyerPage() {
   const { t } = useTranslation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const [flyers, setFlyers] = useState<any[]>([]);
   const [pagination, setPagination] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [sortBy, setSortBy] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20; // Maximum 20 flyers per page as required
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Will be set based on screen size
   const { user, userRole } = useAuthenticate();
   const [categories, setCategories] = useState<any[]>([]);
+  const [userStores, setUserStores] = useState<any[]>([]);
 
   useEffect(() => {
     const category = searchParams.get("category") || "all";
@@ -45,6 +48,46 @@ export default function FlyerPage() {
     setSelectedCategory(category);
     setSelectedSubcategory(subcategory);
   }, [searchParams]);
+
+  // Fetch user's stores if they are a retailer
+  useEffect(() => {
+    const fetchUserStores = async () => {
+      if (userRole !== "RETAILER" || !user?.email) return;
+
+      try {
+        // First get the user ID
+        const userResponse = await fetch(`${baseUrl}user/${user.email}`);
+        if (!userResponse.ok) return;
+
+        const userData = await userResponse.json();
+        const userId = userData?.id;
+
+        if (!userId) return;
+
+        // Then fetch all stores and filter by ownerId
+        const storesResponse = await fetch(`${baseUrl}stores`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user.email,
+          },
+        });
+
+        if (storesResponse.ok) {
+          const storesData = await storesResponse.json();
+          const retailerStores =
+            storesData.stores?.filter(
+              (store: any) => store?.ownerId === userId
+            ) || [];
+          setUserStores(retailerStores);
+        }
+      } catch (error) {
+        console.error("Error fetching user stores:", error);
+      }
+    };
+
+    fetchUserStores();
+  }, [userRole, user?.email]);
 
   // Set sidebar state based on screen size
   useEffect(() => {
@@ -78,6 +121,22 @@ export default function FlyerPage() {
   // Helper functions to get names from IDs
   const getCategoryName = (categoryId: string) => {
     if (categoryId === "all") return t("flyers.allCategories");
+
+    // Check if this is a main category name
+    if (
+      [
+        "Shops & Offers",
+        "Services & Professionals",
+        "Leisure & Tourism",
+        "Auto / Moto / Mobility",
+        "Real Estate",
+        "Announcements",
+      ].includes(categoryId)
+    ) {
+      return categoryId;
+    }
+
+    // This is a category ID, find the name
     const category = categories.find((cat) => cat.id === categoryId);
     return category?.name || categoryId;
   };
@@ -88,27 +147,230 @@ export default function FlyerPage() {
     return subcategory?.name || subcategoryId;
   };
 
+  // Calculate offset for pagination
+  const getOffset = (page: number) => {
+    return (page - 1) * itemsPerPage;
+  };
+
+  // Check if there are more pages available
+  const hasNextPage = () => {
+    if (!pagination) return false;
+    return pagination.total > pagination.offset + itemsPerPage;
+  };
+
+  // Check if there are previous pages
+  const hasPreviousPage = () => {
+    return currentPage > 1;
+  };
+
+  // Get total pages
+  const getTotalPages = () => {
+    if (!pagination) return 1;
+    return Math.ceil(pagination.total / itemsPerPage);
+  };
+
   useEffect(() => {
     const fetchFlyers = async () => {
       try {
         setLoading(true);
-        let url = `${baseUrl}flyers?limit=12`;
+
+        // For retailers, if they have no stores, show empty result
+        if (userRole === "RETAILER" && userStores.length === 0) {
+          setFlyers([]);
+          setPagination({
+            total: 0,
+            limit: itemsPerPage,
+            offset: 0,
+            currentPage: currentPage,
+            totalPages: 1,
+            hasNextPage: false,
+            hasPreviousPage: false,
+            itemsPerPage: itemsPerPage,
+          });
+          return;
+        }
+
+        // If a main category is selected, fetch flyers from all its subcategories
+        if (
+          selectedCategory !== "all" &&
+          !categories.find((cat) => cat.id === selectedCategory)
+        ) {
+          // This is a main category name, fetch from all subcategories
+          const mainCategorySubcategories = categories.filter(
+            (cat) => cat.description === selectedCategory
+          );
+
+          if (mainCategorySubcategories.length > 0) {
+            let allFlyers: any[] = [];
+            let totalCount = 0;
+
+            // For retailers, fetch flyers from their stores only
+            if (userRole === "RETAILER") {
+              for (const store of userStores) {
+                for (const subcategory of mainCategorySubcategories) {
+                  let url = `${baseUrl}flyers?limit=100&offset=0&categoryId=${subcategory.id}&storeId=${store.id}`;
+
+                  // Add active/inactive filter
+                  if (sortBy === "active") {
+                    url += "&isActive=true";
+                  } else if (sortBy === "inactive") {
+                    url += "&isActive=false";
+                  }
+
+                  try {
+                    const response = await fetch(url);
+                    if (response.ok) {
+                      const data = await response.json();
+                      allFlyers = [...allFlyers, ...(data.flyers || [])];
+                      totalCount += data.pagination?.total || 0;
+                    }
+                  } catch (error) {
+                    console.error(
+                      `Error fetching flyers for subcategory ${subcategory.id} and store ${store.id}:`,
+                      error
+                    );
+                  }
+                }
+              }
+            } else {
+              // For non-retailers, fetch from all stores
+              for (const subcategory of mainCategorySubcategories) {
+                let url = `${baseUrl}flyers?limit=100&offset=0&categoryId=${subcategory.id}`;
+
+                // Add active/inactive filter
+                if (sortBy === "active") {
+                  url += "&isActive=true";
+                } else if (sortBy === "inactive") {
+                  url += "&isActive=false";
+                }
+
+                try {
+                  const response = await fetch(url);
+                  if (response.ok) {
+                    const data = await response.json();
+                    allFlyers = [...allFlyers, ...(data.flyers || [])];
+                    totalCount += data.pagination?.total || 0;
+                  }
+                } catch (error) {
+                  console.error(
+                    `Error fetching flyers for subcategory ${subcategory.id}:`,
+                    error
+                  );
+                }
+              }
+            }
+
+            // Apply pagination to the combined results
+            const startIndex = getOffset(currentPage);
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedFlyers = allFlyers.slice(startIndex, endIndex);
+
+            setFlyers(paginatedFlyers);
+
+            // Create pagination info
+            const transformedPagination = {
+              total: allFlyers.length,
+              limit: itemsPerPage,
+              offset: startIndex,
+              currentPage: currentPage,
+              totalPages: Math.ceil(allFlyers.length / itemsPerPage),
+              hasNextPage: endIndex < allFlyers.length,
+              hasPreviousPage: currentPage > 1,
+              itemsPerPage: itemsPerPage,
+            };
+
+            setPagination(transformedPagination);
+            return;
+          }
+        }
+
+        // Regular single category or subcategory filtering
+        let url = `${baseUrl}flyers?limit=${itemsPerPage}&offset=${getOffset(
+          currentPage
+        )}`;
+
+        // Add store filter for retailers
+        if (userRole === "RETAILER" && userStores.length > 0) {
+          // If retailer has multiple stores, we need to fetch from each store
+          if (userStores.length === 1) {
+            url += `&storeId=${userStores[0].id}`;
+          } else {
+            // For multiple stores, we'll need to make multiple calls
+            let allFlyers: any[] = [];
+
+            for (const store of userStores) {
+              let storeUrl = `${baseUrl}flyers?limit=100&offset=0&storeId=${store.id}`;
+
+              // Add category filter if selected
+              if (selectedCategory !== "all") {
+                storeUrl += `&categoryId=${selectedCategory}`;
+              }
+
+              // Add subcategory filter if selected
+              if (selectedSubcategory !== "all") {
+                storeUrl += `&categoryId=${selectedSubcategory}`;
+              }
+
+              // Add active/inactive filter
+              if (sortBy === "active") {
+                storeUrl += "&isActive=true";
+              } else if (sortBy === "inactive") {
+                storeUrl += "&isActive=false";
+              }
+
+              try {
+                const response = await fetch(storeUrl);
+                if (response.ok) {
+                  const data = await response.json();
+                  allFlyers = [...allFlyers, ...(data.flyers || [])];
+                }
+              } catch (error) {
+                console.error(
+                  `Error fetching flyers for store ${store.id}:`,
+                  error
+                );
+              }
+            }
+
+            // Apply pagination to the combined results
+            const startIndex = getOffset(currentPage);
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedFlyers = allFlyers.slice(startIndex, endIndex);
+
+            setFlyers(paginatedFlyers);
+
+            // Create pagination info
+            const transformedPagination = {
+              total: allFlyers.length,
+              limit: itemsPerPage,
+              offset: startIndex,
+              currentPage: currentPage,
+              totalPages: Math.ceil(allFlyers.length / itemsPerPage),
+              hasNextPage: endIndex < allFlyers.length,
+              hasPreviousPage: currentPage > 1,
+              itemsPerPage: itemsPerPage,
+            };
+
+            setPagination(transformedPagination);
+            return;
+          }
+        }
 
         // Add category filter if selected
         if (selectedCategory !== "all") {
           url += `&categoryId=${selectedCategory}`;
         }
 
-        // Add subcategory filter if selected
+        // Add subcategory filter if selected (this will override the main category)
         if (selectedSubcategory !== "all") {
-          url += `&subcategoryId=${selectedSubcategory}`;
+          url += `&categoryId=${selectedSubcategory}`;
         }
 
         // Add active/inactive filter
         if (sortBy === "active") {
-          url += "&active=true";
+          url += "&isActive=true";
         } else if (sortBy === "inactive") {
-          url += "&active=false";
+          url += "&isActive=false";
         }
 
         const response = await fetch(url);
@@ -116,8 +378,19 @@ export default function FlyerPage() {
           throw new Error("Failed to fetch flyers");
         }
         const data = await response.json();
-        setFlyers(data.flyers);
-        setPagination(data.pagination);
+        setFlyers(data.flyers || []);
+
+        // Transform the pagination data to match our expected format
+        const transformedPagination = {
+          ...data.pagination,
+          currentPage: currentPage,
+          totalPages: getTotalPages(),
+          hasNextPage: hasNextPage(),
+          hasPreviousPage: hasPreviousPage(),
+          itemsPerPage: itemsPerPage,
+        };
+
+        setPagination(transformedPagination);
       } catch (error) {
         console.error("Error fetching flyers:", error);
         toast.error("Failed to load flyers");
@@ -127,40 +400,19 @@ export default function FlyerPage() {
     };
 
     fetchFlyers();
-  }, [selectedCategory, selectedSubcategory, sortBy]);
+  }, [
+    selectedCategory,
+    selectedSubcategory,
+    sortBy,
+    currentPage,
+    userRole,
+    userStores,
+  ]);
 
-  const handlePageChange = async (page: number) => {
-    try {
-      setLoading(true);
-      let url = `${baseUrl}flyers?page=${page}&limit=12`;
-
-      if (selectedCategory !== "all") {
-        url += `&categoryId=${selectedCategory}`;
-      }
-
-      if (selectedSubcategory !== "all") {
-        url += `&subcategoryId=${selectedSubcategory}`;
-      }
-
-      if (sortBy === "active") {
-        url += "&active=true";
-      } else if (sortBy === "inactive") {
-        url += "&active=false";
-      }
-
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error("Failed to fetch flyers");
-      }
-      const data = await response.json();
-      setFlyers(data.flyers);
-      setPagination(data.pagination);
-    } catch (error) {
-      console.error("Error fetching flyers:", error);
-      toast.error("Failed to load flyers");
-    } finally {
-      setLoading(false);
-    }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to top when page changes
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleEdit = (flyer: any) => {
@@ -191,7 +443,8 @@ export default function FlyerPage() {
     }
   };
 
-  const filteredFlyers = flyers;
+  // No need for frontend filtering since we're filtering on the backend
+  const displayFlyers = flyers;
 
   return (
     <>
@@ -222,77 +475,62 @@ export default function FlyerPage() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Hero Section - Only show on first page */}
-          {pagination && pagination.currentPage === 1 && (
-            <div className="relative pt-24 pb-16">
-              <div
-                className={`absolute inset-0 rounded-3xl -z-10 ${
-                  userRole === "ADMIN"
-                    ? "bg-gradient-to-r from-blue-400/20 to-blue-600/20"
-                    : "bg-gradient-to-r from-yellow-400/20 to-yellow-600/20"
-                }`}
-              />
-              <div className="text-center max-w-4xl mx-auto">
-                <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="text-5xl md:text-6xl font-bold text-gray-900 mb-6"
-                >
-                  {t("flyers.title")}
-                </motion.h1>
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="text-xl text-gray-600 mb-8"
-                >
-                  {t("flyers.description")}
-                </motion.p>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.4 }}
-                  className="flex flex-wrap justify-center gap-4 mb-8"
-                >
-                  <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                    <HiNewspaper
-                      className={
-                        userRole === "ADMIN"
-                          ? "text-blue-600"
-                          : "text-yellow-600"
-                      }
-                    />
-                    <span className="text-gray-700">
-                      500+ {t("flyers.activeFlyers")}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                    <FaStore
-                      className={
-                        userRole === "ADMIN"
-                          ? "text-blue-600"
-                          : "text-yellow-600"
-                      }
-                    />
-                    <span className="text-gray-700">
-                      200+ {t("flyers.partnerStores")}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                    <HiUser
-                      className={
-                        userRole === "ADMIN"
-                          ? "text-blue-600"
-                          : "text-yellow-600"
-                      }
-                    />
-                    <span className="text-gray-700">
-                      50K+ {t("flyers.monthlyViews")}
-                    </span>
-                  </div>
-                </motion.div>
+          {currentPage === 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className={`text-center mb-12 rounded-xl p-4 ${
+                userRole === "ADMIN" ? "bg-blue-100" : "bg-yellow-100"
+              }`}
+            >
+              <h1 className="text-4xl pt-6 sm:text-5xl font-bold text-gray-900 mb-4">
+                {t("flyers.title")}
+              </h1>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                {t("flyers.description")}
+              </p>
+            </motion.div>
+          )}
+
+          {currentPage === 1 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="flex flex-wrap justify-center gap-4 mb-8"
+            >
+              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
+                <HiNewspaper
+                  className={
+                    userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
+                  }
+                />
+                <span className="text-gray-700">
+                  {pagination?.total || 0}+ {t("flyers.activeFlyers")}
+                </span>
               </div>
-            </div>
+              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
+                <FaStore
+                  className={
+                    userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
+                  }
+                />
+                <span className="text-gray-700">
+                  200+ {t("flyers.partnerStores")}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
+                <HiUser
+                  className={
+                    userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
+                  }
+                />
+                <span className="text-gray-700">
+                  50K+ {t("flyers.monthlyViews")}
+                </span>
+              </div>
+            </motion.div>
           )}
 
           {/* Results Summary */}
@@ -300,8 +538,8 @@ export default function FlyerPage() {
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="text-center sm:text-left">
                 <span className="text-sm text-gray-600">
-                  {t("flyers.showing")} {flyers.length} {t("flyers.of")}{" "}
-                  {filteredFlyers.length} {t("flyers.flyers")}
+                  {t("flyers.showing")} {displayFlyers.length} {t("flyers.of")}{" "}
+                  {pagination?.total || 0} {t("flyers.flyers")}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -336,9 +574,9 @@ export default function FlyerPage() {
               <div className="flex items-center justify-center h-full">
                 <Loader />
               </div>
-            ) : filteredFlyers.length > 0 ? (
+            ) : displayFlyers.length > 0 ? (
               <FlyerList
-                flyers={filteredFlyers}
+                flyers={displayFlyers}
                 pagination={pagination}
                 onPageChange={handlePageChange}
                 onEdit={handleEdit}

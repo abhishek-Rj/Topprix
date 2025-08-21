@@ -51,6 +51,7 @@
     "yourStores": "Your Stores",
     "yourFlyers": "Your Flyers",
     "yourCoupons": "Your Coupons",
+    "createStore": "Create Your Store",
     "settings": "Settings"
   },
   "back": "Back",
@@ -104,7 +105,19 @@
     "alreadyLoggedIn": "You are already logged in!",
     "alreadyLoggedInMessage": "You are currently logged into your account.",
     "goToHome": "Go to Home",
-    "viewProfile": "View My Profile"
+    "viewProfile": "View My Profile",
+    "accountDeletionDisabled": "Account Deletion Unavailable",
+    "accountDeletionMobileOnly": "For security reasons, account deletion is only available through our mobile application.",
+    "whyMobileApp": "Why Mobile App?",
+    "mobileAppBenefits": [
+      "Enhanced identity verification",
+      "Two-factor confirmation",
+      "Advanced security process",
+      "Integrated customer support"
+    ],
+    "understood": "Understood",
+    "webDeletionDisabled": "🔒 Web deletion disabled",
+    "mobileAppNotice": "For security reasons, account deletion is only available through our mobile application. Download the app to manage your account securely."
   },
   "subscription": {
     "title": "Subscription Plans",
@@ -208,6 +221,7 @@
     "platformStats": "Platform Statistics",
     "userDistribution": "User Distribution",
     "topStores": "Top Stores",
+    "allStores": "All Stores",
     "storePerformance": "Store Performance",
     "pending": "Pending"
   },
@@ -330,6 +344,12 @@
     "wishlist": "Wishlist",
     "remove": "Remove",
     "cancel": "Cancel",
+    "cropYourLogo": "Crop Your Logo",
+    "adjustCropArea": "Adjust the crop area to get the best result",
+    "dragToAdjustCrop": "Drag the corners to adjust the crop area",
+    "resetCrop": "Reset Crop",
+    "skipCrop": "Skip Cropping",
+    "applyCrop": "Apply Crop",
     "updating": "Updating...",
     "creating": "Creating...",
     "update": "Update",

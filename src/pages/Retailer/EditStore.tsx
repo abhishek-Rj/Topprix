@@ -117,13 +117,21 @@ export default function EditStore() {
     const canvas = document.createElement("canvas");
     const scaleX = image.naturalWidth / image.width;
     const scaleY = image.naturalHeight / image.height;
-    canvas.width = crop.width;
-    canvas.height = crop.height;
+
+    // Set a consistent output size for the cropped image
+    const outputSize = 400; // 400x400 pixels for the final logo
+    canvas.width = outputSize;
+    canvas.height = outputSize;
+
     const ctx = canvas.getContext("2d");
 
     if (!ctx) {
       throw new Error("No 2d context");
     }
+
+    // Enable image smoothing for better quality
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
 
     ctx.drawImage(
       image,
@@ -133,17 +141,21 @@ export default function EditStore() {
       crop.height * scaleY,
       0,
       0,
-      crop.width,
-      crop.height
+      outputSize,
+      outputSize
     );
 
     return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          throw new Error("Canvas is empty");
-        }
-        resolve(blob);
-      }, "image/jpeg");
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            throw new Error("Canvas is empty");
+          }
+          resolve(blob);
+        },
+        "image/jpeg",
+        0.95
+      ); // High quality JPEG
     });
   };
 
@@ -529,58 +541,179 @@ export default function EditStore() {
               </div>
 
               {showCropModal && imageSrc && (
-                <div className="fixed inset-0 backdrop-blur-sm bg-white/30 flex items-center justify-center z-50 p-4">
+                <div className="fixed inset-0 backdrop-blur-sm bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
                   <div
-                    className={`bg-white/95 backdrop-blur-md rounded-lg p-4 sm:p-6 max-w-2xl w-full mx-4 shadow-2xl border ${
+                    className={`bg-white rounded-xl sm:rounded-2xl shadow-2xl border-2 max-w-5xl w-full mx-2 sm:mx-4 max-h-[95vh] flex flex-col ${
                       userRole === "ADMIN"
-                        ? "border-blue-100"
-                        : "border-yellow-100"
+                        ? "border-blue-200"
+                        : "border-yellow-200"
                     }`}
                   >
-                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
-                      {t("store.cropYourLogo")}
-                    </h3>
-                    <div className="mb-4">
-                      <ReactCrop
-                        crop={crop}
-                        onChange={(c) => setCrop(c)}
-                        aspect={1}
-                        circularCrop
-                      >
-                        <img
-                          ref={imageRef}
-                          src={imageSrc}
-                          alt="Crop preview"
-                          className="max-h-[50vh] sm:max-h-[60vh] object-contain"
-                        />
-                      </ReactCrop>
+                    {/* Header */}
+                    <div
+                      className={`px-4 sm:px-6 py-4 border-b ${
+                        userRole === "ADMIN"
+                          ? "bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200"
+                          : "bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200"
+                      } rounded-t-xl sm:rounded-t-2xl`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`p-2 rounded-full ${
+                              userRole === "ADMIN"
+                                ? "bg-blue-500"
+                                : "bg-yellow-500"
+                            } text-white`}
+                          >
+                            <FiImage className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+                              {t("store.cropYourLogo")}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {t("store.adjustCropArea")}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleCropCancel}
+                          className="p-2 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+                        >
+                          <svg
+                            className="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
-                      <button
-                        type="button"
-                        onClick={handleCropCancel}
-                        className="w-full sm:w-auto px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleCropSkip}
-                        className="w-full sm:w-auto px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-                      >
-                        {t("store.skipCrop")}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleCropComplete}
-                        className={`w-full sm:w-auto px-4 py-2 ${
-                          userRole === "ADMIN"
-                            ? "bg-blue-500 hover:bg-blue-600"
-                            : "bg-yellow-500 hover:bg-yellow-600"
-                        } text-white rounded-md transition-colors`}
-                      >
-                        {t("store.applyCrop")}
-                      </button>
+
+                    {/* Crop Area */}
+                    <div className="flex-1 overflow-hidden flex items-center justify-center p-4 sm:p-6 bg-gray-50">
+                      <div className="relative w-full h-full flex items-center justify-center">
+                        <div
+                          className="crop-container relative"
+                          style={{
+                            width: "min(600px, 90vw)",
+                            height: "min(400px, 60vh)",
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                          }}
+                        >
+                          <ReactCrop
+                            crop={crop}
+                            onChange={(c) => setCrop(c)}
+                            aspect={1}
+                            circularCrop
+                            className="max-w-full max-h-full"
+                          >
+                            <img
+                              ref={imageRef}
+                              src={imageSrc}
+                              alt="Crop preview"
+                              className="max-w-full max-h-full object-contain rounded-lg shadow-md"
+                              style={{
+                                width: "min(600px, 90vw)",
+                                height: "min(400px, 60vh)",
+                                objectFit: "contain",
+                              }}
+                              onLoad={() => {
+                                // Reset crop to center when image loads
+                                setCrop({
+                                  unit: "%",
+                                  width: 80,
+                                  height: 80,
+                                  x: 10,
+                                  y: 10,
+                                });
+                              }}
+                            />
+                          </ReactCrop>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Instructions */}
+                    <div className="px-4 sm:px-6 py-3 bg-gray-50 border-t border-gray-200">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            userRole === "ADMIN"
+                              ? "bg-blue-500"
+                              : "bg-yellow-500"
+                          }`}
+                        ></div>
+                        <span>{t("store.dragToAdjustCrop")}</span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="px-4 sm:px-6 py-4 bg-white border-t border-gray-200 rounded-b-xl sm:rounded-b-2xl">
+                      <div className="flex flex-col sm:flex-row justify-between gap-3">
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCrop({
+                                unit: "%",
+                                width: 90,
+                                height: 90,
+                                x: 5,
+                                y: 5,
+                              });
+                            }}
+                            className={`px-4 py-2 text-sm rounded-lg border transition-colors ${
+                              userRole === "ADMIN"
+                                ? "border-blue-200 text-blue-600 hover:bg-blue-50"
+                                : "border-yellow-200 text-yellow-600 hover:bg-yellow-50"
+                            }`}
+                          >
+                            {t("store.resetCrop")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCropSkip}
+                            className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                          >
+                            {t("store.skipCrop")}
+                          </button>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <button
+                            type="button"
+                            onClick={handleCropCancel}
+                            className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                          >
+                            {t("store.cancel")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleCropComplete}
+                            className={`px-6 py-2 text-sm font-medium text-white rounded-lg transition-all hover:scale-105 shadow-md hover:shadow-lg ${
+                              userRole === "ADMIN"
+                                ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                                : "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700"
+                            }`}
+                          >
+                            <span className="flex items-center gap-2">
+                              <FiCamera className="w-4 h-4" />
+                              {t("store.applyCrop")}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

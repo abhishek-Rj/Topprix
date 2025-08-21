@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import {
   HiPencil,
@@ -20,7 +19,6 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { useTranslation } from "react-i18next";
 
-// Set up PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
   import.meta.url
@@ -363,10 +361,15 @@ export const FlyerCard = ({
         }}
       >
         <CardContent className="p-4">
-          {/* Mobile Layout - Horizontal */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Image/PDF Section */}
-            <div className="relative w-full sm:w-32 h-32 sm:h-24 overflow-hidden rounded-lg flex-shrink-0">
+          {/* New Layout: Title -> Image -> Date Badge */}
+          <div className="flex flex-col items-center space-y-3">
+            {/* Title - At the top */}
+            <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 text-center line-clamp-2 w-full">
+              {flyer.title}
+            </h2>
+
+            {/* Image/PDF Section - In the middle */}
+            <div className="relative w-full h-32 sm:h-40 overflow-hidden rounded-lg">
               {flyer.imageUrl ? (
                 isPdf ? (
                   // PDF Preview - First Page
@@ -414,17 +417,17 @@ export const FlyerCard = ({
                 </div>
               )}
 
-              {/* Preview button - available for all users */}
-              <div className="absolute top-1 right-1 flex gap-1 opacity-0 sm:group-hover:opacity-100 transition-opacity">
+              {/* Action buttons - overlay on image */}
+              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowPreviewModal(true);
                   }}
-                  className="p-1 bg-white/90 sm:hover:bg-white text-blue-600 sm:hover:text-blue-700 rounded-full shadow-sm transition-colors"
+                  className="p-1.5 bg-white/90 hover:bg-white text-blue-600 hover:text-blue-700 rounded-full shadow-sm transition-colors"
                   title="Preview Flyer"
                 >
-                  <HiEye size={12} />
+                  <HiEye size={14} />
                 </button>
 
                 {/* Additional action buttons for authenticated USER role */}
@@ -435,20 +438,20 @@ export const FlyerCard = ({
                         e.stopPropagation();
                         handleAddToShoppingList(e);
                       }}
-                      className="p-1 bg-white/90 sm:hover:bg-white text-green-600 sm:hover:text-green-700 rounded-full shadow-sm transition-colors"
+                      className="p-1.5 bg-white/90 hover:bg-white text-green-600 hover:text-green-700 rounded-full shadow-sm transition-colors"
                       title="Add to Shopping List"
                     >
-                      <HiShoppingCart size={12} />
+                      <HiShoppingCart size={14} />
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         addToWishlist();
                       }}
-                      className={`p-1 bg-white/90 sm:hover:bg-white rounded-full shadow-sm transition-colors ${
+                      className={`p-1.5 bg-white/90 hover:bg-white rounded-full shadow-sm transition-colors ${
                         isInWishlist
                           ? "text-red-500"
-                          : "text-gray-500 sm:hover:text-red-500"
+                          : "text-gray-500 hover:text-red-500"
                       }`}
                       title={
                         isInWishlist
@@ -456,28 +459,21 @@ export const FlyerCard = ({
                           : "Add to Wishlist"
                       }
                     >
-                      <HiHeart size={12} />
+                      <HiHeart size={14} />
                     </button>
                   </>
                 )}
               </div>
             </div>
 
-            {/* Content Section */}
-            <div className="flex-1 min-w-0">
-              <h2 className="text-sm sm:text-lg font-semibold text-gray-800 line-clamp-2 mb-2">
-                {flyer.title}
-              </h2>
-              <div className="flex items-center justify-between">
-                <span
-                  className={`text-xs sm:text-sm font-medium px-2 py-1 rounded-full border ${
-                    getDateBadge().className
-                  }`}
-                >
-                  {getDateBadge().text}
-                </span>
-              </div>
-            </div>
+            {/* Date Badge - At the bottom */}
+            <span
+              className={`text-xs sm:text-sm font-medium px-3 py-1.5 rounded-full border ${
+                getDateBadge().className
+              }`}
+            >
+              {getDateBadge().text}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -585,7 +581,7 @@ const FlyerList = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
         {flyers.map((flyer: any) => (
           <FlyerCard
             key={flyer.id}
@@ -596,26 +592,26 @@ const FlyerList = ({
         ))}
       </div>
 
+      {/* Pagination - Same design as CouponCard */}
       {pagination && (
-        <div className="flex justify-center gap-2 mt-6">
-          <Button
-            variant="outline"
+        <div className="flex justify-center items-center gap-2 mt-8">
+          <button
+            onClick={() => onPageChange(pagination.currentPage - 1)}
             disabled={!pagination.hasPreviousPage}
-            onClick={() => onPageChange(pagination.page - 1)}
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {t("flyers.previous")}
-          </Button>
-          <div className="text-sm text-gray-600 translate-y-2">
-            {t("flyers.page")} {pagination.page} {t("flyers.of")}{" "}
-            {pagination.totalPages}
-          </div>
-          <Button
-            variant="outline"
+            Previous
+          </button>
+          <span className="px-3 py-2 text-sm font-medium text-gray-700">
+            Page {pagination.currentPage} of {pagination.totalPages}
+          </span>
+          <button
+            onClick={() => onPageChange(pagination.currentPage + 1)}
             disabled={!pagination.hasNextPage}
-            onClick={() => onPageChange(pagination.page + 1)}
+            className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {t("flyers.next")}
-          </Button>
+            Next
+          </button>
         </div>
       )}
     </div>

@@ -193,7 +193,7 @@ const Navigation = () => {
                     >
                       {t("navigation.settings")}
                     </Link>
-                    {userRole !== "USER" ? (
+                    {userRole === "RETAILER" && (
                       <>
                         <Link
                           to="/stores"
@@ -201,9 +201,24 @@ const Navigation = () => {
                         >
                           {t("navigation.yourStores")}
                         </Link>
+                        <Link
+                          to="/stores/create-new-store"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50 border-t border-gray-100"
+                        >
+                          <span className="flex items-center">
+                            <span className="mr-2">🏪</span>
+                            {t("navigation.createStore")}
+                          </span>
+                        </Link>
                       </>
-                    ) : (
-                      <></>
+                    )}
+                    {userRole === "ADMIN" && (
+                      <Link
+                        to="/stores"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50"
+                      >
+                        {t("navigation.yourStores")}
+                      </Link>
                     )}
                     <button
                       onClick={async () => {
@@ -267,6 +282,19 @@ const Navigation = () => {
                     {link.name}
                   </Link>
                 ))}
+
+                {/* Additional mobile-only actions for retailers */}
+                {userRole === "RETAILER" && (
+                  <div className="border-t border-gray-200 pt-2 mt-2">
+                    <Link
+                      to="/stores/create-new-store"
+                      className="flex items-center text-sm font-medium py-2 px-4 rounded-md bg-yellow-600 text-white hover:bg-yellow-700 transition-colors"
+                    >
+                      <span className="mr-2">🏪</span>
+                      {t("navigation.createStore")}
+                    </Link>
+                  </div>
+                )}
               </nav>
             </div>
           )}
