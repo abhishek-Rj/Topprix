@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
   FiHeart,
   FiTrash2,
@@ -8,6 +9,8 @@ import {
   FiImage,
   FiFileText,
   FiTag,
+  FiX,
+  FiUser,
 } from "react-icons/fi";
 import Navigation from "../components/navigation";
 import Footer from "../components/Footer";
@@ -28,6 +31,7 @@ interface WishlistItem {
 
 export default function WishlistPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useAuthenticate();
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,12 +41,15 @@ export default function WishlistPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newItemName, setNewItemName] = useState("");
   const [newTargetPrice, setNewTargetPrice] = useState("");
+  const [showAuthPreview, setShowAuthPreview] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
       fetchWishlist();
+    } else if (!loading) {
+      setShowAuthPreview(true);
     }
-  }, [user]);
+  }, [user, loading]);
 
   const fetchWishlist = async () => {
     if (!user?.email) return;
@@ -282,6 +289,95 @@ export default function WishlistPage() {
     (item) => item.itemType === "manual"
   );
 
+  // Authentication Preview Modal Component
+  const AuthPreviewModal = () => (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl w-full mx-2 sm:mx-4 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-red-500 to-pink-600 px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <FiHeart className="text-white text-lg sm:text-xl md:text-2xl mr-2 sm:mr-3" />
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">
+                Wishlist
+              </h2>
+            </div>
+            <button
+              onClick={() => setShowAuthPreview(false)}
+              className="text-white hover:text-gray-200 transition-colors p-1"
+            >
+              <FiX size={20} className="sm:w-6 sm:h-6" />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-3 sm:p-4 md:p-6">
+          <div className="text-center mb-4 sm:mb-6">
+            <FiHeart className="mx-auto text-4xl sm:text-5xl md:text-6xl text-red-300 mb-3 sm:mb-4" />
+            <h3 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-2">
+              Connexion Requise
+            </h3>
+            <p className="text-xs sm:text-sm md:text-base text-gray-600 leading-relaxed px-2 sm:px-0">
+              Pour accéder à votre wishlist et sauvegarder vos articles
+              préférés, vous devez être connecté.
+            </p>
+          </div>
+
+          {/* Features Preview */}
+          <div className="bg-red-50 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+            <h4 className="font-semibold text-gray-800 mb-2 sm:mb-3 flex items-center text-sm sm:text-base">
+              <FiHeart className="mr-2 text-red-600" />
+              Fonctionnalités de la Wishlist :
+            </h4>
+            <ul className="text-xs sm:text-sm text-gray-600 space-y-1 sm:space-y-2">
+              <li className="flex items-center">
+                <FiHeart className="mr-2 text-red-500 text-xs" />
+                Sauvegardez vos articles préférés
+              </li>
+              <li className="flex items-center">
+                <FiTag className="mr-2 text-green-500 text-xs" />
+                Suivez les prix et promotions
+              </li>
+              <li className="flex items-center">
+                <FiPlus className="mr-2 text-blue-500 text-xs" />
+                Ajoutez des articles manuellement
+              </li>
+            </ul>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-2 sm:space-y-3">
+            <button
+              onClick={() => navigate("/login")}
+              className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 sm:py-3 px-3 sm:px-4 rounded-lg transition-colors flex items-center justify-center text-sm sm:text-base"
+            >
+              <FiUser className="mr-2 w-4 h-4 sm:w-5 sm:h-5" />
+              Se Connecter
+            </button>
+
+            <button
+              onClick={() => navigate("/signup")}
+              className="w-full bg-white hover:bg-gray-50 text-red-700 font-medium py-2 sm:py-3 px-3 sm:px-4 rounded-lg border border-red-300 transition-colors text-sm sm:text-base"
+            >
+              Créer un Compte
+            </button>
+
+            <button
+              onClick={() => {
+                setShowAuthPreview(false);
+                navigate("/");
+              }}
+              className="w-full text-gray-500 hover:text-gray-700 font-medium py-1.5 sm:py-2 px-3 sm:px-4 transition-colors text-xs sm:text-sm"
+            >
+              Retourner à l'accueil
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
       <>
@@ -310,6 +406,7 @@ export default function WishlistPage() {
   return (
     <>
       <Navigation />
+      {showAuthPreview && <AuthPreviewModal />}
       <div className="min-h-screen bg-yellow-50 pt-20">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">

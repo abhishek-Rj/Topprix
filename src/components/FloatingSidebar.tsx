@@ -77,14 +77,14 @@ export default function FloatingSidebar({
     return acc;
   }, {} as Record<string, Category[]>);
 
-  // Define category icons and priorities
+  // Define category icons and priorities - Updated to match French API responses
   const categoryMetadata = {
-    "Shops & Offers": { icon: "⭐", priority: 1, isTop: true },
-    "Services & Professionals": { icon: "🛠", priority: 2, isTop: false },
-    "Leisure & Tourism": { icon: "🎉", priority: 3, isTop: false },
-    "Auto / Moto / Mobility": { icon: "🚗", priority: 4, isTop: false },
-    "Real Estate": { icon: "🏡", priority: 5, isTop: false },
-    Announcements: { icon: "📢", priority: 6, isTop: false },
+    "Magasins & Offres": { icon: "⭐", priority: 1, isTop: true },
+    "Services & Professionnels": { icon: "🛠", priority: 2, isTop: false },
+    "Loisirs & Tourisme": { icon: "🎉", priority: 3, isTop: false },
+    "Auto / Moto / Mobilité": { icon: "🚗", priority: 4, isTop: false },
+    Immobilier: { icon: "🏡", priority: 5, isTop: false },
+    Annonces: { icon: "📢", priority: 6, isTop: false },
   };
 
   useEffect(() => {
@@ -140,14 +140,14 @@ export default function FloatingSidebar({
   };
 
   const handleCategorySelect = (categoryId: string) => {
-    // If it's a main category name (not an ID), pass it directly
+    // If it's a main category name (description), pass it directly
     if (groupedCategories[categoryId]) {
-      // This is a main category, select it directly
+      // This is a main category (description), select it directly
       onCategoryChange(categoryId);
       // Reset subcategory selection
       onSubcategoryChange("all");
     } else {
-      // This is a direct category ID
+      // This is a direct category ID (subcategory)
       onCategoryChange(categoryId);
       // Reset subcategory when category changes
       onSubcategoryChange("all");
@@ -280,7 +280,7 @@ export default function FloatingSidebar({
                         >
                           <button
                             onClick={() => {
-                              // If main category is already selected, expand it
+                              // If main category is already selected, just toggle expansion
                               if (selectedCategory === mainCategory) {
                                 toggleCategoryExpansion(mainCategory);
                               } else {

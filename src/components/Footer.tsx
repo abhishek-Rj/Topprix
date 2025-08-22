@@ -108,34 +108,50 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
             <ul className="space-y-2 sm:space-y-3">
               <li>
                 <a
-                  href="/category/fashion"
+                  href="/category/magasins-offres"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
-                  {t("footer.fashion")}
+                  ⭐ Magasins & Offres
                 </a>
               </li>
               <li>
                 <a
-                  href="/category/electronics"
+                  href="/category/services-professionnels"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
-                  {t("footer.electronics")}
+                  🛠 Services & Professionnels
                 </a>
               </li>
               <li>
                 <a
-                  href="/category/food"
+                  href="/category/loisirs-tourisme"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
-                  {t("footer.foodDining")}
+                  🎉 Loisirs & Tourisme
                 </a>
               </li>
               <li>
                 <a
-                  href="/category/home"
+                  href="/category/auto-moto-mobilite"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
-                  {t("footer.homeLiving")}
+                  🚗 Auto / Moto / Mobilité
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/category/immobilier"
+                  className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
+                >
+                  🏡 Immobilier
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/category/annonces"
+                  className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
+                >
+                  📢 Annonces
                 </a>
               </li>
             </ul>

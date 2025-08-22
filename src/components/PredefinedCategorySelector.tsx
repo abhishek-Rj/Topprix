@@ -58,14 +58,14 @@ export default function PredefinedCategorySelector({
     return acc;
   }, {} as Record<string, Category[]>);
 
-  // Define category icons and priorities
+  // Define category icons and priorities - Updated to match French API responses
   const categoryMetadata = {
-    "Shops & Offers": { icon: "⭐", priority: 1, isTop: true },
-    "Services & Professionals": { icon: "🛠", priority: 2, isTop: false },
-    "Leisure & Tourism": { icon: "🎉", priority: 3, isTop: false },
-    "Auto / Moto / Mobility": { icon: "🚗", priority: 4, isTop: false },
-    "Real Estate": { icon: "🏡", priority: 5, isTop: false },
-    Announcements: { icon: "📢", priority: 6, isTop: false },
+    "Magasins & Offres": { icon: "⭐", priority: 1, isTop: true },
+    "Services & Professionnels": { icon: "🛠", priority: 2, isTop: false },
+    "Loisirs & Tourisme": { icon: "🎉", priority: 3, isTop: false },
+    "Auto / Moto / Mobilité": { icon: "🚗", priority: 4, isTop: false },
+    Immobilier: { icon: "🏡", priority: 5, isTop: false },
+    Annonces: { icon: "📢", priority: 6, isTop: false },
   };
 
   const toggleCategoryExpansion = (categoryName: string) => {

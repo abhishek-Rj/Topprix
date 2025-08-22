@@ -122,15 +122,15 @@ export default function FlyerPage() {
   const getCategoryName = (categoryId: string) => {
     if (categoryId === "all") return t("flyers.allCategories");
 
-    // Check if this is a main category name
+    // Check if this is a main category name (French descriptions from API)
     if (
       [
-        "Shops & Offers",
-        "Services & Professionals",
-        "Leisure & Tourism",
-        "Auto / Moto / Mobility",
-        "Real Estate",
-        "Announcements",
+        "Magasins & Offres",
+        "Services & Professionnels",
+        "Loisirs & Tourisme",
+        "Auto / Moto / Mobilité",
+        "Immobilier",
+        "Annonces",
       ].includes(categoryId)
     ) {
       return categoryId;
