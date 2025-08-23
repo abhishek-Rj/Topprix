@@ -108,7 +108,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
             <ul className="space-y-2 sm:space-y-3">
               <li>
                 <a
-                  href="/flyers"
+                  href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
                   ⭐ Magasins & Offres
@@ -116,7 +116,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
               </li>
               <li>
                 <a
-                  href="/flyers"
+                  href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
                   🛠 Services & Professionnels
@@ -124,7 +124,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
               </li>
               <li>
                 <a
-                  href="/flyers"
+                  href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
                   🎉 Loisirs & Tourisme
@@ -132,7 +132,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
               </li>
               <li>
                 <a
-                  href="/flyers"
+                  href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
                   🚗 Auto / Moto / Mobilité
@@ -140,7 +140,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
               </li>
               <li>
                 <a
-                  href="/flyers"
+                  href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
                   🏡 Immobilier
@@ -148,7 +148,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
               </li>
               <li>
                 <a
-                  href="/flyers"
+                  href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
                   📢 Annonces
