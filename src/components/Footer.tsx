@@ -111,7 +111,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
                   href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
-                  ⭐ Magasins & Offres
+                  Magasins & Offres
                 </a>
               </li>
               <li>
@@ -119,7 +119,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
                   href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
-                  🛠 Services & Professionnels
+                  Services & Professionnels
                 </a>
               </li>
               <li>
@@ -127,7 +127,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
                   href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
-                  🎉 Loisirs & Tourisme
+                  Loisirs & Tourisme
                 </a>
               </li>
               <li>
@@ -135,7 +135,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
                   href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
-                  🚗 Auto / Moto / Mobilité
+                  Auto / Moto / Mobilité
                 </a>
               </li>
               <li>
@@ -143,7 +143,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
                   href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
-                  🏡 Immobilier
+                  Immobilier
                 </a>
               </li>
               <li>
@@ -151,7 +151,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
                   href="/explore/flyers"
                   className="text-sm sm:text-base text-gray-400 hover:text-yellow-500 transition-colors duration-200 block py-1"
                 >
-                  📢 Annonces
+                  Annonces
                 </a>
               </li>
             </ul>
