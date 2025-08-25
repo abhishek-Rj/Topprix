@@ -43,7 +43,7 @@ const Navigation = () => {
       { name: t("navigation.coupon"), path: "/explore/coupons" },
       { name: t("navigation.stores"), path: "/stores" },
       { name: t("navigation.wishlist"), path: "/wishlist" },
-      { name: "Shopping Lists", path: "/shopping-lists" },
+      { name: t("navigation.shoppingLists"), path: "/shopping-lists" },
       { name: t("navigation.profile"), path: "/profile" },
     ];
   }
@@ -51,7 +51,7 @@ const Navigation = () => {
   if (userRole === "RETAILER") {
     navLinks = [
       { name: t("navigation.dashboard"), path: "/retailer-dashboard" },
-      { name: "Subscriptions", path: "/subscriptions" },
+      { name: t("navigation.subscriptions"), path: "/subscriptions" },
       { name: t("navigation.yourStores"), path: "/stores" },
       { name: t("navigation.yourFlyers"), path: "/explore/flyers" },
       { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
@@ -62,7 +62,7 @@ const Navigation = () => {
   if (userRole === "ADMIN") {
     navLinks = [
       { name: t("navigation.dashboard"), path: "/admin-dashboard" },
-      { name: "Pricing Plans", path: "/admin/pricing-plans" },
+      { name: t("navigation.pricingPlans"), path: "/admin/pricing-plans" },
       { name: t("navigation.yourStores"), path: "/stores" },
       { name: t("navigation.yourFlyers"), path: "/explore/flyers" },
       { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
@@ -137,7 +137,7 @@ const Navigation = () => {
                       : "text-gray-600 hover:text-yellow-600"
                   }`}
                 >
-                  {i18n.language === "en" ? "EN" : i18n.language.toUpperCase()}
+                  {i18n.language === "en" ? t("language.en") : t("language.fr")}
                 </button>
                 <div className="absolute right-0 mt-2 w-28 bg-white rounded-lg shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
                   <button
@@ -148,7 +148,7 @@ const Navigation = () => {
                         : ""
                     }`}
                   >
-                    Française
+                    {t("language.french")}
                   </button>
                   <button
                     onClick={() => changeLanguage("en")}
@@ -158,7 +158,7 @@ const Navigation = () => {
                         : ""
                     }`}
                   >
-                    English
+                    {t("language.english")}
                   </button>
                 </div>
               </div>

@@ -185,16 +185,14 @@ export default function Subscriptions() {
         throw new Error(data.message || "Failed to create subscription");
       }
 
-      // Handle successful subscription creation
       if (data.hostedInvoiceUrl) {
         setPaymentUrl(data.hostedInvoiceUrl);
         setShowPaymentModal(true);
-        toast.success(data.message || t("subscription.subscriptionCreated"));
+        window.open(`${data.hostedInvoiceUrl}`, "_blank");
       } else {
         toast.success(
           data.message || t("subscription.subscriptionCreatedSuccess")
         );
-        // Refresh current subscription data
         await fetchCurrentSubscription();
       }
     } catch (error) {

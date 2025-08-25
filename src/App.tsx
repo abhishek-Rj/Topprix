@@ -25,6 +25,7 @@ import Terms from "./pages/Terms";
 import GeneralConditions from "./pages/GeneralConditions";
 import AboutUs from "./pages/AboutUs";
 import LegalNotices from "./pages/LegalNotices";
+import ContactUs from "./pages/ContactUs";
 
 function App() {
   return (
@@ -57,6 +58,7 @@ function App() {
           <Route path="/general-conditions" element={<GeneralConditions />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/legal-notices" element={<LegalNotices />} />
+          <Route path="/contact" element={<ContactUs />} />
         </Routes>
       </BrowserRouter>
     </>

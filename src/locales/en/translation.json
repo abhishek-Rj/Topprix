@@ -1,5 +1,5 @@
 {
-  "createAccount": "Create Account",
+  "createAccount": "Open an Account",
   "accountExist": "Already have an account?",
   "signIn": "Sign In",
   "signUp": "Sign Up",
@@ -7,9 +7,17 @@
   "email": "Email",
   "phone": "Phone",
   "password": "Password",
-  "selectRole": "Select Role",
-  "customer": "Customer",
-  "retailer": "Retailer",
+  "selectRole": "Profile Selection",
+  "customer": "Customer (I buy and browse)",
+  "retailer": "Merchant (I sell as a professional)",
+  "rolePlaceholder": "I am",
+  "privacyAccept": "I accept the",
+  "privacyPolicy": "Privacy Policy",
+  "termsAccept": "I accept the",
+  "termsOfUse": "Terms of Use",
+  "generalConditionsAccept": "I accept the",
+  "generalConditions": "General Conditions of Sale",
+  "accountCreationNote": "By creating an account, you accept our",
   "creatingAccount": "Creating Account...",
   "continueWith": "Or continue with",
   "login": "Login",
@@ -46,15 +54,35 @@
     "coupon": "Coupons",
     "stores": "Stores",
     "wishlist": "Wishlist",
+    "shoppingLists": "Shopping Lists",
     "profile": "Profile",
     "dashboard": "Dashboard",
     "yourStores": "Your Stores",
     "yourFlyers": "Your Flyers",
     "yourCoupons": "Your Coupons",
     "createStore": "Create Your Store",
-    "settings": "Settings"
+    "settings": "Settings",
+    "subscriptions": "Subscriptions",
+    "pricingPlans": "Pricing Plans"
   },
   "back": "Back",
+  "language": {
+    "english": "English",
+    "french": "French",
+    "en": "EN",
+    "fr": "FR"
+  },
+  "shoppingLists": {
+    "title": "My Shopping Lists",
+    "noLists": "No shopping lists yet"
+  },
+  "pricingPlans": {
+    "title": "Pricing Plans",
+    "noPlans": "No Pricing Plans Yet"
+  },
+  "subscriptions": {
+    "title": "Subscriptions"
+  },
   "profile": {
     "name": "Name",
     "email": "Email",

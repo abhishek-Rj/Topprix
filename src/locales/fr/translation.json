@@ -1,5 +1,5 @@
 {
-  "createAccount": "Créer un compte",
+  "createAccount": "Ouvrir un Compte",
   "accountExist": "Vous avez déjà un compte?",
   "signIn": "Se connecter",
   "signUp": "S'inscrire",
@@ -7,9 +7,17 @@
   "email": "Email",
   "phone": "Téléphone",
   "password": "Mot de passe",
-  "selectRole": "Sélectionner un rôle",
-  "customer": "Client",
-  "retailer": "Détaillant",
+  "selectRole": "Sélection de Profil",
+  "customer": "Client (J'achète et navigue)",
+  "retailer": "Marchand (Je vends en tant que professionnel)",
+  "rolePlaceholder": "Je suis",
+  "privacyAccept": "J'accepte la",
+  "privacyPolicy": "Politique de Confidentialité",
+  "termsAccept": "J'accepte les",
+  "termsOfUse": "Conditions Générales d'Utilisation",
+  "generalConditionsAccept": "J'accepte les",
+  "generalConditions": "Conditions Générales de Vente",
+  "accountCreationNote": "En créant un compte, vous acceptez notre",
   "creatingAccount": "Création du compte...",
   "continueWith": "Ou continuer avec",
   "login": "Connexion",
@@ -46,15 +54,35 @@
     "coupon": "Coupons",
     "stores": "Magasins",
     "wishlist": "Liste de souhaits",
+    "shoppingLists": "Listes d'achats",
     "profile": "Profil",
     "dashboard": "Tableau de bord",
     "yourStores": "Vos magasins",
     "yourFlyers": "Vos prospectus",
     "yourCoupons": "Vos coupons",
     "createStore": "Créer votre magasin",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "subscriptions": "Abonnements",
+    "pricingPlans": "Plans tarifaires"
   },
   "back": "Retour",
+  "language": {
+    "english": "Anglais",
+    "french": "Français",
+    "en": "EN",
+    "fr": "FR"
+  },
+  "shoppingLists": {
+    "title": "Mes Listes d'Achats",
+    "noLists": "Aucune liste d'achats pour le moment"
+  },
+  "pricingPlans": {
+    "title": "Plans Tarifaires",
+    "noPlans": "Aucun Plan Tarifaire Pour Le Moment"
+  },
+  "subscriptions": {
+    "title": "Abonnements"
+  },
   "profile": {
     "name": "Nom",
     "email": "E-mail",

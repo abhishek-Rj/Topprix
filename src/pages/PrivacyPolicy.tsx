@@ -20,14 +20,14 @@ export default function PrivacyPolicy() {
 
   return (
     <>
-      <div className="min-h-screen pt-16 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+      <div className="min-h-screen pt-16 bg-white">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white shadow-2xl">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-            <div className="mb-8">
-              <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
+        <div className="bg-gradient-to-r from-green-600 to-teal-600 text-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+            <div className="mb-6">
+              <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg
-                  className="w-12 h-12 text-white"
+                  className="w-8 h-8 text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -43,7 +43,7 @@ export default function PrivacyPolicy() {
               </h1>
               <p className="text-xl md:text-2xl text-green-100">Topprix.re</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 inline-block">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 inline-block">
               <p className="text-lg text-white font-medium">
                 📅 Date de mise à jour : Juillet 2025
               </p>
@@ -53,11 +53,11 @@ export default function PrivacyPolicy() {
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Introduction */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 transform hover:scale-[1.02] transition-all duration-300">
+          <div className="bg-gray-50 rounded-lg p-8 mb-8">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg
-                  className="w-8 h-8 text-green-600"
+                  className="w-6 h-6 text-green-600"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -84,20 +84,22 @@ export default function PrivacyPolicy() {
           {/* Interactive Sections */}
           <div className="space-y-6">
             {/* Legal Information */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
                 onClick={() => toggleSection("legal")}
-                className="w-full p-6 text-left bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 transition-all duration-300"
+                className="w-full p-6 text-left bg-green-50 hover:bg-green-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">1</span>
+                    <div className="w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      1
                     </div>
-                    <h3 className="text-xl font-bold">Informations légales</h3>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Informations légales
+                    </h3>
                   </div>
                   <svg
-                    className={`w-6 h-6 transform transition-transform duration-300 ${
+                    className={`w-5 h-5 text-green-500 transform transition-transform duration-200 ${
                       expandedSections.has("legal") ? "rotate-180" : ""
                     }`}
                     fill="currentColor"
@@ -112,17 +114,17 @@ export default function PrivacyPolicy() {
                 </div>
               </button>
               {expandedSections.has("legal") && (
-                <div className="p-6 bg-gray-50">
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
                   <p className="text-gray-700 mb-4">
                     Topprix.re est une marque appartenant à la société :
                   </p>
-                  <div className="bg-white p-6 rounded-xl border-l-4 border-green-500 shadow-md">
-                    <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <div className="grid md:grid-cols-2 gap-6">
                       <div>
-                        <p className="font-semibold text-gray-900 mb-2 text-lg">
+                        <p className="font-semibold text-gray-900 mb-3 text-lg">
                           🏢 Kliklokal SASU
                         </p>
-                        <p className="text-gray-700">
+                        <p className="text-gray-700 mb-2">
                           📍 56 Rue du Général de Gaulle, 97400, Saint-Denis
                           Réunion
                         </p>
@@ -131,11 +133,13 @@ export default function PrivacyPolicy() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-700">📧 contact@topprix.re</p>
-                        <p className="text-gray-700">📞 0693039840</p>
-                        <div className="mt-3">
-                          <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">
-                            Responsable du traitement
+                        <p className="text-gray-700 mb-2">
+                          📧 contact@topprix.re
+                        </p>
+                        <p className="text-gray-700 mb-3">📞 0693039840</p>
+                        <div>
+                          <span className="inline-block bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-lg">
+                            Société Réunionnaise
                           </span>
                         </div>
                       </div>
@@ -146,22 +150,22 @@ export default function PrivacyPolicy() {
             </div>
 
             {/* Data Collection */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
                 onClick={() => toggleSection("data-collection")}
-                className="w-full p-6 text-left bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+                className="w-full p-6 text-left bg-teal-50 hover:bg-teal-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">2</span>
+                    <div className="w-8 h-8 bg-teal-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      2
                     </div>
-                    <h3 className="text-xl font-bold">
-                      Quelles données personnelles collectons-nous ?
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Collecte des données
                     </h3>
                   </div>
                   <svg
-                    className={`w-6 h-6 transform transition-transform duration-300 ${
+                    className={`w-5 h-5 text-teal-500 transform transition-transform duration-200 ${
                       expandedSections.has("data-collection")
                         ? "rotate-180"
                         : ""
@@ -178,59 +182,35 @@ export default function PrivacyPolicy() {
                 </div>
               </button>
               {expandedSections.has("data-collection") && (
-                <div className="p-6 bg-gray-50">
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
                   <p className="text-gray-700 mb-6">
-                    Nous collectons uniquement les données strictement
-                    nécessaires au bon fonctionnement de notre site et à la
-                    gestion de vos commandes :
+                    Nous collectons uniquement les données nécessaires au bon
+                    fonctionnement de notre service :
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                      <div className="bg-white p-4 rounded-xl border-l-4 border-blue-500 shadow-md">
-                        <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                          <span className="text-blue-600">👤</span>
-                          Informations d'identification
-                        </h4>
-                        <ul className="space-y-1 text-gray-700 text-sm">
-                          <li>• Nom et prénom</li>
-                          <li>• Adresse email</li>
-                          <li>• Numéro de téléphone</li>
-                          <li>• Adresse de livraison</li>
-                        </ul>
-                      </div>
-                      <div className="bg-white p-4 rounded-xl border-l-4 border-green-500 shadow-md">
-                        <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                          <span className="text-green-600">💳</span>
-                          Données bancaires
-                        </h4>
-                        <p className="text-gray-700 text-sm">
-                          Transmises de façon sécurisée à nos prestataires de
-                          paiement
-                        </p>
-                      </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <span className="text-green-600">👤</span>
+                        Données personnelles
+                      </h4>
+                      <ul className="space-y-2 text-gray-700 text-sm">
+                        <li>• Nom et prénom</li>
+                        <li>• Adresse email</li>
+                        <li>• Numéro de téléphone (optionnel)</li>
+                        <li>• Adresse postale (optionnel)</li>
+                      </ul>
                     </div>
-                    <div className="space-y-3">
-                      <div className="bg-white p-4 rounded-xl border-l-4 border-purple-500 shadow-md">
-                        <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                          <span className="text-purple-600">🌐</span>
-                          Données de navigation
-                        </h4>
-                        <ul className="space-y-1 text-gray-700 text-sm">
-                          <li>• Adresse IP</li>
-                          <li>• Type de navigateur</li>
-                          <li>• Pages visitées</li>
-                          <li>• Durée de navigation</li>
-                        </ul>
-                      </div>
-                      <div className="bg-white p-4 rounded-xl border-l-4 border-orange-500 shadow-md">
-                        <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                          <span className="text-orange-600">📍</span>
-                          Données de localisation
-                        </h4>
-                        <p className="text-gray-700 text-sm">
-                          Uniquement si vous autorisez l'accès
-                        </p>
-                      </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <span className="text-teal-600">📊</span>
+                        Données d'utilisation
+                      </h4>
+                      <ul className="space-y-2 text-gray-700 text-sm">
+                        <li>• Pages visitées</li>
+                        <li>• Temps passé sur le site</li>
+                        <li>• Préférences de recherche</li>
+                        <li>• Interactions avec le contenu</li>
+                      </ul>
                     </div>
                   </div>
                 </div>
@@ -238,22 +218,22 @@ export default function PrivacyPolicy() {
             </div>
 
             {/* Data Usage */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
                 onClick={() => toggleSection("data-usage")}
-                className="w-full p-6 text-left bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-300"
+                className="w-full p-6 text-left bg-blue-50 hover:bg-blue-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">3</span>
+                    <div className="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      3
                     </div>
-                    <h3 className="text-xl font-bold">
-                      Pourquoi collectons-nous ces données ?
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Utilisation des données
                     </h3>
                   </div>
                   <svg
-                    className={`w-6 h-6 transform transition-transform duration-300 ${
+                    className={`w-5 h-5 text-blue-500 transform transition-transform duration-200 ${
                       expandedSections.has("data-usage") ? "rotate-180" : ""
                     }`}
                     fill="currentColor"
@@ -268,87 +248,64 @@ export default function PrivacyPolicy() {
                 </div>
               </button>
               {expandedSections.has("data-usage") && (
-                <div className="p-6 bg-gray-50">
-                  <p className="text-gray-700 mb-6">
-                    Vos données sont utilisées uniquement pour les finalités
-                    suivantes :
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
+                  <p className="text-gray-700 mb-4">
+                    Vos données sont utilisées exclusivement pour :
                   </p>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-green-600"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                        <span className="text-gray-700">
-                          Gérer votre compte et vos commandes
-                        </span>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                      <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-blue-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
                       </div>
-                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-green-600"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                        <span className="text-gray-700">
-                          Service client et informations importantes
-                        </span>
-                      </div>
+                      <span className="text-gray-700">
+                        Fournir et améliorer nos services
+                      </span>
                     </div>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-green-600"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                        <span className="text-gray-700">
-                          Offres commerciales (avec consentement)
-                        </span>
+                    <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                      <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-blue-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
                       </div>
-                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-green-600"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                        <span className="text-gray-700">
-                          Sécurité et amélioration du site
-                        </span>
+                      <span className="text-gray-700">
+                        Personnaliser votre expérience utilisateur
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                      <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg
+                          className="w-4 h-4 text-blue-600"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
                       </div>
+                      <span className="text-gray-700">
+                        Communiquer avec vous concernant notre service
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -356,22 +313,22 @@ export default function PrivacyPolicy() {
             </div>
 
             {/* User Rights */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
                 onClick={() => toggleSection("user-rights")}
-                className="w-full p-6 text-left bg-gradient-to-r from-indigo-500 to-indigo-600 text-white hover:from-indigo-600 hover:to-indigo-700 transition-all duration-300"
+                className="w-full p-6 text-left bg-purple-50 hover:bg-purple-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">8</span>
+                    <div className="w-8 h-8 bg-purple-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      4
                     </div>
-                    <h3 className="text-xl font-bold">
-                      Quels sont vos droits et comment les exercer ?
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Vos droits
                     </h3>
                   </div>
                   <svg
-                    className={`w-6 h-6 transform transition-transform duration-300 ${
+                    className={`w-5 h-5 text-purple-500 transform transition-transform duration-200 ${
                       expandedSections.has("user-rights") ? "rotate-180" : ""
                     }`}
                     fill="currentColor"
@@ -386,135 +343,141 @@ export default function PrivacyPolicy() {
                 </div>
               </button>
               {expandedSections.has("user-rights") && (
-                <div className="p-6 bg-gray-50">
-                  <p className="text-gray-700 mb-6">
-                    Conformément à la loi « Informatique et Libertés » et au
-                    RGPD, vous avez le droit :
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
+                  <p className="text-gray-700 mb-4">
+                    Conformément au RGPD, vous disposez des droits suivants :
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-3">
-                      <div className="bg-white p-4 rounded-xl border-l-4 border-indigo-500 shadow-md">
-                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <span className="text-indigo-600">👁️</span>
-                          Droit d'accès
-                        </h4>
-                        <p className="text-gray-700 text-sm">
-                          Accéder à vos données personnelles que nous détenons
-                        </p>
+                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                        <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-purple-600"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-gray-700">
+                          Droit d'accès à vos données
+                        </span>
                       </div>
-                      <div className="bg-white p-4 rounded-xl border-l-4 border-green-500 shadow-md">
-                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <span className="text-green-600">✏️</span>
+                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                        <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-purple-600"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-gray-700">
                           Droit de rectification
-                        </h4>
-                        <p className="text-gray-700 text-sm">
-                          Rectifier des données inexactes ou incomplètes
-                        </p>
-                      </div>
-                      <div className="bg-white p-4 rounded-xl border-l-4 border-red-500 shadow-md">
-                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <span className="text-red-600">🗑️</span>
-                          Droit d'effacement
-                        </h4>
-                        <p className="text-gray-700 text-sm">
-                          Demander l'effacement de vos données
-                        </p>
+                        </span>
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <div className="bg-white p-4 rounded-xl border-l-4 border-purple-500 shadow-md">
-                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <span className="text-purple-600">🚫</span>
-                          Droit d'opposition
-                        </h4>
-                        <p className="text-gray-700 text-sm">
-                          Vous opposer au traitement de vos données
-                        </p>
+                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                        <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-purple-600"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-gray-700">
+                          Droit à l'effacement
+                        </span>
                       </div>
-                      <div className="bg-white p-4 rounded-xl border-l-4 border-orange-500 shadow-md">
-                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <span className="text-orange-600">📤</span>
+                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                        <div className="w-6 h-6 bg-purple-100 rounded-lg flex items-center justify-center">
+                          <svg
+                            className="w-4 h-4 text-purple-600"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        <span className="text-gray-700">
                           Droit à la portabilité
-                        </h4>
-                        <p className="text-gray-700 text-sm">
-                          Transférer vos données à un autre prestataire
-                        </p>
-                      </div>
-                      <div className="bg-white p-4 rounded-xl border-l-4 border-teal-500 shadow-md">
-                        <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <span className="text-teal-600">⚖️</span>
-                          Droit de plainte
-                        </h4>
-                        <p className="text-gray-700 text-sm">
-                          Déposer une plainte auprès de la CNIL
-                        </p>
+                        </span>
                       </div>
                     </div>
-                  </div>
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 mt-6">
-                    <h4 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                      <span className="text-blue-600">📧</span>
-                      Pour exercer ces droits
-                    </h4>
-                    <p className="text-blue-800 text-center font-medium">
-                      Contactez-nous par email à : contact@topprix.re
-                    </p>
-                    <p className="text-blue-700 text-center mt-2 text-sm">
-                      Nous nous engageons à répondre dans un délai maximal de
-                      deux mois
-                    </p>
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Final Notice */}
-          <div className="bg-gradient-to-r from-green-100 to-teal-100 border-l-4 border-green-500 p-6 rounded-2xl shadow-lg mt-8">
+          {/* Contact Information */}
+          <div className="bg-blue-50 border border-blue-200 p-6 rounded-lg mt-8">
             <div className="flex items-start gap-4">
-              <div className="text-2xl">✅</div>
+              <div className="text-2xl">📧</div>
               <div>
-                <h3 className="text-lg font-semibold text-green-800 mb-2">
-                  Politique complète et conforme
+                <h3 className="text-lg font-semibold text-blue-800 mb-2">
+                  Contactez-nous
                 </h3>
-                <p className="text-green-800">
-                  Cette politique de confidentialité est maintenant complète et
-                  conforme au RGPD. Pour toute question concernant la protection
-                  de vos données, n'hésitez pas à nous contacter à{" "}
-                  <a
-                    href="mailto:contact@topprix.re"
-                    className="font-semibold underline hover:text-green-900"
-                  >
-                    contact@topprix.re
-                  </a>
+                <p className="text-blue-800 mb-3">
+                  Pour toute question concernant cette politique de
+                  confidentialité ou pour exercer vos droits, contactez-nous à :
                 </p>
+                <a
+                  href="mailto:contact@topprix.re"
+                  className="font-semibold text-blue-600 hover:text-blue-800 underline"
+                >
+                  contact@topprix.re
+                </a>
               </div>
             </div>
           </div>
 
-          {/* Legal Notices Link */}
+          {/* Related Links */}
           <div className="mt-8 text-center">
-            <div className="bg-white rounded-2xl shadow-lg p-6 inline-block">
+            <div className="bg-gray-50 rounded-lg p-6 inline-block">
               <p className="text-gray-600 mb-4">
                 Pour plus d'informations légales, consultez également nos
               </p>
-              <a
-                href="/legal-notices"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+              <div className="flex flex-wrap gap-3 justify-center">
+                <a
+                  href="/terms"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors duration-200"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                Mentions Légales
-              </a>
+                  Conditions d'Utilisation
+                </a>
+                <a
+                  href="/general-conditions"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors duration-200"
+                >
+                  Conditions de Vente
+                </a>
+                <a
+                  href="/legal-notices"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Mentions Légales
+                </a>
+              </div>
             </div>
           </div>
         </div>
