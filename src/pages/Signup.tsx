@@ -267,13 +267,16 @@ export default function Signup() {
             </div>
 
             <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                {t("selectRole")}
+              </label>
               <select
                 ref={roleRef}
                 className={`w-full hover:scale-105 transition-transform pl-10 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 
                                     ${roleError ? "border-red-500" : ""}`}
                 required
               >
-                <option value="">{t("selectRole")}</option>
+                <option value="">{t("rolePlaceholder")}</option>
                 <option value="USER">{t("customer")}</option>
                 <option value="RETAILER">{t("retailer")}</option>
               </select>
@@ -288,14 +291,14 @@ export default function Signup() {
                 className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
               />
               <label htmlFor="privacy-policy" className="text-xs text-gray-600">
-                J'accepte la{" "}
+                {t("privacyAccept")}{" "}
                 <a
                   href="/privacy"
                   className="text-yellow-600 hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Politique de Confidentialité
+                  {t("privacyPolicy")}
                 </a>
               </label>
             </div>
@@ -312,14 +315,14 @@ export default function Signup() {
                 htmlFor="terms-conditions"
                 className="text-xs text-gray-600"
               >
-                J'accepte les{" "}
+                {t("termsAccept")}{" "}
                 <a
                   href="/terms"
                   className="text-yellow-600 hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Conditions Générales d'Utilisation
+                  {t("termsOfUse")}
                 </a>
               </label>
             </div>
@@ -336,14 +339,14 @@ export default function Signup() {
                 htmlFor="general-conditions"
                 className="text-xs text-gray-600"
               >
-                J'accepte les{" "}
+                {t("generalConditionsAccept")}{" "}
                 <a
                   href="/general-conditions"
                   className="text-yellow-600 hover:underline"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  Conditions Générales de Vente
+                  {t("generalConditions")}
                 </a>
               </label>
             </div>
@@ -379,12 +382,12 @@ export default function Signup() {
           {/* Privacy Policy Link */}
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              En créant un compte, vous acceptez notre{" "}
+              {t("accountCreationNote")}{" "}
               <a
                 href="/privacy"
                 className="text-yellow-600 hover:underline hover:text-yellow-700 transition-colors"
               >
-                Politique de Confidentialité
+                {t("privacyPolicy")}
               </a>
             </p>
           </div>

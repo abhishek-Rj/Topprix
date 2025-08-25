@@ -8,14 +8,14 @@ export default function AboutUs() {
 
   return (
     <>
-      <div className="min-h-screen pt-16 bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50">
+      <div className="min-h-screen pt-16 bg-white">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white shadow-2xl">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-            <div className="mb-8">
-              <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6 transform hover:scale-110 transition-transform duration-300">
+        <div className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+            <div className="mb-6">
+              <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-4 transform hover:scale-110 transition-transform duration-300">
                 <svg
-                  className="w-12 h-12 text-white"
+                  className="w-8 h-8 text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -26,10 +26,10 @@ export default function AboutUs() {
                   />
                 </svg>
               </div>
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6">
                 À Propos de TopPrix.re
               </h1>
-              <p className="text-xl md:text-2xl text-yellow-100 max-w-4xl mx-auto leading-relaxed animate-fade-in-delay">
+              <p className="text-xl md:text-2xl text-yellow-100 max-w-4xl mx-auto leading-relaxed">
                 Une initiative locale, humaine, engagée et visionnaire
               </p>
             </div>
@@ -50,10 +50,10 @@ export default function AboutUs() {
               <button
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
-                className={`px-6 py-3 rounded-full font-medium transition-all duration-300 transform hover:scale-105 ${
+                className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 ${
                   activeSection === section.id
-                    ? "bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg"
-                    : "bg-white text-gray-700 hover:bg-yellow-50 border border-gray-200"
+                    ? "bg-yellow-500 text-white shadow-lg"
+                    : "bg-gray-100 text-gray-700 hover:bg-yellow-50 border border-gray-200"
                 }`}
               >
                 <span className="mr-2">{section.icon}</span>
@@ -66,21 +66,21 @@ export default function AboutUs() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           {/* Introduction Section */}
           {activeSection === "story" && (
-            <div className="animate-fade-in">
+            <div>
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                   Notre Histoire
                 </h2>
-                <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-yellow-500 mx-auto rounded-full"></div>
               </div>
 
-              <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 transform hover:scale-[1.01] transition-all duration-300">
+              <div className="bg-gray-50 rounded-lg p-8 md:p-12">
                 <p className="text-lg text-gray-700 leading-relaxed mb-6">
                   Nous sommes une équipe de Réunionnais passionnés, issus du
                   web, du marketing local et du commerce, unis par une
                   conviction simple :
                 </p>
-                <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-l-4 border-yellow-500 p-8 rounded-2xl mb-8 transform hover:scale-[1.02] transition-all duration-300">
+                <div className="bg-yellow-50 border border-yellow-200 p-8 rounded-lg mb-8">
                   <p className="text-xl font-semibold text-yellow-800 text-center">
                     La Réunion mérite une plateforme moderne, éthique et utile,
                     pour consommer mieux, soutenir les commerçants locaux et
@@ -92,173 +92,178 @@ export default function AboutUs() {
                   TopPrix.re est né de notre observation terrain :
                 </p>
 
-                <div className="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-2xl p-8 mb-8 transform hover:scale-[1.02] transition-all duration-300">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-8 mb-8">
                   <div className="flex items-start gap-4">
                     <div className="text-red-500 text-3xl">📬</div>
                     <div>
                       <p className="text-gray-800 font-medium mb-3 text-lg">
                         Chaque semaine, des dizaines de prospectus inondent les
-                        boîtes aux lettres, sont à peine lus… puis finissent à
-                        la poubelle.
+                        boîtes aux lettres, générant des tonnes de déchets
+                        papier.
                       </p>
-                      <p className="text-gray-700 text-lg">
-                        À l'heure du digital, comment justifier encore cette
-                        pollution inutile, surtout sur une île aussi précieuse
-                        que la nôtre ?
+                      <p className="text-gray-700">
+                        Ces prospectus, souvent non lus, représentent un
+                        gaspillage environnemental et économique considérable.
                       </p>
                     </div>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <span className="text-blue-600">🌍</span>
+                      Problème environnemental
+                    </h3>
+                    <ul className="space-y-2 text-gray-700">
+                      <li>• Déforestation pour la production de papier</li>
+                      <li>• Émissions CO2 du transport et de l'impression</li>
+                      <li>• Gaspillage des ressources naturelles</li>
+                      <li>• Pollution des sols et de l'eau</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <span className="text-green-600">💰</span>
+                      Problème économique
+                    </h3>
+                    <ul className="space-y-2 text-gray-700">
+                      <li>• Coûts d'impression et de distribution</li>
+                      <li>• Perte de visibilité pour les commerçants</li>
+                      <li>• Inefficacité du ciblage client</li>
+                      <li>• Manque de mesure de performance</li>
+                    </ul>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Our Solution Section */}
+          {/* Solution Section */}
           {activeSection === "solution" && (
-            <div className="animate-fade-in">
+            <div>
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                   Notre Réponse
                 </h2>
-                <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-yellow-500 mx-auto rounded-full"></div>
               </div>
 
-              <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 transform hover:scale-[1.01] transition-all duration-300">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                  Un outil local, intelligent et écologique
-                </h3>
-
-                <p className="text-lg text-gray-700 leading-relaxed mb-8 text-center">
-                  Nous avons donc lancé TopPrix.re, une plateforme pensée pour :
+              <div className="bg-gray-50 rounded-lg p-8 md:p-12">
+                <p className="text-lg text-gray-700 leading-relaxed mb-8">
+                  Face à ces constats, nous avons développé une solution
+                  numérique complète et innovante :
                 </p>
 
-                <div className="grid md:grid-cols-3 gap-6 mb-8">
-                  <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl transform hover:scale-105 transition-all duration-300">
-                    <div className="text-5xl mb-4">🎯</div>
-                    <h4 className="font-semibold text-gray-900 mb-2 text-lg">
-                      Faciliter l'accès
-                    </h4>
-                    <p className="text-gray-700">Aux bons plans locaux</p>
-                  </div>
-                  <div className="text-center p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl transform hover:scale-105 transition-all duration-300">
-                    <div className="text-5xl mb-4">🌱</div>
-                    <h4 className="font-semibold text-gray-900 mb-2 text-lg">
-                      Réduire l'impact
-                    </h4>
-                    <p className="text-gray-700">
-                      Écologique de la publicité papier
-                    </p>
-                  </div>
-                  <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl transform hover:scale-105 transition-all duration-300">
-                    <div className="text-5xl mb-4">🏪</div>
-                    <h4 className="font-semibold text-gray-900 mb-2 text-lg">
-                      Donner une vitrine
-                    </h4>
-                    <p className="text-gray-700">
-                      Digitale aux commerçants réunionnais
-                    </p>
-                  </div>
+                <div className="bg-blue-50 border border-blue-200 p-8 rounded-lg mb-8">
+                  <h3 className="text-2xl font-bold text-blue-900 mb-4 text-center">
+                    🚀 TopPrix.re : La plateforme qui révolutionne la
+                    consommation locale
+                  </h3>
+                  <p className="text-blue-800 text-center text-lg">
+                    Une alternative digitale, écologique et performante aux
+                    prospectus papier traditionnels.
+                  </p>
                 </div>
 
-                <div className="bg-gradient-to-r from-yellow-100 via-orange-100 to-red-100 p-8 rounded-2xl transform hover:scale-[1.02] transition-all duration-300">
-                  <p className="text-center text-gray-800 font-medium text-lg mb-6">
-                    C'est un projet éthique, durable et{" "}
-                    <span className="text-yellow-600 font-bold text-xl">
-                      100 % péi
-                    </span>
-                    , soutenu par des valeurs fortes :
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-4">
-                    {[
-                      "Simplicité",
-                      "Utilité",
-                      "Responsabilité",
-                      "Solidarité économique",
-                    ].map((value, index) => (
-                      <span
-                        key={value}
-                        className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-full text-sm font-medium transform hover:scale-110 transition-all duration-300"
-                        style={{ animationDelay: `${index * 100}ms` }}
-                      >
-                        {value}
-                      </span>
-                    ))}
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div className="text-4xl mb-4">🌱</div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">
+                      Écologique
+                    </h4>
+                    <p className="text-gray-700">
+                      Réduction drastique des déchets papier et de l'empreinte
+                      carbone.
+                    </p>
+                  </div>
+                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div className="text-4xl mb-4">💡</div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">
+                      Innovante
+                    </h4>
+                    <p className="text-gray-700">
+                      Technologies modernes pour une expérience utilisateur
+                      optimale.
+                    </p>
+                  </div>
+                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div className="text-4xl mb-4">🎯</div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">
+                      Efficace
+                    </h4>
+                    <p className="text-gray-700">
+                      Ciblage précis et mesure de performance en temps réel.
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* What We Offer Section */}
+          {/* Offer Section */}
           {activeSection === "offer" && (
-            <div className="animate-fade-in">
+            <div>
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                  Concrètement, que proposons-nous ?
+                  Ce qu'on propose
                 </h2>
-                <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-yellow-500 mx-auto rounded-full"></div>
               </div>
 
-              <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 transform hover:scale-[1.01] transition-all duration-300">
-                <p className="text-lg text-gray-700 leading-relaxed mb-8 text-center">
-                  Nous centralisons tous les bons plans et services utiles à La
-                  Réunion, dans 4 grands univers :
-                </p>
-
+              <div className="bg-gray-50 rounded-lg p-8 md:p-12">
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="space-y-6">
-                    <div className="flex items-start gap-4 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl transform hover:scale-105 transition-all duration-300">
-                      <div className="text-4xl">🛒</div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2 text-lg">
-                          1. Commerces & Offres
-                        </h4>
-                        <p className="text-gray-700">
-                          Hypermarchés, électroménager, mode, déco, bio,
-                          jardinage, bébé…
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-4 p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl transform hover:scale-105 transition-all duration-300">
-                      <div className="text-4xl">🛠️</div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2 text-lg">
-                          2. Services & Pros
-                        </h4>
-                        <p className="text-gray-700">
-                          Artisans, services à domicile, santé, formation,
-                          emploi, réparation…
-                        </p>
-                      </div>
+                    <div className="bg-white p-6 rounded-lg border border-gray-200">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <span className="text-green-600">🛒</span>
+                        Pour les consommateurs
+                      </h3>
+                      <ul className="space-y-3 text-gray-700">
+                        <li className="flex items-center gap-2">
+                          <span className="text-green-500">✓</span>
+                          Accès gratuit aux offres locales
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-green-500">✓</span>
+                          Comparaison de prix intelligente
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-green-500">✓</span>
+                          Notifications personnalisées
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-green-500">✓</span>
+                          Application mobile intuitive
+                        </li>
+                      </ul>
                     </div>
                   </div>
 
                   <div className="space-y-6">
-                    <div className="flex items-start gap-4 p-6 bg-gradient-to-br from-purple-50 to-violet-50 rounded-2xl transform hover:scale-105 transition-all duration-300">
-                      <div className="text-4xl">🎉</div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2 text-lg">
-                          3. Loisirs & Tourisme
-                        </h4>
-                        <p className="text-gray-700">
-                          Sorties, restaurants, hôtels, événements, culture,
-                          sport…
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-start gap-4 p-6 bg-gradient-to-br from-orange-50 to-red-50 rounded-2xl transform hover:scale-105 transition-all duration-300">
-                      <div className="text-4xl">🚗</div>
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-2 text-lg">
-                          4. Auto & Mobilité
-                        </h4>
-                        <p className="text-gray-700">
-                          Véhicules, garages, locations, accessoires, mobilité
-                          douce…
-                        </p>
-                      </div>
+                    <div className="bg-white p-6 rounded-lg border border-gray-200">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <span className="text-blue-600">🏪</span>
+                        Pour les commerçants
+                      </h3>
+                      <ul className="space-y-3 text-gray-700">
+                        <li className="flex items-center gap-2">
+                          <span className="text-blue-500">✓</span>
+                          Publication d'offres en temps réel
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-blue-500">✓</span>
+                          Analytics et statistiques détaillées
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-blue-500">✓</span>
+                          Ciblage géographique précis
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-blue-500">✓</span>
+                          Support technique dédié
+                        </li>
+                      </ul>
                     </div>
                   </div>
                 </div>
@@ -266,179 +271,189 @@ export default function AboutUs() {
             </div>
           )}
 
-          {/* Our Mission Section */}
+          {/* Mission Section */}
           {activeSection === "mission" && (
-            <div className="animate-fade-in">
+            <div>
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                   Notre Mission
                 </h2>
-                <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-yellow-500 mx-auto rounded-full"></div>
               </div>
 
-              <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 transform hover:scale-[1.01] transition-all duration-300">
-                <div className="grid md:grid-cols-2 gap-8 mb-8">
-                  <div className="space-y-4">
-                    {[
-                      "Aider les Réunionnais à consommer plus intelligemment",
-                      "Accompagner les pros dans leur transition digitale",
-                    ].map((mission, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-3 transform hover:scale-105 transition-all duration-300"
-                      >
-                        <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center transform hover:scale-110 transition-all duration-300">
-                          <span className="text-white text-lg font-bold">
-                            ✓
-                          </span>
-                        </div>
-                        <span className="text-gray-800 text-lg">{mission}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-4">
-                    {[
-                      "Préserver l'environnement en remplaçant les supports papier",
-                      "Créer un réflexe local, utile et durable",
-                    ].map((mission, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-3 transform hover:scale-105 transition-all duration-300"
-                      >
-                        <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center transform hover:scale-110 transition-all duration-300">
-                          <span className="text-white text-lg font-bold">
-                            ✓
-                          </span>
-                        </div>
-                        <span className="text-gray-800 text-lg">{mission}</span>
-                      </div>
-                    ))}
-                  </div>
+              <div className="bg-gray-50 rounded-lg p-8 md:p-12">
+                <div className="text-center mb-8">
+                  <p className="text-xl text-gray-700 leading-relaxed">
+                    Notre mission est de créer un écosystème numérique qui
+                    connecte intelligemment les consommateurs et les commerçants
+                    locaux, tout en préservant notre environnement.
+                  </p>
                 </div>
 
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-2xl transform hover:scale-[1.02] transition-all duration-300">
-                  <p className="text-center text-gray-800 text-lg">
-                    Nous construisons un écosystème qui profite à tous les
-                    acteurs de l'île :
-                    <span className="font-semibold block mt-2">
-                      particuliers, commerçants, artisans, producteurs,
-                      professionnels du service
-                    </span>
-                    , etc.
-                  </p>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <span className="text-purple-600">🎯</span>
+                      Objectifs immédiats
+                    </h3>
+                    <ul className="space-y-2 text-gray-700">
+                      <li>• Réduire de 80% les prospectus papier</li>
+                      <li>• Connecter 1000+ commerçants locaux</li>
+                      <li>• Atteindre 50,000+ utilisateurs actifs</li>
+                      <li>• Créer 20+ emplois locaux</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <span className="text-orange-600">🌟</span>
+                      Vision long terme
+                    </h3>
+                    <ul className="space-y-2 text-gray-700">
+                      <li>• Devenir la référence digitale locale</li>
+                      <li>• Exporter le modèle à d'autres territoires</li>
+                      <li>• Contribuer à la transition écologique</li>
+                      <li>• Développer l'économie circulaire</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Future Vision Section */}
+          {/* Future Section */}
           {activeSection === "future" && (
-            <div className="animate-fade-in">
+            <div>
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                   Et demain ?
                 </h2>
-                <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-yellow-500 mx-auto rounded-full"></div>
               </div>
 
-              <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 transform hover:scale-[1.01] transition-all duration-300">
+              <div className="bg-gray-50 rounded-lg p-8 md:p-12">
                 <p className="text-lg text-gray-700 leading-relaxed mb-8 text-center">
-                  Nous ne faisons que commencer. Notre vision est claire :
+                  Notre ambition ne s'arrête pas à La Réunion. Nous envisageons
+                  un avenir où TopPrix.re devient un modèle de référence pour la
+                  consommation locale durable.
                 </p>
 
-                <div className="grid md:grid-cols-2 gap-6 mb-8">
-                  <div className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl transform hover:scale-105 transition-all duration-300">
-                    <h4 className="font-bold text-gray-900 mb-3 text-lg">
-                      🚀 Développement
-                    </h4>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <span className="text-teal-600">🚀</span>
+                      Développements futurs
+                    </h3>
                     <ul className="space-y-2 text-gray-700">
-                      <li>• Offrir des alertes personnalisées</li>
-                      <li>• Développer un comparateur intelligent local</li>
+                      <li>• Intelligence artificielle pour le ciblage</li>
+                      <li>• Intégration blockchain pour la transparence</li>
+                      <li>• Application de réalité augmentée</li>
+                      <li>• Système de fidélité innovant</li>
                     </ul>
                   </div>
-
-                  <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl transform hover:scale-105 transition-all duration-300">
-                    <h4 className="font-bold text-gray-900 mb-3 text-lg">
-                      💼 Interface Pro
-                    </h4>
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <span className="text-indigo-600">🌍</span>
+                      Expansion géographique
+                    </h3>
                     <ul className="space-y-2 text-gray-700">
-                      <li>• Proposer une interface Pro autonome</li>
-                      <li>• Publier facilement et rapidement</li>
+                      <li>• Autres territoires d'outre-mer</li>
+                      <li>• Métropole française</li>
+                      <li>• Pays francophones</li>
+                      <li>• Marchés internationaux</li>
                     </ul>
                   </div>
-                </div>
-
-                <div className="text-center">
-                  <p className="text-xl font-semibold text-gray-800 mb-4">
-                    Et devenir une référence éco-digitale dans l'Océan Indien
-                  </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Local Startup Section */}
+          {/* Startup Section */}
           {activeSection === "startup" && (
-            <div className="animate-fade-in">
+            <div>
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                  Une startup réunionnaise, au service du territoire
+                  Startup locale
                 </h2>
-                <div className="w-24 h-1 bg-gradient-to-r from-yellow-500 to-orange-500 mx-auto rounded-full"></div>
+                <div className="w-24 h-1 bg-yellow-500 mx-auto rounded-full"></div>
               </div>
 
-              <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 transform hover:scale-[1.01] transition-all duration-300">
+              <div className="bg-gray-50 rounded-lg p-8 md:p-12">
                 <div className="text-center mb-8">
-                  <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                    TopPrix.re est porté par une structure locale indépendante.
-                  </p>
-                  <p className="text-lg text-gray-700 leading-relaxed">
-                    Nous croyons en la force de l'innovation, au service du
-                    collectif, pas au service des géants du numérique ou des
-                    algorithmes anonymes.
+                  <p className="text-xl text-gray-700 leading-relaxed">
+                    TopPrix.re est une startup 100% réunionnaise, créée par des
+                    locaux, pour les locaux, avec une vision globale.
                   </p>
                 </div>
 
-                <div className="bg-gradient-to-r from-yellow-100 to-orange-100 p-8 rounded-2xl text-center transform hover:scale-[1.02] transition-all duration-300">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                    C'est à cela qu'est notre différence :
-                  </h3>
-                  <p className="text-xl text-gray-800 font-medium">
-                    Un projet conçu par des Réunionnais, pour La Réunion, avec
-                    amour et ambition.
-                  </p>
+                <div className="grid md:grid-cols-3 gap-6">
+                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div className="text-4xl mb-4">🏝️</div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">
+                      Made in Réunion
+                    </h4>
+                    <p className="text-gray-700">
+                      Conçue et développée localement, adaptée aux spécificités
+                      de notre territoire.
+                    </p>
+                  </div>
+                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div className="text-4xl mb-4">👥</div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">
+                      Équipe locale
+                    </h4>
+                    <p className="text-gray-700">
+                      Des talents réunionnais passionnés par leur île et
+                      déterminés à la faire rayonner.
+                    </p>
+                  </div>
+                  <div className="bg-white p-6 rounded-lg border border-gray-200 text-center">
+                    <div className="text-4xl mb-4">💪</div>
+                    <h4 className="text-xl font-bold text-gray-900 mb-3">
+                      Impact local
+                    </h4>
+                    <p className="text-gray-700">
+                      Création d'emplois, développement économique et
+                      préservation de l'environnement local.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-8 bg-yellow-50 border border-yellow-200 p-6 rounded-lg">
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-yellow-800 mb-3">
+                      Rejoignez l'aventure TopPrix.re !
+                    </h3>
+                    <p className="text-yellow-800 mb-4">
+                      Ensemble, construisons l'avenir de la consommation locale
+                      et durable.
+                    </p>
+                    <a
+                      href="mailto:contact@topprix.re"
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-yellow-600 text-white font-semibold rounded-lg hover:bg-yellow-700 transition-colors duration-200"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
+                          clipRule="evenodd"
+                        />
+                        <path
+                          fillRule="evenodd"
+                          d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Nous contacter
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           )}
-
-          {/* Call to Action */}
-          <div className="text-center mt-16">
-            <div className="bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-white rounded-3xl p-8 md:p-12 transform hover:scale-[1.02] transition-all duration-300">
-              <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                Rejoignez l'aventure TopPrix.re !
-              </h3>
-              <p className="text-lg text-yellow-100 mb-6">
-                Ensemble, construisons un avenir plus intelligent et durable
-                pour La Réunion
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a
-                  href="/"
-                  className="px-8 py-3 bg-white text-yellow-600 font-semibold rounded-lg hover:bg-gray-100 transition-all duration-300 transform hover:scale-105"
-                >
-                  Découvrir la plateforme
-                </a>
-                <a
-                  href="/contact"
-                  className="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-yellow-600 transition-all duration-300 transform hover:scale-105"
-                >
-                  Nous contacter
-                </a>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <Footer />

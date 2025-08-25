@@ -20,14 +20,14 @@ export default function Terms() {
 
   return (
     <>
-      <div className="min-h-screen pt-16 bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50">
+      <div className="min-h-screen pt-16 bg-white">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 text-white shadow-lg">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
             <div className="mb-6">
-              <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg
-                  className="w-10 h-10 text-white"
+                  className="w-8 h-8 text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -41,9 +41,9 @@ export default function Terms() {
               <h1 className="text-4xl md:text-6xl font-bold mb-4">
                 Conditions Générales d'Utilisation
               </h1>
-              <p className="text-xl md:text-2xl text-yellow-100">Topprix.re</p>
+              <p className="text-xl md:text-2xl text-blue-100">Topprix.re</p>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6 inline-block">
+            <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 inline-block">
               <p className="text-lg text-white font-medium">
                 📅 Date de mise à jour : Juillet 2025
               </p>
@@ -53,11 +53,11 @@ export default function Terms() {
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           {/* Introduction */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 transform hover:scale-[1.02] transition-all duration-300">
+          <div className="bg-gray-50 rounded-lg p-8 mb-8">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <svg
-                  className="w-8 h-8 text-blue-600"
+                  className="w-6 h-6 text-blue-600"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -82,20 +82,22 @@ export default function Terms() {
           {/* Interactive Sections */}
           <div className="space-y-6">
             {/* Legal Information */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
                 onClick={() => toggleSection("legal")}
-                className="w-full p-6 text-left bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+                className="w-full p-6 text-left bg-blue-50 hover:bg-blue-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">1</span>
+                    <div className="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      1
                     </div>
-                    <h3 className="text-xl font-bold">Informations légales</h3>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Informations légales
+                    </h3>
                   </div>
                   <svg
-                    className={`w-6 h-6 transform transition-transform duration-300 ${
+                    className={`w-5 h-5 text-blue-500 transform transition-transform duration-200 ${
                       expandedSections.has("legal") ? "rotate-180" : ""
                     }`}
                     fill="currentColor"
@@ -110,17 +112,17 @@ export default function Terms() {
                 </div>
               </button>
               {expandedSections.has("legal") && (
-                <div className="p-6 bg-gray-50">
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
                   <p className="text-gray-700 mb-4">
                     Topprix.re est une marque appartenant à la société :
                   </p>
-                  <div className="bg-white p-6 rounded-xl border-l-4 border-blue-500 shadow-md">
-                    <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-white p-6 rounded-lg border border-gray-200">
+                    <div className="grid md:grid-cols-2 gap-6">
                       <div>
-                        <p className="font-semibold text-gray-900 mb-2 text-lg">
+                        <p className="font-semibold text-gray-900 mb-3 text-lg">
                           🏢 Kliklokal SASU
                         </p>
-                        <p className="text-gray-700">
+                        <p className="text-gray-700 mb-2">
                           📍 56 Rue du Général de Gaulle, 97400, Saint-Denis
                           Réunion
                         </p>
@@ -129,10 +131,12 @@ export default function Terms() {
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-700">📧 contact@topprix.re</p>
-                        <p className="text-gray-700">📞 0693039840</p>
-                        <div className="mt-3">
-                          <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
+                        <p className="text-gray-700 mb-2">
+                          📧 contact@topprix.re
+                        </p>
+                        <p className="text-gray-700 mb-3">📞 0693039840</p>
+                        <div>
+                          <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-lg">
                             Société Réunionnaise
                           </span>
                         </div>
@@ -144,22 +148,22 @@ export default function Terms() {
             </div>
 
             {/* Service Description */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
                 onClick={() => toggleSection("service")}
-                className="w-full p-6 text-left bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 transition-all duration-300"
+                className="w-full p-6 text-left bg-green-50 hover:bg-green-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">2</span>
+                    <div className="w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      2
                     </div>
-                    <h3 className="text-xl font-bold">
+                    <h3 className="text-xl font-bold text-gray-900">
                       Description du service
                     </h3>
                   </div>
                   <svg
-                    className={`w-6 h-6 transform transition-transform duration-300 ${
+                    className={`w-5 h-5 text-green-500 transform transition-transform duration-200 ${
                       expandedSections.has("service") ? "rotate-180" : ""
                     }`}
                     fill="currentColor"
@@ -174,14 +178,14 @@ export default function Terms() {
                 </div>
               </button>
               {expandedSections.has("service") && (
-                <div className="p-6 bg-gray-50">
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
                   <p className="text-gray-700 mb-6">
                     Topprix.re est une plateforme de découverte et de partage
                     d'offres, de coupons et de prospectus provenant de divers
                     commerces et services.
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-white p-4 rounded-xl border-l-4 border-green-500">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
                       <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                         <span className="text-green-600">🛒</span>
                         Services Consommateurs
@@ -192,7 +196,7 @@ export default function Terms() {
                         <li>• Comparaison de prix intelligente</li>
                       </ul>
                     </div>
-                    <div className="bg-white p-4 rounded-xl border-l-4 border-purple-500">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
                       <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                         <span className="text-purple-600">🏪</span>
                         Services Commerçants
@@ -209,22 +213,22 @@ export default function Terms() {
             </div>
 
             {/* User Obligations */}
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
                 onClick={() => toggleSection("obligations")}
-                className="w-full p-6 text-left bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 transition-all duration-300"
+                className="w-full p-6 text-left bg-purple-50 hover:bg-purple-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                      <span className="text-white text-sm font-bold">3</span>
+                    <div className="w-8 h-8 bg-purple-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      3
                     </div>
-                    <h3 className="text-xl font-bold">
+                    <h3 className="text-xl font-bold text-gray-900">
                       Obligations des utilisateurs
                     </h3>
                   </div>
                   <svg
-                    className={`w-6 h-6 transform transition-transform duration-300 ${
+                    className={`w-5 h-5 text-purple-500 transform transition-transform duration-200 ${
                       expandedSections.has("obligations") ? "rotate-180" : ""
                     }`}
                     fill="currentColor"
@@ -239,14 +243,14 @@ export default function Terms() {
                 </div>
               </button>
               {expandedSections.has("obligations") && (
-                <div className="p-6 bg-gray-50">
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
                   <p className="text-gray-700 mb-4">
                     En utilisant Topprix.re, vous vous engagez à :
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                        <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
                           <svg
                             className="w-4 h-4 text-green-600"
                             fill="currentColor"
@@ -263,8 +267,8 @@ export default function Terms() {
                           Fournir des informations exactes et à jour
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                        <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
                           <svg
                             className="w-4 h-4 text-green-600"
                             fill="currentColor"
@@ -283,8 +287,8 @@ export default function Terms() {
                       </div>
                     </div>
                     <div className="space-y-3">
-                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                        <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
                           <svg
                             className="w-4 h-4 text-green-600"
                             fill="currentColor"
@@ -301,8 +305,8 @@ export default function Terms() {
                           Ne pas utiliser le service à des fins illégales
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg">
-                        <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+                      <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
+                        <div className="w-6 h-6 bg-green-100 rounded-lg flex items-center justify-center">
                           <svg
                             className="w-4 h-4 text-green-600"
                             fill="currentColor"
@@ -327,7 +331,7 @@ export default function Terms() {
           </div>
 
           {/* Notice */}
-          <div className="bg-gradient-to-r from-yellow-100 to-orange-100 border-l-4 border-yellow-500 p-6 rounded-2xl shadow-lg mt-8">
+          <div className="bg-yellow-50 border border-yellow-200 p-6 rounded-lg mt-8">
             <div className="flex items-start gap-4">
               <div className="text-2xl">⚠️</div>
               <div>
@@ -352,13 +356,13 @@ export default function Terms() {
 
           {/* Legal Notices Link */}
           <div className="mt-8 text-center">
-            <div className="bg-white rounded-2xl shadow-lg p-6 inline-block">
+            <div className="bg-gray-50 rounded-lg p-6 inline-block">
               <p className="text-gray-600 mb-4">
                 Pour plus d'informations légales, consultez également nos
               </p>
               <a
                 href="/legal-notices"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors duration-200"
               >
                 <svg
                   className="w-5 h-5"

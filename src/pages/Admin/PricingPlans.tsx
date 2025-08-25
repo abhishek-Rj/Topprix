@@ -19,6 +19,7 @@ import {
 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import Footer from "../../components/Footer";
+import { useTranslation } from "react-i18next";
 
 interface PricingPlan {
   id: string;
@@ -36,6 +37,7 @@ interface PricingPlan {
 export default function PricingPlans() {
   const { user, userRole, loading: authLoading } = useAuthenticate();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);

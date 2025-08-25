@@ -38,14 +38,14 @@ export default function Home() {
       (async () => {
         const fetchCoupons = await fetch(`${baseUrl}coupons?limit=3`);
         if (!fetchCoupons.ok) {
-          toast.error("Something went wrong");
-          throw new Error("Didn't fetched coupons");
+          toast.error("Une erreur s'est produite");
+          throw new Error("Impossible de récupérer les coupons");
         }
         setCoupons((await fetchCoupons.json()).coupons);
       })();
     } catch (error) {
       console.error("Error fetching coupons:", error);
-      toast.error("Failed to fetch coupons");
+      toast.error("Impossible de récupérer les coupons");
     }
   }, []);
 
@@ -54,14 +54,14 @@ export default function Home() {
       (async () => {
         const fetchFlyers = await fetch(`${baseUrl}flyers?limit=3`);
         if (!fetchFlyers.ok) {
-          toast.error("Something went wrong");
-          throw new Error("Didn't fetched flyers");
+          toast.error("Une erreur s'est produite");
+          throw new Error("Impossible de récupérer les prospectus");
         }
         setFlyers((await fetchFlyers.json()).flyers);
       })();
     } catch (error) {
       console.error("Error fetching flyers:", error);
-      toast.error("Failed to fetch flyers");
+      toast.error("Impossible de récupérer les prospectus");
     }
   }, []);
 
@@ -111,7 +111,7 @@ export default function Home() {
             <div className="flex items-center">
               <img
                 src={"/logowb.png"}
-                alt="Topprix Logo"
+                alt="Logo Topprix"
                 className="w-10 h-10 mr-2"
               />
               <h1
@@ -134,7 +134,7 @@ export default function Home() {
                 }`}
               >
                 <HiTag />
-                Explore Flyers
+                Explorer les Prospectus
               </button>
               <button
                 onClick={() => navigate("/explore/flyers")}
@@ -145,7 +145,7 @@ export default function Home() {
                 }`}
               >
                 <HiNewspaper />
-                Explore Coupons
+                Explorer les Coupons
               </button>
               <button
                 onClick={() => {
@@ -166,7 +166,7 @@ export default function Home() {
                 ) : (
                   <>
                     <HiUser />
-                    Login
+                    Connexion
                   </>
                 )}
               </button>
@@ -208,7 +208,7 @@ export default function Home() {
                   }`}
                 >
                   <HiTag />
-                  Explore Flyers
+                  Explorer les Prospectus
                 </button>
                 <button
                   onClick={() => {
@@ -222,7 +222,7 @@ export default function Home() {
                   }`}
                 >
                   <HiNewspaper />
-                  Explore Coupons
+                  Explorer les Coupons
                 </button>
                 <button
                   onClick={() => {
@@ -243,7 +243,7 @@ export default function Home() {
                   ) : (
                     <>
                       <HiUser />
-                      Login
+                      Connexion
                     </>
                   )}
                 </button>
@@ -278,7 +278,7 @@ export default function Home() {
                 }`}
               >
                 <HiTrendingUp className="w-4 h-4" />
-                Save up to 70% on your favorite brands
+                Économisez jusqu'à 70% sur vos marques préférées
               </div>
             </motion.div>
 
@@ -293,13 +293,13 @@ export default function Home() {
               }`}
             >
               <h1 className="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
-                Discover Amazing
+                Découvrez des
                 <span
                   className={`${
                     userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                   } block`}
                 >
-                  Deals Everywhere
+                  Offres Incroyables
                 </span>
               </h1>
             </motion.div>
@@ -310,14 +310,15 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed"
             >
-              Find the best coupons and flyers from your favorite stores.
+              Trouvez les meilleurs coupons et prospectus de vos magasins
+              préférés.
               <span
                 className={`${
                   userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                 } font-semibold`}
               >
                 {" "}
-                Save more, shop smarter.
+                Économisez plus, achetez plus intelligemment.
               </span>
             </motion.p>
 
@@ -336,7 +337,7 @@ export default function Home() {
                 }`}
               >
                 <HiTag className="w-5 h-5" />
-                Browse Flyers
+                Parcourir les Prospectus
               </button>
               <button
                 onClick={() => navigate("/explore/coupons")}
@@ -347,7 +348,7 @@ export default function Home() {
                 }`}
               >
                 <HiNewspaper className="w-5 h-5" />
-                View Coupons
+                Voir les Coupons
               </button>
             </motion.div>
 
@@ -366,7 +367,7 @@ export default function Home() {
                 >
                   500+
                 </div>
-                <div className="text-gray-600">Active Stores</div>
+                <div className="text-gray-600">Magasins Actifs</div>
               </div>
               <div className="text-center">
                 <div
@@ -376,7 +377,7 @@ export default function Home() {
                 >
                   10K+
                 </div>
-                <div className="text-gray-600">Happy Customers</div>
+                <div className="text-gray-600">Clients Satisfaits</div>
               </div>
               <div className="text-center">
                 <div
@@ -384,9 +385,9 @@ export default function Home() {
                     userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                   }`}
                 >
-                  $2M+
+                  2M€+
                 </div>
-                <div className="text-gray-600">Total Savings</div>
+                <div className="text-gray-600">Économies Totales</div>
               </div>
             </motion.div>
           </div>
@@ -411,10 +412,10 @@ export default function Home() {
           >
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-                Popular Flyers
+                Prospectus Populaires
               </h2>
               <p className="text-gray-600">
-                Discover the latest deals from top stores
+                Découvrez les dernières offres des meilleurs magasins
               </p>
             </div>
             <button
@@ -425,7 +426,7 @@ export default function Home() {
                   : "text-yellow-600 hover:text-yellow-700 bg-yellow-50 hover:bg-yellow-100"
               }`}
             >
-              View All
+              Voir Tout
               <HiTrendingUp className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </motion.div>
@@ -460,11 +461,11 @@ export default function Home() {
             >
               <div className="text-8xl mb-6">😔</div>
               <h3 className="text-2xl font-semibold text-gray-700 mb-4">
-                No flyers available today!
+                Aucun prospectus disponible aujourd'hui !
               </h3>
               <p className="text-gray-500 text-lg max-w-md mx-auto">
-                Check back later for amazing deals and exclusive offers from
-                your favorite stores.
+                Revenez plus tard pour des offres incroyables et des promotions
+                exclusives de vos magasins préférés.
               </p>
             </motion.div>
           )}
@@ -489,10 +490,10 @@ export default function Home() {
           >
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-                Popular Coupons
+                Coupons Populaires
               </h2>
               <p className="text-gray-600">
-                Save big with these exclusive discount codes
+                Économisez gros avec ces codes de réduction exclusifs
               </p>
             </div>
             <button
@@ -503,7 +504,7 @@ export default function Home() {
                   : "text-yellow-600 hover:text-yellow-700 bg-yellow-50 hover:bg-yellow-100"
               }`}
             >
-              View All
+              Voir Tout
               <HiTrendingUp className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </motion.div>
@@ -538,10 +539,11 @@ export default function Home() {
             >
               <div className="text-8xl mb-6">🎫</div>
               <h3 className="text-2xl font-semibold text-gray-700 mb-4">
-                No coupons available today!
+                Aucun coupon disponible aujourd'hui !
               </h3>
               <p className="text-gray-500 text-lg max-w-md mx-auto">
-                Check back soon for amazing discount codes and exclusive offers.
+                Revenez bientôt pour des codes de réduction incroyables et des
+                offres exclusives.
               </p>
             </motion.div>
           )}
@@ -565,18 +567,18 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              What Our{" "}
+              Ce que disent nos{" "}
               <span
                 className={`${
                   userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                 }`}
               >
-                Customers
-              </span>{" "}
-              Say
+                Clients
+              </span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Join thousands of happy customers who save money every day
+              Rejoignez des milliers de clients satisfaits qui économisent de
+              l'argent chaque jour
             </p>
           </motion.div>
 
@@ -600,8 +602,8 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600 mb-6 italic">
-                "Topprix has saved me hundreds of dollars! The deals are amazing
-                and the app is so easy to use."
+                "Topprix m'a fait économiser des centaines d'euros ! Les offres
+                sont incroyables et l'application est si facile à utiliser."
               </p>
               <div className="flex items-center">
                 <div
@@ -615,7 +617,7 @@ export default function Home() {
                   <div className="font-semibold text-gray-900">
                     Sarah Johnson
                   </div>
-                  <div className="text-gray-500 text-sm">Regular Customer</div>
+                  <div className="text-gray-500 text-sm">Cliente Régulière</div>
                 </div>
               </div>
             </div>
@@ -633,8 +635,8 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600 mb-6 italic">
-                "I love how I can find all the best deals in one place. The
-                flyers section is my favorite!"
+                "J'adore comment je peux trouver toutes les meilleures offres en
+                un seul endroit. La section prospectus est ma préférée !"
               </p>
               <div className="flex items-center">
                 <div
@@ -646,7 +648,9 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">Mike Chen</div>
-                  <div className="text-gray-500 text-sm">Smart Shopper</div>
+                  <div className="text-gray-500 text-sm">
+                    Acheteur Intelligent
+                  </div>
                 </div>
               </div>
             </div>
@@ -664,8 +668,8 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600 mb-6 italic">
-                "The coupons are always valid and the savings are real. Highly
-                recommend Topprix!"
+                "Les coupons sont toujours valides et les économies sont
+                réelles. Je recommande vivement Topprix !"
               </p>
               <div className="flex items-center">
                 <div
@@ -677,7 +681,9 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">Emma Davis</div>
-                  <div className="text-gray-500 text-sm">Deal Hunter</div>
+                  <div className="text-gray-500 text-sm">
+                    Chasseuse de Bonnes Affaires
+                  </div>
                 </div>
               </div>
             </div>
@@ -696,7 +702,7 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Why Choose{" "}
+              Pourquoi choisir{" "}
               <span
                 className={`${
                   userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
@@ -707,8 +713,8 @@ export default function Home() {
               ?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We make saving money easy and fun. Discover amazing deals from
-              your favorite stores.
+              Nous rendons l'économie d'argent facile et amusante. Découvrez des
+              offres incroyables de vos magasins préférés.
             </p>
           </motion.div>
 
@@ -730,10 +736,10 @@ export default function Home() {
                 <FaRegMoneyBillAlt className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Save Money
+                Économisez de l'Argent
               </h3>
               <p className="text-gray-600">
-                Get exclusive discounts and save on every purchase
+                Obtenez des réductions exclusives et économisez sur chaque achat
               </p>
             </motion.div>
 
@@ -748,10 +754,10 @@ export default function Home() {
                 <HiShoppingBag className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Easy Shopping
+                Achats Faciles
               </h3>
               <p className="text-gray-600">
-                Browse deals from hundreds of stores in one place
+                Parcourez les offres de centaines de magasins en un seul endroit
               </p>
             </motion.div>
 
@@ -766,10 +772,10 @@ export default function Home() {
                 <FaRegSmile className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Happy Customers
+                Clients Satisfaits
               </h3>
               <p className="text-gray-600">
-                Join thousands of satisfied shoppers worldwide
+                Rejoignez des milliers d'acheteurs satisfaits dans le monde
               </p>
             </motion.div>
 
@@ -784,10 +790,10 @@ export default function Home() {
                 <HiCheckCircle className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Verified Deals
+                Offres Vérifiées
               </h3>
               <p className="text-gray-600">
-                All deals are verified and updated regularly
+                Toutes les offres sont vérifiées et mises à jour régulièrement
               </p>
             </motion.div>
           </motion.div>
@@ -817,12 +823,12 @@ export default function Home() {
               }`}
             >
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Have a Store?
+                Vous avez un Magasin ?
               </h2>
               <p className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed text-gray-700">
-                Create your store profile and start sharing your coupons and
-                flyers with thousands of potential customers. Join our growing
-                community of retailers!
+                Créez votre profil de magasin et commencez à partager vos
+                coupons et prospectus avec des milliers de clients potentiels.
+                Rejoignez notre communauté grandissante de détaillants !
               </p>
               <button
                 onClick={() => {
@@ -830,10 +836,14 @@ export default function Home() {
                     navigate("stores/create-new-store");
                   } else if (userRole === "USER") {
                     navigate("/signup");
-                    toast.info("You need to SignIn as a Retailer");
+                    toast.info(
+                      "Vous devez vous connecter en tant que Détaillant"
+                    );
                   } else {
                     navigate("/signup");
-                    toast.info("You need to SignIn as a Retailer");
+                    toast.info(
+                      "Vous devez vous connecter en tant que Détaillant"
+                    );
                   }
                 }}
                 className={`flex items-center gap-3 px-8 py-4 bg-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold text-lg mx-auto ${
@@ -843,7 +853,7 @@ export default function Home() {
                 }`}
               >
                 <FaStore className="w-5 h-5" />
-                Create Your Store
+                Créer Votre Magasin
               </button>
             </div>
           </motion.div>
