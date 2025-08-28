@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { HiChevronDown, HiChevronRight, HiStar } from "react-icons/hi";
 import useAuthenticate from "@/hooks/authenticationt";
 import baseUrl from "@/hooks/baseurl";
+import { useTranslation } from "react-i18next";
 
 interface Category {
   id: string;
@@ -23,6 +24,7 @@ export default function PredefinedCategorySelector({
   allowMultiple = true,
 }: Props) {
   const { userRole } = useAuthenticate();
+  const { t } = useTranslation();
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,21 +138,19 @@ export default function PredefinedCategorySelector({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <label className="block text-sm font-bold text-gray-700">
-          Select Categories <span className="text-red-600">*</span>
+          {t("selectCategories")} <span className="text-red-600">*</span>
         </label>
         <span className="text-xs text-gray-500">
-          {selectedCategories.length} categories selected
+          {selectedCategories.length} {t("categoriesSelected")}
         </span>
       </div>
 
-      <div className="space-y-3 max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-4">
+      <div className="space-y-3 max-h-96 overflow-y-auto border border-gray-200 rounded-lg p-4 bg-gray-50/50">
         {categories.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
             <div className="mb-2">📁</div>
-            <p className="font-medium">No categories available</p>
-            <p className="text-sm">
-              Please check your database connection or contact support.
-            </p>
+            <p className="font-medium">{t("noCategoriesAvailable")}</p>
+            <p className="text-sm">{t("checkDatabaseConnection")}</p>
           </div>
         ) : (
           Object.entries(groupedCategories)
@@ -181,10 +181,10 @@ export default function PredefinedCategorySelector({
                   <button
                     type="button"
                     onClick={() => toggleCategoryExpansion(mainCategory)}
-                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-between ${
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
                       expandedCategories.includes(mainCategory)
-                        ? `${colors.bgLight} ${colors.text} font-medium`
-                        : "hover:bg-gray-50"
+                        ? `${colors.bgLight} ${colors.text} font-medium shadow-sm`
+                        : "hover:bg-gray-50 hover:shadow-sm"
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -203,11 +203,11 @@ export default function PredefinedCategorySelector({
 
                   {/* Subcategories */}
                   {expandedCategories.includes(mainCategory) && (
-                    <div className="border-t border-gray-200 bg-gray-50 p-3 space-y-2">
+                    <div className="border-t border-gray-200 bg-gray-50 p-4 space-y-3">
                       {subcategories.map((subcategory) => (
                         <div
                           key={subcategory.id}
-                          className="flex items-center gap-3"
+                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200"
                         >
                           <input
                             type="checkbox"
@@ -216,11 +216,11 @@ export default function PredefinedCategorySelector({
                             onChange={() =>
                               handleSubcategoryToggle(subcategory.id)
                             }
-                            className={`rounded ${colors.ring} ${colors.text} focus:ring-2 focus:ring-offset-2`}
+                            className={`w-4 h-4 rounded ${colors.ring} ${colors.text} focus:ring-2 focus:ring-offset-2 transition-all`}
                           />
                           <label
                             htmlFor={subcategory.id}
-                            className="flex-1 text-sm cursor-pointer hover:text-gray-700"
+                            className="flex-1 text-sm cursor-pointer hover:text-gray-700 transition-colors"
                           >
                             <div className="font-medium">
                               {subcategory.name}
@@ -239,16 +239,19 @@ export default function PredefinedCategorySelector({
       {/* Selection Summary */}
       {selectedCategories.length > 0 && (
         <div
-          className={`p-3 rounded-lg ${colors.bgLight} border ${colors.border}`}
+          className={`p-4 rounded-lg ${colors.bgLight} border ${colors.border} shadow-sm`}
         >
-          <h4 className="font-medium text-sm mb-2">Selected Categories:</h4>
+          <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
+            <span className={`w-2 h-2 rounded-full ${colors.bg}`}></span>
+            {t("selectedCategories")}: {selectedCategories.length}
+          </h4>
           <div className="flex flex-wrap gap-2">
             {selectedCategories.map((catId) => {
               const category = categories.find((c) => c.id === catId);
               return (
                 <span
                   key={catId}
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${colors.bg} text-white`}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium ${colors.bg} text-white shadow-sm hover:scale-105 transition-transform`}
                 >
                   {category?.name}
                 </span>
@@ -259,10 +262,14 @@ export default function PredefinedCategorySelector({
       )}
 
       {/* Note about predefined categories */}
-      <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-        <strong>Note:</strong> These are predefined categories and
-        subcategories. The system automatically organizes content based on these
-        selections for better user experience.
+      <div className="text-xs text-gray-500 bg-gray-50 p-4 rounded-lg border border-gray-200">
+        <div className="flex items-start gap-2">
+          <span className="text-blue-500 mt-0.5">ℹ️</span>
+          <div>
+            <strong className="text-gray-700">{t("note")}:</strong>{" "}
+            {t("predefinedCategoriesNote")}
+          </div>
+        </div>
       </div>
     </div>
   );

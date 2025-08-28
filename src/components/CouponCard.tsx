@@ -197,7 +197,7 @@ export const CouponCard = ({
 
   const addToShoppingList = async () => {
     if (!userId || !selectedListId) {
-      toast.error("Please select a shopping list");
+      toast.error(t("pleaseSelectShoppingList"));
       return;
     }
 
@@ -217,22 +217,22 @@ export const CouponCard = ({
       );
 
       if (response.ok) {
-        toast.success("Coupon added to shopping list");
+        toast.success(t("couponAddedToShoppingList"));
         setShowShoppingListModal(false);
         setSelectedListId("");
         setQuantity(1);
       } else {
-        toast.error("Failed to add coupon to shopping list");
+        toast.error(t("failedToAddToShoppingList"));
       }
     } catch (error) {
       console.error("Error adding to shopping list:", error);
-      toast.error("Failed to add coupon to shopping list");
+      toast.error(t("failedToAddToShoppingList"));
     }
   };
 
   const addToWishlist = async () => {
     if (!userId) {
-      toast.error("Please log in to add to wishlist");
+      toast.error(t("pleaseLoginToAddToWishlist"));
       return;
     }
 
@@ -251,37 +251,49 @@ export const CouponCard = ({
         setIsInWishlist(!isInWishlist);
         toast.success(
           isInWishlist
-            ? "Coupon removed from wishlist"
-            : "Coupon added to wishlist"
+            ? t("couponRemovedFromWishlist")
+            : t("couponAddedToWishlist")
         );
       } else {
-        toast.error("Failed to update wishlist");
+        toast.error(t("failedToUpdateWishlist"));
       }
     } catch (error) {
       console.error("Error updating wishlist:", error);
-      toast.error("Failed to update wishlist");
+      toast.error(t("failedToUpdateWishlist"));
     }
   };
 
   const handleDelete = async () => {
-    if (!onDelete) return;
-
     setIsDeleting(true);
+    if (!isAuthorized) {
+      toast.error(t("notAuthorized"));
+      return;
+    }
+
     try {
-      await onDelete(coupon.id);
-      setShowDeleteDialogueBox(false);
+      const response = await fetch(`${baseUrl}coupons/${coupon.id}`, {
+        method: "DELETE",
+        headers: {
+          "user-email": user?.email || "",
+        },
+      });
+
+      if (response.ok) {
+        toast.success(t("couponDeletedSuccessfully"));
+        if (onDelete) {
+          onDelete(coupon.id);
+        }
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        throw new Error("Failed to delete coupon");
+      }
     } catch (error) {
-      console.error("Error deleting coupon:", error);
-      toast.error("Failed to delete coupon");
+      toast.error(t("deleteError"));
     } finally {
       setIsDeleting(false);
-    }
-  };
-
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onEdit) {
-      onEdit(coupon);
+      setShowDeleteDialogueBox(false);
     }
   };
 
@@ -293,7 +305,7 @@ export const CouponCard = ({
   const handleAddToShoppingList = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!userId) {
-      toast.error("Please log in to add to shopping list");
+      toast.error(t("pleaseLoginToAddToShoppingList"));
       return;
     }
     fetchShoppingLists();
@@ -314,12 +326,24 @@ export const CouponCard = ({
           {/* Header with Actions */}
           <div className="flex items-center justify-end mb-4">
             <div className="flex items-center gap-1 sm:gap-2">
+              {/* Delete button for ADMIN and RETAILER roles */}
+              {isAuthorized && (
+                <button
+                  onClick={handleDeleteClick}
+                  className="p-1.5 sm:p-2 text-red-600 sm:hover:text-red-700 transition-colors rounded-full hover:bg-red-50"
+                  title={t("deleteCoupon")}
+                >
+                  <HiTrash className="w-4 h-4" />
+                </button>
+              )}
+
+              {/* User action buttons */}
               {user && userRole === "USER" && (
                 <>
                   <button
                     onClick={handleAddToShoppingList}
                     className="p-1.5 sm:p-2 text-green-600 sm:hover:text-green-700 transition-colors rounded-full hover:bg-green-50"
-                    title="Add to Shopping List"
+                    title={t("addToShoppingList")}
                   >
                     <HiShoppingCart className="w-4 h-4" />
                   </button>
@@ -331,7 +355,9 @@ export const CouponCard = ({
                         : "text-gray-500 sm:hover:text-red-500"
                     }`}
                     title={
-                      isInWishlist ? "Remove from Wishlist" : "Add to Wishlist"
+                      isInWishlist
+                        ? t("removeFromWishlist")
+                        : t("addToWishlist")
                     }
                   >
                     <HiHeart size={16} />
@@ -396,7 +422,7 @@ export const CouponCard = ({
                       <button
                         onClick={handleAddToShoppingList}
                         className="p-2 text-green-600 sm:hover:text-green-700 transition-colors"
-                        title="Add to Shopping List"
+                        title={t("addToShoppingList")}
                       >
                         <HiShoppingCart className="w-5 h-5" />
                       </button>
@@ -409,8 +435,8 @@ export const CouponCard = ({
                         }`}
                         title={
                           isInWishlist
-                            ? "Remove from Wishlist"
-                            : "Add to Wishlist"
+                            ? t("removeFromWishlist")
+                            : t("addToWishlist")
                         }
                       >
                         <HiHeart className="w-5 h-5" />
@@ -418,23 +444,14 @@ export const CouponCard = ({
                     </>
                   )}
                   {isAuthorized && (
-                    <>
-                      <button
-                        onClick={handleEdit}
-                        className="p-2 text-yellow-600 sm:hover:text-yellow-700 transition-colors"
-                        title="Edit Coupon"
-                      >
-                        <HiPencil className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={handleDeleteClick}
-                        disabled={isDeleting}
-                        className="p-2 text-red-600 sm:hover:text-red-700 transition-colors disabled:opacity-50"
-                        title="Delete Coupon"
-                      >
-                        <HiTrash className="w-5 h-5" />
-                      </button>
-                    </>
+                    <button
+                      onClick={handleDeleteClick}
+                      disabled={isDeleting}
+                      className="p-2 text-red-600 sm:hover:text-red-700 transition-colors disabled:opacity-50"
+                      title={t("deleteCoupon")}
+                    >
+                      <HiTrash className="w-5 h-5" />
+                    </button>
                   )}
                   <button
                     onClick={() => setShowPreview(false)}
@@ -630,19 +647,19 @@ export const CouponCard = ({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Add to Shopping List
+              {t("addToShoppingList")}
             </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Shopping List
+                  {t("selectShoppingList")}
                 </label>
                 <select
                   value={selectedListId}
                   onChange={(e) => setSelectedListId(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 >
-                  <option value="">Choose a list</option>
+                  <option value="">{t("chooseList")}</option>
                   {shoppingLists.map((list) => (
                     <option key={list.id} value={list.id}>
                       {list.name}
@@ -652,7 +669,7 @@ export const CouponCard = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Quantity
+                  {t("quantity")}
                 </label>
                 <input
                   type="number"
@@ -668,13 +685,13 @@ export const CouponCard = ({
                 onClick={() => setShowShoppingListModal(false)}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 onClick={addToShoppingList}
                 className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors"
               >
-                Add to List
+                {t("addToList")}
               </button>
             </div>
           </div>
@@ -732,17 +749,18 @@ const CouponList = ({
             disabled={pagination.currentPage === 1}
             className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Previous
+            {t("previous")}
           </button>
           <span className="px-3 py-2 text-sm font-medium text-gray-700">
-            Page {pagination.currentPage} of {pagination.totalPages}
+            {t("page")} {pagination.currentPage} {t("of")}{" "}
+            {pagination.totalPages}
           </span>
           <button
             onClick={() => onPageChange(pagination.currentPage + 1)}
             disabled={!pagination.hasNextPage}
             className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
-            Next
+            {t("next")}
           </button>
         </div>
       )}
