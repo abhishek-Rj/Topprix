@@ -289,7 +289,7 @@ export const FlyerCard = ({
   const handleDelete = async () => {
     setIsDeleting(true);
     if (!isAuthorized) {
-      toast.error("You are not authorized to delete flyers");
+      toast.error(t("notAuthorized"));
       return;
     }
 
@@ -302,7 +302,7 @@ export const FlyerCard = ({
       });
 
       if (response.ok) {
-        toast.success("Flyer deleted successfully");
+        toast.success(t("deleteSuccess"));
         if (onDelete) {
           onDelete(flyer.id);
         }
@@ -313,7 +313,7 @@ export const FlyerCard = ({
         throw new Error("Failed to delete flyer");
       }
     } catch (error) {
-      toast.error("Error deleting flyer");
+      toast.error(t("deleteError"));
     } finally {
       setIsDeleting(false);
       setShowDeleteDialogueBox(false);
@@ -430,6 +430,17 @@ export const FlyerCard = ({
                   <HiEye size={14} />
                 </button>
 
+                {/* Delete button for ADMIN and RETAILER roles */}
+                {isAuthorized && (
+                  <button
+                    onClick={handleDeleteClick}
+                    className="p-1.5 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 rounded-full shadow-sm transition-colors"
+                    title={t("deleteFlyer")}
+                  >
+                    <HiTrash size={14} />
+                  </button>
+                )}
+
                 {/* Additional action buttons for authenticated USER role */}
                 {user && userRole === "USER" && (
                   <>
@@ -483,19 +494,19 @@ export const FlyerCard = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Add to Shopping List
+              {t("addToShoppingList")}
             </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Shopping List
+                  {t("selectShoppingList")}
                 </label>
                 <select
                   value={selectedListId}
                   onChange={(e) => setSelectedListId(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  <option value="">Choose a list...</option>
+                  <option value="">{t("chooseList")}</option>
                   {shoppingLists.map((list) => (
                     <option key={list.id} value={list.id}>
                       {list.title}
@@ -505,7 +516,7 @@ export const FlyerCard = ({
               </div>
               <div className="flex items-center gap-2">
                 <label className="text-sm font-medium text-gray-700">
-                  Quantity:
+                  {t("quantity")}
                 </label>
                 <input
                   type="number"
@@ -534,7 +545,7 @@ export const FlyerCard = ({
                 disabled={!selectedListId}
                 className="px-4 py-2 bg-green-500 sm:hover:bg-green-600 disabled:bg-gray-300 text-white rounded-md transition"
               >
-                Add to List
+                {t("addToList")}
               </button>
             </div>
           </div>
@@ -600,17 +611,18 @@ const FlyerList = ({
             disabled={!pagination.hasPreviousPage}
             className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Previous
+            {t("previous")}
           </button>
           <span className="px-3 py-2 text-sm font-medium text-gray-700">
-            Page {pagination.currentPage} of {pagination.totalPages}
+            {t("page")} {pagination.currentPage} {t("of")}{" "}
+            {pagination.totalPages}
           </span>
           <button
             onClick={() => onPageChange(pagination.currentPage + 1)}
             disabled={!pagination.hasNextPage}
             className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Next
+            {t("next")}
           </button>
         </div>
       )}

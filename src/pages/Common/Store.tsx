@@ -168,6 +168,7 @@ export default function StoreDetailPage() {
 
   const handleEdit = (coupon: any) => {
     setIsEditing(true);
+    setActiveTab("coupons"); // Set active tab to coupons when editing
     setSelectedCoupon(coupon);
     setTitle(coupon.title);
     setDescription(coupon.description);
@@ -187,6 +188,7 @@ export default function StoreDetailPage() {
 
   const handleEditFlyer = (flyer: any) => {
     setIsEditing(true);
+    setActiveTab("flyers"); // Set active tab to flyers when editing
     setSelectedFlyer(flyer);
     setTitle(flyer.title);
     setDescription(flyer.description);
@@ -340,8 +342,8 @@ export default function StoreDetailPage() {
 
         toast.success(
           isEditing
-            ? t("store.flyerUpdatedSuccessfully")
-            : t("store.flyerCreatedSuccessfully")
+            ? t("flyerUpdatedSuccessfully")
+            : t("flyerCreatedSuccessfully")
         );
         setTimeout(() => {
           window.location.reload();
@@ -433,12 +435,12 @@ export default function StoreDetailPage() {
           );
         }
         if (isEditing) {
-          toast.success(t("store.couponUpdatedSuccessfully"));
+          toast.success(t("couponUpdatedSuccessfully"));
           setTimeout(() => {
             window.location.reload();
           }, 1000);
         } else {
-          toast.success(t("store.couponCreatedSuccessfully"));
+          toast.success(t("couponCreatedSuccessfully"));
           setTimeout(() => {
             window.location.reload();
           }, 1000);
@@ -706,10 +708,13 @@ export default function StoreDetailPage() {
           <div className="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-6xl xl:max-w-7xl mx-auto max-h-[98vh] sm:max-h-[95vh] overflow-y-auto p-3 sm:p-6 lg:p-8">
             <div className="flex justify-between items-center mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
-                {isEditing ? t("store.edit") : t("store.create")}{" "}
-                {activeTab === "flyers"
-                  ? t("store.flyers")
-                  : t("store.coupons")}
+                {isEditing
+                  ? activeTab === "flyers"
+                    ? t("editFlyer")
+                    : t("editCouponDialogTitle")
+                  : activeTab === "flyers"
+                  ? t("createFlyer")
+                  : t("createCouponDialogTitle")}
               </h2>
               <button
                 onClick={() => {
@@ -1010,20 +1015,10 @@ export default function StoreDetailPage() {
                         </div>
                         <div>
                           <h3 className="text-sm font-medium text-blue-900 mb-2">
-                            Conditions Générales de Vente
+                            {t("generalConditionsOfSale")}
                           </h3>
                           <p className="text-xs text-blue-800 mb-3">
-                            En créant ce prospectus, vous acceptez nos{" "}
-                            <a
-                              href="/general-conditions"
-                              className="text-blue-600 hover:underline font-medium"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              Conditions Générales de Vente
-                            </a>{" "}
-                            et confirmez que le contenu respecte la législation
-                            en vigueur.
+                            {t("generalConditionsAcceptance")}
                           </p>
                         </div>
                       </div>
@@ -1173,7 +1168,7 @@ export default function StoreDetailPage() {
                             >
                               <div className="text-xl sm:text-2xl mb-1">🔲</div>
                               <div className="text-xs text-gray-600">
-                                Upload QR Code
+                                {t("uploadQrCode")}
                               </div>
                             </label>
                           </div>
@@ -1219,13 +1214,14 @@ export default function StoreDetailPage() {
                     {/* Date Selection */}
                     <div className="space-y-3 sm:space-y-4">
                       <h4 className="text-sm font-semibold text-gray-700">
-                        Validity Period
+                        {t("validityPeriod")}
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         {/* Start Date */}
                         <div ref={startRef} className="relative">
                           <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                            Start Date <span className="text-red-500">*</span>
+                            {t("startDate")}{" "}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -1234,7 +1230,7 @@ export default function StoreDetailPage() {
                             }
                             onFocus={() => setShowStartDateCalender(true)}
                             readOnly
-                            placeholder="Select Start Date"
+                            placeholder={t("selectStartDate")}
                             className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer text-sm sm:text-base"
                             required
                           />
@@ -1255,14 +1251,15 @@ export default function StoreDetailPage() {
                         {/* End Date */}
                         <div ref={endRef} className="relative">
                           <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
-                            End Date <span className="text-red-500">*</span>
+                            {t("endDate")}{" "}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
                             value={endDate ? endDate.toLocaleDateString() : ""}
                             onFocus={() => setShowEndDateCalender(true)}
                             readOnly
-                            placeholder="Select End Date"
+                            placeholder={t("selectEndDate")}
                             className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer text-sm sm:text-base"
                             required
                           />
@@ -1304,20 +1301,10 @@ export default function StoreDetailPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-medium text-blue-900 mb-2">
-                        Conditions Générales de Vente
+                        {t("generalConditionsOfSale")}
                       </h3>
                       <p className="text-xs text-blue-800 mb-3">
-                        En créant ce coupon, vous acceptez nos{" "}
-                        <a
-                          href="/general-conditions"
-                          className="text-blue-600 hover:underline font-medium"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Conditions Générales de Vente
-                        </a>{" "}
-                        et confirmez que le contenu respecte la législation en
-                        vigueur.
+                        {t("generalConditionsAcceptance")}
                       </p>
                     </div>
                   </div>
@@ -1333,7 +1320,7 @@ export default function StoreDetailPage() {
                   }}
                   className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2 text-sm sm:text-base rounded-md hover:scale-105 transition bg-gray-100 text-gray-700 hover:bg-gray-200 order-2 sm:order-1"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button
                   type="submit"
@@ -1342,11 +1329,11 @@ export default function StoreDetailPage() {
                 >
                   {isSubmitting
                     ? isEditing
-                      ? "Updating..."
-                      : "Creating..."
+                      ? t("updating")
+                      : t("creating")
                     : isEditing
-                    ? "Update"
-                    : "Create"}
+                    ? t("update")
+                    : t("create")}
                 </button>
               </div>
             </form>
