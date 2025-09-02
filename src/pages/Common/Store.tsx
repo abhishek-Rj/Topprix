@@ -1,7 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import Navigation from "../../components/navigation";
-import { HiNewspaper, HiTag, HiPlus, HiPencil, HiX } from "react-icons/hi";
+import {
+  HiNewspaper,
+  HiTag,
+  HiPlus,
+  HiPencil,
+  HiX,
+  HiRefresh,
+} from "react-icons/hi";
 import baseUrl from "../../hooks/baseurl";
 import { toast } from "react-toastify";
 import PredefinedCategorySelector from "@/components/PredefinedCategorySelector";
@@ -15,13 +22,16 @@ import useClickOutside from "@/hooks/useClickOutside";
 import { CouponList } from "@/components/CouponCard";
 import Footer from "@/components/Footer";
 import FlyerList from "@/components/FlyerCard";
+import { AntiWasteList } from "@/components/AntiWasteCard";
 import { useTranslation } from "react-i18next";
 
 export default function StoreDetailPage() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"flyers" | "coupons">("flyers");
+  const [activeTab, setActiveTab] = useState<
+    "flyers" | "coupons" | "antiwaste"
+  >("flyers");
   const [store, setStore] = useState<any>(null);
   const [showDialog, setShowDialog] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -60,14 +70,57 @@ export default function StoreDetailPage() {
   const [showEndDateCalender, setShowEndDateCalender] =
     useState<boolean>(false);
 
+  // Anti-waste state variables
+  const [antiWasteItems, setAntiWasteItems] = useState<any>(null);
+  const [showAntiWasteDialog, setShowAntiWasteDialog] = useState(false);
+  const [isEditingAntiWaste, setIsEditingAntiWaste] = useState(false);
+  const [selectedAntiWasteItem, setSelectedAntiWasteItem] = useState<any>(null);
+  const [antiWasteName, setAntiWasteName] = useState("");
+  const [antiWasteDescription, setAntiWasteDescription] = useState("");
+  const [originalPrice, setOriginalPrice] = useState("");
+  const [discountedPrice, setDiscountedPrice] = useState("");
+  const [quantity, setQuantity] = useState("");
+  const [expiryDate, setExpiryDate] = useState<Date | undefined>(undefined);
+  const [antiWasteImage, setAntiWasteImage] = useState<File | null>(null);
+  const [antiWasteImagePreview, setAntiWasteImagePreview] = useState<
+    string | null
+  >(null);
+  const [antiWasteCategory, setAntiWasteCategory] = useState("");
+  const [antiWasteCondition, setAntiWasteCondition] = useState("");
+  const [showExpiryDateCalendar, setShowExpiryDateCalendar] = useState(false);
+
   const barcodeRef = useRef<HTMLInputElement>(null);
   const qrCodeRef = useRef<HTMLInputElement>(null);
 
   const startRef = useRef(null);
   const endRef = useRef(null);
+  const expiryRef = useRef(null);
 
   useClickOutside(startRef, () => setShowStartDateCalender(false));
   useClickOutside(endRef, () => setShowEndDateCalender(false));
+  useClickOutside(expiryRef, () => setShowExpiryDateCalendar(false));
+
+  const antiWasteCategories = [
+    "Bakery",
+    "Dairy",
+    "Fruits",
+    "Vegetables",
+    "Meat",
+    "Fish",
+    "Pantry",
+    "Beverages",
+    "Snacks",
+    "Frozen",
+    "Other",
+  ];
+
+  const antiWasteConditions = [
+    { value: "NEAR_EXPIRY", label: "Near Expiry" },
+    { value: "SURPLUS_STOCK", label: "Surplus Stock" },
+    { value: "SEASONAL", label: "Seasonal" },
+    { value: "SLIGHTLY_DAMAGED", label: "Slightly Damaged" },
+    { value: "SHORT_DATED", label: "Short Dated" },
+  ];
 
   useEffect(() => {
     if (activeTab === "coupons") {
@@ -104,12 +157,40 @@ export default function StoreDetailPage() {
           toast.error(t("store.somethingWentWrong") + err);
         }
       })();
+    } else if (activeTab === "antiwaste") {
+      (async () => {
+        try {
+          const fetchAntiWaste = await fetch(
+            `${baseUrl}api/anti-waste-items?storeId=${id}&limit=${20}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "user-email": user?.email || "",
+              },
+            }
+          );
+          if (fetchAntiWaste.ok) {
+            const antiWasteData = await fetchAntiWaste.json();
+            console.log("Anti-waste data:", antiWasteData); // Debug log
+            setAntiWasteItems(antiWasteData.data);
+            setPagination(antiWasteData.pagination);
+          } else {
+            toast.error(t("store.couldFetchAntiWaste"));
+          }
+        } catch (err) {
+          toast.error(t("store.somethingWentWrong") + err);
+        }
+      })();
     }
   }, [activeTab]);
 
   useEffect(() => {
-    if (localStorage.getItem("lastVisited") === "flyers") {
+    const lastVisited = localStorage.getItem("lastVisited");
+    if (lastVisited === "flyers") {
       setActiveTab("flyers");
+    } else if (lastVisited === "antiwaste") {
+      setActiveTab("antiwaste");
     } else {
       setActiveTab("coupons");
     }
@@ -212,6 +293,22 @@ export default function StoreDetailPage() {
     setShowDialog(true);
   };
 
+  const handleEditAntiWaste = (item: any) => {
+    setIsEditingAntiWaste(true);
+    setActiveTab("antiwaste"); // Set active tab to antiwaste when editing
+    setSelectedAntiWasteItem(item);
+    setAntiWasteName(item.name);
+    setAntiWasteDescription(item.description);
+    setOriginalPrice(item.originalPrice.toString());
+    setDiscountedPrice(item.discountedPrice.toString());
+    setQuantity(item.quantity.toString());
+    setExpiryDate(item.expiryDate ? new Date(item.expiryDate) : undefined);
+    setAntiWasteImagePreview(item.imageUrl);
+    setAntiWasteCategory(item.category);
+    setAntiWasteCondition(item.condition);
+    setShowDialog(true);
+  };
+
   const handleFileChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     type: "barcode" | "qrcode" | "flyer"
@@ -253,16 +350,48 @@ export default function StoreDetailPage() {
 
   const onPagination = async (page: number) => {
     try {
-      const fetchMoreCoupons = await fetch(
-        `${baseUrl}coupons?storeId=${id}&page=${page}&limit=${12}`
-      );
-      if (!fetchMoreCoupons.ok) {
-        toast.error(t("store.couldntFetchMoreCoupons"));
-        throw new Error(t("store.cannotFetchMoreCoupons"));
+      if (activeTab === "coupons") {
+        const fetchMoreCoupons = await fetch(
+          `${baseUrl}coupons?storeId=${id}&page=${page}&limit=${12}`
+        );
+        if (!fetchMoreCoupons.ok) {
+          toast.error(t("store.couldntFetchMoreCoupons"));
+          throw new Error(t("store.cannotFetchMoreCoupons"));
+        }
+        const moreCoupons = await fetchMoreCoupons.json();
+        setCoupons(moreCoupons.coupons);
+        setPagination(moreCoupons.pagination);
+      } else if (activeTab === "flyers") {
+        const fetchMoreFlyers = await fetch(
+          `${baseUrl}flyers?storeId=${id}&page=${page}&limit=${12}`
+        );
+        if (!fetchMoreFlyers.ok) {
+          toast.error(t("store.couldntFetchMoreFlyers"));
+          throw new Error(t("store.cannotFetchMoreFlyers"));
+        }
+        const moreFlyers = await fetchMoreFlyers.json();
+        setFlyers(moreFlyers.flyers);
+        setPagination(moreFlyers.pagination);
+      } else if (activeTab === "antiwaste") {
+        const fetchMoreAntiWaste = await fetch(
+          `${baseUrl}api/anti-waste-items?storeId=${id}&page=${page}&limit=${20}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "user-email": localStorage.getItem("userEmail") || "",
+            },
+          }
+        );
+        if (!fetchMoreAntiWaste.ok) {
+          toast.error(t("store.couldntFetchMoreAntiWaste"));
+          throw new Error(t("store.cannotFetchMoreAntiWaste"));
+        }
+        const moreAntiWaste = await fetchMoreAntiWaste.json();
+        console.log("Anti-waste pagination data:", moreAntiWaste); // Debug log
+        setAntiWasteItems(moreAntiWaste.data);
+        setPagination(moreAntiWaste.pagination);
       }
-      const moreCoupons = await fetchMoreCoupons.json();
-      setCoupons(moreCoupons.coupons);
-      setPagination(moreCoupons.pagination);
     } catch (error) {
       toast.error(t("store.cannotLoadPage") + error);
     }
@@ -360,6 +489,95 @@ export default function StoreDetailPage() {
           isEditing
             ? t("store.errorUpdatingFlyer")
             : t("store.errorCreatingFlyer")
+        );
+      }
+    } else if (activeTab === "antiwaste") {
+      if (
+        !antiWasteName ||
+        !antiWasteDescription ||
+        !originalPrice ||
+        !discountedPrice ||
+        !quantity ||
+        !expiryDate ||
+        !antiWasteCategory ||
+        !antiWasteCondition
+      ) {
+        toast.error(t("store.pleaseFillRequiredFieldsAntiWaste"));
+        setIsSubmitting(false);
+        return;
+      }
+
+      try {
+        let imageUrl = "";
+
+        if (antiWasteImage) {
+          const imageRef = ref(
+            storage,
+            `antiwaste/${Date.now()}_${antiWasteImage.name}`
+          );
+          await uploadBytes(imageRef, antiWasteImage);
+          imageUrl = await getDownloadURL(imageRef);
+        }
+
+        const antiWasteData = {
+          storeId: id,
+          name: antiWasteName,
+          description: antiWasteDescription,
+          originalPrice: parseFloat(originalPrice),
+          discountedPrice: parseFloat(discountedPrice),
+          quantity: parseInt(quantity),
+          expiryDate: expiryDate?.toISOString(),
+          imageUrl:
+            imageUrl ||
+            (isEditingAntiWaste ? selectedAntiWasteItem?.imageUrl : ""),
+          category: antiWasteCategory,
+          condition: antiWasteCondition,
+          isAvailable: true,
+        };
+
+        const url = isEditingAntiWaste
+          ? `${baseUrl}api/anti-waste-items/${selectedAntiWasteItem.id}`
+          : `${baseUrl}api/anti-waste-items`;
+
+        const response = await fetch(url, {
+          method: isEditingAntiWaste ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": user?.email || "",
+          },
+          body: JSON.stringify(antiWasteData),
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            isEditingAntiWaste
+              ? t("store.failedToUpdateAntiWaste")
+              : t("store.failedToCreateAntiWaste")
+          );
+        }
+
+        toast.success(
+          isEditingAntiWaste
+            ? t("antiWaste.itemUpdatedSuccessfully")
+            : t("antiWaste.itemCreatedSuccessfully")
+        );
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+
+        setShowDialog(false);
+        resetForm();
+      } catch (error) {
+        console.error(
+          isEditingAntiWaste
+            ? "Error updating anti-waste item:"
+            : "Error creating anti-waste item:",
+          error
+        );
+        toast.error(
+          isEditingAntiWaste
+            ? t("store.errorUpdatingAntiWaste")
+            : t("store.errorCreatingAntiWaste")
         );
       }
     } else {
@@ -490,6 +708,20 @@ export default function StoreDetailPage() {
     setIsSponsored(false);
     setStartDate(undefined);
     setEndDate(undefined);
+
+    // Reset anti-waste form
+    setAntiWasteName("");
+    setAntiWasteDescription("");
+    setOriginalPrice("");
+    setDiscountedPrice("");
+    setQuantity("");
+    setExpiryDate(undefined);
+    setAntiWasteImage(null);
+    setAntiWasteImagePreview(null);
+    setAntiWasteCategory("");
+    setAntiWasteCondition("");
+    setIsEditingAntiWaste(false);
+    setSelectedAntiWasteItem(null);
   };
 
   if (!store) return null;
@@ -606,7 +838,7 @@ export default function StoreDetailPage() {
                     setActiveTab("coupons");
                     localStorage.setItem("lastVisited", "coupons");
                   }}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-r-full border ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 border-t border-b ${
                     userRole === "ADMIN"
                       ? "border-blue-500"
                       : "border-yellow-500"
@@ -623,6 +855,30 @@ export default function StoreDetailPage() {
                   <HiTag />
                   <span className="hidden sm:inline">{t("store.coupons")}</span>
                 </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("antiwaste");
+                    localStorage.setItem("lastVisited", "antiwaste");
+                  }}
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2 rounded-r-full border ${
+                    userRole === "ADMIN"
+                      ? "border-blue-500"
+                      : "border-yellow-500"
+                  } font-medium transition-all ${
+                    activeTab === "antiwaste"
+                      ? userRole === "ADMIN"
+                        ? "bg-blue-500 text-white"
+                        : "bg-yellow-500 text-white"
+                      : userRole === "ADMIN"
+                      ? "bg-white text-blue-600 hover:bg-blue-100"
+                      : "bg-white text-yellow-600 hover:bg-yellow-100"
+                  }`}
+                >
+                  <HiRefresh />
+                  <span className="hidden sm:inline">
+                    {t("store.antiWaste")}
+                  </span>
+                </button>
               </div>
 
               {(userRole === "ADMIN" || userRole === "RETAILER") && (
@@ -637,7 +893,9 @@ export default function StoreDetailPage() {
                   <HiPlus />
                   {activeTab === "flyers"
                     ? t("store.createFlyer")
-                    : t("store.createCoupon")}
+                    : activeTab === "coupons"
+                    ? t("store.createCoupon")
+                    : t("store.createAntiWaste")}
                 </button>
               )}
             </div>
@@ -673,27 +931,59 @@ export default function StoreDetailPage() {
                     </p>
                   </div>
                 )
-              ) : coupons ? (
-                <CouponList
-                  coupons={coupons}
+              ) : activeTab === "coupons" ? (
+                coupons ? (
+                  <CouponList
+                    coupons={coupons}
+                    pagination={pagination}
+                    onPageChange={onPagination}
+                    onEdit={handleEdit}
+                  />
+                ) : (
+                  <div className="text-center text-gray-700">
+                    <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
+                      <HiTag
+                        className={
+                          userRole === "ADMIN"
+                            ? "text-blue-600"
+                            : "text-yellow-600"
+                        }
+                      />
+                      {t("store.coupons")}
+                    </h2>
+                    <p className="text-sm sm:text-base">
+                      {t("store.noCouponsYet")}
+                    </p>
+                  </div>
+                )
+              ) : // Anti-waste tab content
+              antiWasteItems ? (
+                <AntiWasteList
+                  items={antiWasteItems}
                   pagination={pagination}
                   onPageChange={onPagination}
-                  onEdit={handleEdit}
+                  onEdit={handleEditAntiWaste}
+                  onDelete={(itemId) => {
+                    // Remove the item from the list
+                    setAntiWasteItems(
+                      antiWasteItems.filter((item: any) => item.id !== itemId)
+                    );
+                  }}
                 />
               ) : (
                 <div className="text-center text-gray-700">
                   <h2 className="text-lg sm:text-xl font-semibold flex items-center justify-center gap-2 mb-4">
-                    <HiTag
+                    <HiRefresh
                       className={
                         userRole === "ADMIN"
                           ? "text-blue-600"
                           : "text-yellow-600"
                       }
                     />
-                    {t("store.coupons")}
+                    {t("store.antiWaste")}
                   </h2>
                   <p className="text-sm sm:text-base">
-                    {t("store.noCouponsYet")}
+                    {t("store.noAntiWasteYet")}
                   </p>
                 </div>
               )}
@@ -711,9 +1001,13 @@ export default function StoreDetailPage() {
                 {isEditing
                   ? activeTab === "flyers"
                     ? t("editFlyer")
+                    : activeTab === "antiwaste"
+                    ? t("antiWaste.editItem")
                     : t("editCouponDialogTitle")
                   : activeTab === "flyers"
                   ? t("createFlyer")
+                  : activeTab === "antiwaste"
+                  ? t("antiWaste.createItem")
                   : t("createCouponDialogTitle")}
               </h2>
               <button
@@ -1025,7 +1319,7 @@ export default function StoreDetailPage() {
                     </div>
                   </div>
                 </div>
-              ) : (
+              ) : activeTab === "coupons" ? (
                 // Coupon Form - Redesigned for better space utilization
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
                   {/* Left Column */}
@@ -1280,7 +1574,223 @@ export default function StoreDetailPage() {
                     </div>
                   </div>
                 </div>
-              )}
+              ) : activeTab === "antiwaste" ? (
+                // Anti-Waste Form
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+                  {/* Left Column */}
+                  <div className="space-y-4 sm:space-y-6">
+                    {/* Basic Information */}
+                    <div className="space-y-3 sm:space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                          {t("antiWaste.name")}{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={antiWasteName}
+                          onChange={(e) => setAntiWasteName(e.target.value)}
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                          placeholder={t("antiWaste.enterItemName")}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                          {t("antiWaste.description")}{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <textarea
+                          value={antiWasteDescription}
+                          onChange={(e) =>
+                            setAntiWasteDescription(e.target.value)
+                          }
+                          rows={3}
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                          placeholder={t("antiWaste.describeItem")}
+                          required
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                            {t("antiWaste.originalPrice")}{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={originalPrice}
+                            onChange={(e) => setOriginalPrice(e.target.value)}
+                            className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                            placeholder="0.00"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                            {t("antiWaste.discountedPrice")}{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={discountedPrice}
+                            onChange={(e) => setDiscountedPrice(e.target.value)}
+                            className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                            placeholder="0.00"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                            {t("antiWaste.quantity")}{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => setQuantity(e.target.value)}
+                            className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                            placeholder="1"
+                            min="1"
+                            required
+                          />
+                        </div>
+
+                        <div ref={expiryRef} className="relative">
+                          <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                            {t("antiWaste.expiryDate")}{" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={
+                              expiryDate ? expiryDate.toLocaleDateString() : ""
+                            }
+                            onFocus={() => setShowExpiryDateCalendar(true)}
+                            readOnly
+                            placeholder={t("antiWaste.selectExpiryDate")}
+                            className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 cursor-pointer text-sm sm:text-base"
+                            required
+                          />
+                          {showExpiryDateCalendar && (
+                            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[60] bg-white/90 backdrop-blur-md border border-yellow-400 rounded-xl shadow-2xl p-2 sm:p-4">
+                              <Calendar
+                                mode="single"
+                                selected={expiryDate}
+                                onSelect={(date) => {
+                                  setExpiryDate(date);
+                                  setShowExpiryDateCalendar(false);
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Image Upload */}
+                    <div className="space-y-3 sm:space-y-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                        {t("antiWaste.itemImage")}
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setAntiWasteImage(file);
+                            setAntiWasteImagePreview(URL.createObjectURL(file));
+                          }
+                        }}
+                        className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                      />
+                      {antiWasteImagePreview && (
+                        <div className="relative inline-block">
+                          <img
+                            src={antiWasteImagePreview}
+                            alt="Preview"
+                            className="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-md sm:rounded-lg shadow-md"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAntiWasteImagePreview(null);
+                              setAntiWasteImage(null);
+                            }}
+                            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 shadow-md"
+                          >
+                            <MdCancel className="text-xs sm:text-sm" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="space-y-4 sm:space-y-6">
+                    {/* Category and Condition */}
+                    <div className="space-y-3 sm:space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                          {t("antiWaste.category")}{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={antiWasteCategory}
+                          onChange={(e) => setAntiWasteCategory(e.target.value)}
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                          required
+                        >
+                          <option value="">
+                            {t("antiWaste.selectCategory")}
+                          </option>
+                          {antiWasteCategories.map((category) => (
+                            <option key={category} value={category}>
+                              {category}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1 sm:mb-2">
+                          {t("antiWaste.condition")}{" "}
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          value={antiWasteCondition}
+                          onChange={(e) =>
+                            setAntiWasteCondition(e.target.value)
+                          }
+                          className="w-full px-3 py-2 sm:px-4 sm:py-3 border hover:scale-105 transition border-gray-300 rounded-md sm:rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm sm:text-base"
+                          required
+                        >
+                          <option value="">
+                            {t("antiWaste.selectCondition")}
+                          </option>
+                          {antiWasteConditions.map((condition) => (
+                            <option
+                              key={condition.value}
+                              value={condition.value}
+                            >
+                              {condition.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
 
               {/* General Conditions Notice for Coupons */}
               {activeTab === "coupons" && (

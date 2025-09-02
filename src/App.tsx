@@ -26,8 +26,17 @@ import GeneralConditions from "./pages/GeneralConditions";
 import AboutUs from "./pages/AboutUs";
 import LegalNotices from "./pages/LegalNotices";
 import ContactUs from "./pages/ContactUs";
+import LocationDialog from "./components/LocationDialog";
+import useLocationDialog from "./hooks/useLocationDialog";
+import LocationLoginPrompt from "./components/LocationLoginPrompt";
+import useLocationLoginPrompt from "./hooks/useLocationLoginPrompt";
+import AntiWaste from "./pages/AntiWaste";
 
 function App() {
+  const { showLocationDialog, handleLocationSet, handleCloseDialog } =
+    useLocationDialog();
+  const { showLoginPrompt, handleClosePrompt } = useLocationLoginPrompt();
+
   return (
     <>
       <BrowserRouter>
@@ -42,6 +51,7 @@ function App() {
           <Route path="/stores/store/:id" element={<StoreDetailPage />} />
           <Route path="/explore/coupons" element={<CouponPage />} />
           <Route path="/explore/flyers" element={<FlyerPage />} />
+          <Route path="/explore/anti-waste" element={<AntiWaste />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/shopping-lists" element={<ShoppingList />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
@@ -60,6 +70,19 @@ function App() {
           <Route path="/legal-notices" element={<LegalNotices />} />
           <Route path="/contact" element={<ContactUs />} />
         </Routes>
+
+        {/* Location Dialog */}
+        <LocationDialog
+          isOpen={showLocationDialog}
+          onClose={handleCloseDialog}
+          onLocationSet={handleLocationSet}
+        />
+
+        {/* Location Login Prompt */}
+        <LocationLoginPrompt
+          isOpen={showLoginPrompt}
+          onClose={handleClosePrompt}
+        />
       </BrowserRouter>
     </>
   );

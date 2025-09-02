@@ -127,11 +127,11 @@ export default function Subscriptions() {
       }
 
       const userData = await userResponse.json();
-      setUserData(userData);
+      setUserData(userData.user);
 
       // Then fetch the subscription using the user ID
       const subscriptionResponse = await fetch(
-        `${baseUrl}api/users/${userData.id}/subscription`,
+        `${baseUrl}api/users/${userData.user.id}/subscription`,
         {
           method: "GET",
           headers: {

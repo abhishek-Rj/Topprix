@@ -92,6 +92,7 @@ export default function Profile() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [loader, setLoader] = useState<boolean>(true);
   const [editing, setEditing] = useState<boolean>(false);
+  const [editingName, setEditingName] = useState<boolean>(false);
   const [editedName, setEditedName] = useState<string>("");
   const [editedLocation, setEditedLocation] = useState<string>("");
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -105,6 +106,49 @@ export default function Profile() {
   const [subscriptionLoading, setSubscriptionLoading] =
     useState<boolean>(false);
   const [showAuthPreview, setShowAuthPreview] = useState<boolean>(false);
+  const [formattedLocation, setFormattedLocation] = useState<string>("");
+  const [editingLocation, setEditingLocation] = useState<boolean>(false);
+  const [zipCode, setZipCode] = useState<string>("");
+  const [country, setCountry] = useState<string>("");
+
+  // Function to get coordinates from zip code and country (same as createNewStore)
+  const getCoordinates = async (zip: string, countryCode: string) => {
+    try {
+      const response = await fetch(
+        `https://api.openweathermap.org/geo/1.0/zip?zip=${zip},${countryCode}&appid=663dbc9ffe2e08f3f82073649c5a6373`
+      );
+      const data = await response.json();
+      if (data.cod === "404") {
+        throw new Error("Location not found");
+      }
+      return {
+        lat: data.lat,
+        lon: data.lon,
+      };
+    } catch (error) {
+      throw new Error("Error getting coordinates");
+    }
+  };
+
+  // Function to get formatted address from coordinates using OpenCage API
+  const getFormattedAddress = async (coordinates: string) => {
+    if (!coordinates) return "";
+
+    try {
+      const response = await fetch(
+        `https://api.opencagedata.com/geocode/v1/json?q=${coordinates}&key=17632a4f83e446c79e94ce690a4551d4`
+      );
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        return data.results[0].formatted;
+      }
+    } catch (error) {
+      console.error("Error fetching formatted address:", error);
+    }
+
+    return coordinates; // Fallback to original coordinates if API fails
+  };
 
   useEffect(() => {
     if (loading) return;
@@ -117,26 +161,77 @@ export default function Profile() {
 
     const fetchUserData = async () => {
       try {
-        const userDoc = await getDoc(doc(db, "users", authUser.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data();
-          setUser(userData);
-          setEditedLocation(userData.location || "");
-          setEditedName(userData.name || "");
+        // Fetch user data from API
+        const userResponse = await fetch(`${baseUrl}user/${authUser.email}`);
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          const apiUserData = userData.user;
 
-          if (userData.createdAt) {
-            const createdAt = userData.createdAt.toDate
-              ? userData.createdAt.toDate()
-              : new Date(userData.createdAt);
+          // Get Firestore data for additional fields
+          const userDoc = await getDoc(doc(db, "users", authUser.uid));
+          const firestoreData = userDoc.exists() ? userDoc.data() : {};
+
+          // Combine API and Firestore data
+          const combinedUserData = {
+            ...firestoreData,
+            ...apiUserData,
+            location: apiUserData.location || firestoreData.location || "",
+          };
+
+          setUser(combinedUserData);
+          setEditedLocation(combinedUserData.location || "");
+          setEditedName(combinedUserData.name || "");
+
+          // Get formatted address from coordinates
+          if (combinedUserData.location) {
+            const formattedAddress = await getFormattedAddress(
+              combinedUserData.location
+            );
+            setFormattedLocation(formattedAddress);
+          }
+
+          if (combinedUserData.createdAt) {
+            const createdAt = combinedUserData.createdAt.toDate
+              ? combinedUserData.createdAt.toDate()
+              : new Date(combinedUserData.createdAt);
             setAccountCreatedDate(createdAt);
           }
 
           // Fetch subscription data for retailers
-          if (userData.role === "RETAILER" && authUser.email) {
+          if (combinedUserData.role === "RETAILER" && authUser.email) {
             await fetchUserSubscription(authUser.email);
           }
         } else {
-          console.log("No user document found");
+          // Fallback to Firestore if API fails
+          const userDoc = await getDoc(doc(db, "users", authUser.uid));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            setUser(userData);
+            setEditedLocation(userData.location || "");
+            setEditedName(userData.name || "");
+
+            // Get formatted address from coordinates
+            if (userData.location) {
+              const formattedAddress = await getFormattedAddress(
+                userData.location
+              );
+              setFormattedLocation(formattedAddress);
+            }
+
+            if (userData.createdAt) {
+              const createdAt = userData.createdAt.toDate
+                ? userData.createdAt.toDate()
+                : new Date(userData.createdAt);
+              setAccountCreatedDate(createdAt);
+            }
+
+            // Fetch subscription data for retailers
+            if (userData.role === "RETAILER" && authUser.email) {
+              await fetchUserSubscription(authUser.email);
+            }
+          } else {
+            console.log("No user document found");
+          }
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -243,6 +338,12 @@ export default function Profile() {
         name: editedName,
         location: editedLocation,
       });
+
+      // Update formatted location if location was changed
+      if (editedLocation) {
+        const formattedAddress = await getFormattedAddress(editedLocation);
+        setFormattedLocation(formattedAddress);
+      }
     } catch (error: any) {
       console.error("Error updating profile:", error);
       setError(error.message || "Failed to update profile");
@@ -251,6 +352,110 @@ export default function Profile() {
     }
     setEditing(false);
     window.location.reload();
+  };
+
+  const handleNameSave = async () => {
+    if (!authUser) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const updateUser = await fetch(
+        `${baseUrl}user/update/${authUser?.email}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: editedName,
+          }),
+        }
+      );
+
+      const data = await updateUser.json();
+      if (!data.user) {
+        throw new Error("Failed to update user name");
+      }
+      await updateDoc(doc(db, "users", authUser.uid), {
+        name: editedName,
+      });
+
+      // Update user state
+      setUser((prev: any) => ({
+        ...prev,
+        name: editedName,
+      }));
+
+      setEditingName(false);
+    } catch (error: any) {
+      console.error("Error updating name:", error);
+      setError(error.message || "Failed to update name");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLocationSave = async () => {
+    if (!authUser || !zipCode || !country) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      // Get coordinates from zip code and country
+      const coordinates = await getCoordinates(zipCode, country);
+
+      // Update user location via API
+      const updateUser = await fetch(
+        `${baseUrl}user/update/${authUser?.email}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            location: `${coordinates.lat}, ${coordinates.lon}`,
+          }),
+        }
+      );
+
+      const data = await updateUser.json();
+      if (!data.user) {
+        throw new Error("Failed to update user location");
+      }
+
+      // Update Firestore
+      await updateDoc(doc(db, "users", authUser.uid), {
+        location: `${coordinates.lat}, ${coordinates.lon}`,
+      });
+
+      // Get formatted address
+      const formattedAddress = await getFormattedAddress(
+        `${coordinates.lat}, ${coordinates.lon}`
+      );
+      setFormattedLocation(formattedAddress);
+      setEditedLocation(`${coordinates.lat}, ${coordinates.lon}`);
+
+      // Update user state
+      setUser((prev: any) => ({
+        ...prev,
+        location: `${coordinates.lat}, ${coordinates.lon}`,
+      }));
+
+      setEditingLocation(false);
+      setZipCode("");
+      setCountry("");
+    } catch (error: any) {
+      console.error("Error updating location:", error);
+      setError(error.message || "Failed to update location");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -323,10 +528,6 @@ export default function Profile() {
       default:
         return <FiClock className="w-4 h-4" />;
     }
-  };
-
-  const handlePricingPlans = () => {
-    navigate("/admin/pricing-plans");
   };
 
   // Authentication Preview Modal Component
@@ -690,28 +891,6 @@ export default function Profile() {
               <h2 className="text-xl font-semibold text-gray-800">
                 {t("profile.personalInfo")}
               </h2>
-              <button
-                onClick={() => setEditing(!editing)}
-                className={`flex items-center text-sm font-medium ${
-                  editing
-                    ? "text-red-500"
-                    : user?.role === "ADMIN"
-                    ? "text-blue-600"
-                    : "text-yellow-600"
-                }`}
-              >
-                {editing ? (
-                  <>
-                    <FiX className="mr-1" />
-                    {t("profile.cancel")}
-                  </>
-                ) : (
-                  <>
-                    <FiEdit className="mr-1" />
-                    {t("profile.edit")}
-                  </>
-                )}
-              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-10">
@@ -719,7 +898,7 @@ export default function Profile() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t("profile.name")}
                 </label>
-                {editing ? (
+                {editingName ? (
                   <div className="mt-1 relative rounded-md shadow-sm">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                       <FiUser className="text-gray-400" />
@@ -736,9 +915,54 @@ export default function Profile() {
                     />
                   </div>
                 ) : (
-                  <div className="flex items-center">
-                    <FiUser className="text-gray-400 mr-2" />
-                    <span className="text-gray-800">{user?.name || "—"}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <FiUser className="text-gray-400 mr-2" />
+                      <span className="text-gray-800">{user?.name || "—"}</span>
+                    </div>
+                    <button
+                      onClick={() => setEditingName(true)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <FiEdit className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+                {editingName && (
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      onClick={handleNameSave}
+                      disabled={isSaving}
+                      className={`flex items-center px-3 py-1 rounded-md text-white text-sm font-medium ${
+                        isSaving
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : user?.role === "ADMIN"
+                          ? "bg-blue-600 hover:bg-blue-700"
+                          : "bg-yellow-600 hover:bg-yellow-700"
+                      }`}
+                    >
+                      {isSaving ? (
+                        <>
+                          <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                          {t("profile.saving")}
+                        </>
+                      ) : (
+                        <>
+                          <FiSave className="mr-1" />
+                          {t("profile.save")}
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingName(false);
+                        setEditedName(user?.name || "");
+                      }}
+                      className="flex items-center px-3 py-1 rounded-md text-gray-600 bg-gray-100 hover:bg-gray-200 text-sm font-medium"
+                    >
+                      <FiX className="mr-1" />
+                      {t("profile.cancel")}
+                    </button>
                   </div>
                 )}
               </div>
@@ -757,28 +981,133 @@ export default function Profile() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t("profile.location")}
                 </label>
-                {editing ? (
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <IoLocationOutline className="text-gray-400" />
+                {editingLocation ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          {t("profile.zipCode")}
+                        </label>
+                        <input
+                          type="text"
+                          value={zipCode}
+                          onChange={(e) => setZipCode(e.target.value)}
+                          placeholder={t("profile.enterZipCode")}
+                          className={`focus:ring-2 focus:ring-offset-2 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border ${
+                            user?.role === "ADMIN"
+                              ? "focus:ring-blue-500 focus:border-blue-500"
+                              : "focus:ring-yellow-500 focus:border-yellow-500"
+                          }`}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">
+                          {t("profile.country")}
+                        </label>
+                        <select
+                          value={country}
+                          onChange={(e) => setCountry(e.target.value)}
+                          className={`focus:ring-2 focus:ring-offset-2 block w-full sm:text-sm border-gray-300 rounded-md py-2 px-3 border ${
+                            user?.role === "ADMIN"
+                              ? "focus:ring-blue-500 focus:border-blue-500"
+                              : "focus:ring-yellow-500 focus:border-yellow-500"
+                          }`}
+                        >
+                          <option value="">{t("profile.selectCountry")}</option>
+                          <optgroup label="North America">
+                            <option value="US">🇺🇸 United States</option>
+                            <option value="CA">🇨🇦 Canada</option>
+                          </optgroup>
+                          <optgroup label="Europe">
+                            <option value="GB">🇬🇧 United Kingdom</option>
+                            <option value="FR">🇫🇷 France</option>
+                            <option value="DE">🇩🇪 Germany</option>
+                            <option value="IT">🇮🇹 Italy</option>
+                            <option value="ES">🇪🇸 Spain</option>
+                            <option value="PT">🇵🇹 Portugal</option>
+                            <option value="NL">🇳🇱 Netherlands</option>
+                            <option value="BE">🇧🇪 Belgium</option>
+                            <option value="SE">🇸🇪 Sweden</option>
+                            <option value="NO">🇳🇴 Norway</option>
+                            <option value="DK">🇩🇰 Denmark</option>
+                            <option value="IE">🇮🇪 Ireland</option>
+                            <option value="PL">🇵🇱 Poland</option>
+                            <option value="RO">🇷🇴 Romania</option>
+                            <option value="BG">🇧🇬 Bulgaria</option>
+                            <option value="GR">🇬🇷 Greece</option>
+                            <option value="CZ">🇨🇿 Czech Republic</option>
+                            <option value="SK">🇸🇰 Slovakia</option>
+                            <option value="HU">🇭🇺 Hungary</option>
+                            <option value="RU">🇷🇺 Russia</option>
+                            <option value="TR">🇹🇷 Turkey</option>
+                          </optgroup>
+                          <optgroup label="Middle East">
+                            <option value="SA">🇸🇦 Saudi Arabia</option>
+                            <option value="AE">🇦🇪 United Arab Emirates</option>
+                            <option value="QA">🇶🇦 Qatar</option>
+                            <option value="KW">🇰🇼 Kuwait</option>
+                            <option value="OM">🇴🇲 Oman</option>
+                            <option value="BH">🇧🇭 Bahrain</option>
+                          </optgroup>
+                          <optgroup label="Asia Pacific">
+                            <option value="IN">🇮🇳 India</option>
+                            <option value="AU">🇦🇺 Australia</option>
+                            <option value="NZ">🇳🇿 New Zealand</option>
+                          </optgroup>
+                        </select>
+                      </div>
                     </div>
-                    <input
-                      type="text"
-                      value={editedLocation}
-                      onChange={(e) => setEditedLocation(e.target.value)}
-                      className={`focus:ring-2 focus:ring-offset-2 block w-full pl-10 sm:text-sm border-gray-300 rounded-md py-2 px-3 border ${
-                        user?.role === "ADMIN"
-                          ? "focus:ring-blue-500 focus:border-blue-500"
-                          : "focus:ring-yellow-500 focus:border-yellow-500"
-                      }`}
-                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleLocationSave}
+                        disabled={isSaving}
+                        className={`flex items-center px-3 py-1 rounded-md text-white text-sm font-medium ${
+                          isSaving
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : user?.role === "ADMIN"
+                            ? "bg-blue-600 hover:bg-blue-700"
+                            : "bg-yellow-600 hover:bg-yellow-700"
+                        }`}
+                      >
+                        {isSaving ? (
+                          <>
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                            {t("profile.saving")}
+                          </>
+                        ) : (
+                          <>
+                            <FiSave className="mr-1" />
+                            {t("profile.saveLocation")}
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingLocation(false);
+                          setZipCode("");
+                          setCountry("");
+                        }}
+                        className="flex items-center px-3 py-1 rounded-md text-gray-600 bg-gray-100 hover:bg-gray-200 text-sm font-medium"
+                      >
+                        <FiX className="mr-1" />
+                        {t("profile.cancel")}
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <div className="flex items-center">
-                    <IoLocationOutline className="text-gray-400 mr-2" />
-                    <span className="text-gray-800">
-                      {user?.location || "—"}
-                    </span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <IoLocationOutline className="text-gray-400 mr-2" />
+                      <span className="text-gray-800">
+                        {formattedLocation || user?.location || "—"}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setEditingLocation(true)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <FiEdit className="w-4 h-4" />
+                    </button>
                   </div>
                 )}
               </div>
@@ -799,34 +1128,6 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-
-            {editing && (
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className={`flex items-center px-4 py-2 rounded-md text-white font-medium ${
-                    isSaving
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : user?.role === "ADMIN"
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : "bg-yellow-600 hover:bg-yellow-700"
-                  }`}
-                >
-                  {isSaving ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      {t("profile.saving")}
-                    </>
-                  ) : (
-                    <>
-                      <FiSave className="mr-2" />
-                      {t("profile.saveChanges")}
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Account Actions */}

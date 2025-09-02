@@ -41,6 +41,7 @@ const Navigation = () => {
     navLinks = [
       { name: t("navigation.flyer"), path: "/explore/flyers" },
       { name: t("navigation.coupon"), path: "/explore/coupons" },
+      { name: t("navigation.antiWaste"), path: "/explore/anti-waste" },
       { name: t("navigation.stores"), path: "/stores" },
       { name: t("navigation.wishlist"), path: "/wishlist" },
       { name: t("navigation.shoppingLists"), path: "/shopping-lists" },

@@ -59,6 +59,7 @@ export default function RetailerStores() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [limit, setLimit] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isNearbyMode, setIsNearbyMode] = useState<boolean>(false);
 
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
@@ -67,7 +68,8 @@ export default function RetailerStores() {
 
   const navigate = useNavigate();
 
-  if (userRole === "USER") {
+  // Only redirect ADMIN users away from stores page
+  if (userRole === "ADMIN") {
     navigate("/not-found");
   }
 
@@ -83,11 +85,50 @@ export default function RetailerStores() {
     return params.toString();
   };
 
+  const buildNearbyQueryString = () => {
+    const params = new URLSearchParams();
+
+    if (searchTerm) params.append("search", searchTerm);
+    if (selectedCategories.length > 0)
+      params.append("categoryIds", selectedCategories.join(","));
+    if (limit) params.append("limit", limit.toString());
+    if (currentPage) params.append("page", currentPage.toString());
+    params.append("radius", "25"); // Default radius of 25km
+
+    return params.toString();
+  };
+
   const fetchStores = async (page: number = 1) => {
     setIsLoading(true);
     try {
-      const queryString = buildQueryString();
-      const url = `${baseUrl}stores${queryString ? `?${queryString}` : ""}`;
+      let url: string;
+      let queryString: string;
+
+      // Check if user has location data (for USER role and non-logged in users)
+      const userLatitude = localStorage.getItem("userLatitude");
+      const userLongitude = localStorage.getItem("userLongitude");
+      const hasLocation =
+        userLatitude &&
+        userLongitude &&
+        userLatitude !== "" &&
+        userLongitude !== "";
+
+      if (userRole === "USER" && hasLocation) {
+        // Use nearby stores API for logged-in users with location
+        queryString = buildNearbyQueryString();
+        url = `${baseUrl}location/nearby-stores?latitude=${userLatitude}&longitude=${userLongitude}&${queryString}`;
+        setIsNearbyMode(true);
+      } else if (!user && hasLocation) {
+        // Use nearby stores API for non-logged in users with location
+        queryString = buildNearbyQueryString();
+        url = `${baseUrl}location/nearby-stores?latitude=${userLatitude}&longitude=${userLongitude}&${queryString}`;
+        setIsNearbyMode(true);
+      } else {
+        // Use regular stores API for all other cases
+        queryString = buildQueryString();
+        url = `${baseUrl}stores${queryString ? `?${queryString}` : ""}`;
+        setIsNearbyMode(false);
+      }
 
       const response = await fetch(url, {
         method: "GET",
@@ -99,22 +140,47 @@ export default function RetailerStores() {
 
       const data = await response.json();
 
-      const fetchUser = await fetch(
-        `${baseUrl}user/${localStorage.getItem("userEmail")}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "user-email": user?.email || "",
-          },
-        }
-      );
-
-      const userId = (await fetchUser.json()).id;
+      // For RETAILER role, filter to show only their stores
       if (userRole === "RETAILER") {
-        data.stores = data.stores.filter(
-          (store: any) => store?.ownerId === userId
-        );
+        try {
+          const fetchUser = await fetch(
+            `${baseUrl}user/${localStorage.getItem("userEmail")}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                "user-email": user?.email || "",
+              },
+            }
+          );
+
+          if (fetchUser.ok) {
+            const userData = await fetchUser.json();
+            const userId = userData.user.id;
+
+            // Filter stores to show only those owned by the current retailer
+            data.stores = data.stores.filter(
+              (store: any) => store?.ownerId === userId
+            );
+
+            // Update pagination data for filtered results
+            data.totalCount = data.stores.length;
+            data.totalPages = Math.ceil(data.stores.length / (limit || 20));
+          } else {
+            console.error("Failed to fetch user data for retailer filtering");
+            data.stores = [];
+            data.totalCount = 0;
+            data.totalPages = 1;
+          }
+        } catch (error) {
+          console.error(
+            "Error fetching user data for retailer filtering:",
+            error
+          );
+          data.stores = [];
+          data.totalCount = 0;
+          data.totalPages = 1;
+        }
       }
 
       if (data.stores) {
@@ -257,7 +323,7 @@ export default function RetailerStores() {
                     ? t("stores.allStores")
                     : userRole === "RETAILER"
                     ? t("stores.yourStores")
-                    : t("stores.title")}
+                    : t("stores.browseStores")}
                 </h1>
                 {(userRole === "RETAILER" || userRole === "ADMIN") && (
                   <button
@@ -272,6 +338,18 @@ export default function RetailerStores() {
                   </button>
                 )}
               </div>
+
+              {/* Nearby Stores Indicator */}
+              {isNearbyMode && (userRole === "USER" || !user) && (
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-green-800 font-medium">
+                      {t("stores.showingNearbyStores")}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Search and Filters Section */}
               <div className="mb-6 space-y-4">
