@@ -82,7 +82,9 @@
     "locationBasedCoupons": "Location-based coupons and discounts",
     "login": "Login",
     "signup": "Sign Up",
-    "maybeLater": "Maybe Later"
+    "maybeLater": "Maybe Later",
+    "forLocationBasedDeals": "For location-based deals, login to account",
+    "loginForDeals": "Login for Deals"
   },
   "editFlyer": "Edit Flyer",
   "createFlyer": "Create Flyer",
@@ -280,7 +282,16 @@
     "manageDeals": "Manage Deals",
     "askLocationTitle": "Location Access Required",
     "askLocationMessage": "We need your location to show you the best deals nearby.",
-    "enterLocation": "Enter your location"
+    "enterLocation": "Enter your location",
+    "antiWastePromo": {
+      "title": "Promoting Anti-Waste, Protecting Our Planet",
+      "subtitle": "Join us in fighting food waste while saving money. Discover discounted items nearing expiry and help reduce environmental impact.",
+      "point1": "Save money with exclusive anti-waste deals",
+      "point2": "Support sustainable shopping and responsible consumption",
+      "point3": "Help reduce waste and protect the environment",
+      "cta": "Explore Anti-Waste Items",
+      "note": "No products shown here – discover them on the Anti-Waste page"
+    }
   },
   "dashboard": {
     "title": "Dashboard",

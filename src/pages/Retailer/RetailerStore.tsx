@@ -124,9 +124,28 @@ export default function RetailerStores() {
         url = `${baseUrl}location/nearby-stores?latitude=${userLatitude}&longitude=${userLongitude}&${queryString}`;
         setIsNearbyMode(true);
       } else {
-        // Use regular stores API for all other cases
-        queryString = buildQueryString();
-        url = `${baseUrl}stores${queryString ? `?${queryString}` : ""}`;
+        // Use ownerId filter for retailers
+        if (userRole === "RETAILER") {
+          // fetch user id first
+          const userEmail =
+            localStorage.getItem("userEmail") || user?.email || "";
+          const userResp = await fetch(`${baseUrl}user/${userEmail}`, {
+            headers: {
+              "Content-Type": "application/json",
+              "user-email": user?.email || "",
+            },
+          });
+          const userData = userResp.ok ? await userResp.json() : null;
+          const ownerId = userData?.user?.id || userData?.id || "";
+          queryString = buildQueryString();
+          const qs = new URLSearchParams(queryString);
+          if (ownerId) qs.set("ownerId", ownerId);
+          url = `${baseUrl}stores?${qs.toString()}`;
+        } else {
+          // Use regular stores API for all other cases
+          queryString = buildQueryString();
+          url = `${baseUrl}stores${queryString ? `?${queryString}` : ""}`;
+        }
         setIsNearbyMode(false);
       }
 
@@ -140,48 +159,7 @@ export default function RetailerStores() {
 
       const data = await response.json();
 
-      // For RETAILER role, filter to show only their stores
-      if (userRole === "RETAILER") {
-        try {
-          const fetchUser = await fetch(
-            `${baseUrl}user/${localStorage.getItem("userEmail")}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                "user-email": user?.email || "",
-              },
-            }
-          );
-
-          if (fetchUser.ok) {
-            const userData = await fetchUser.json();
-            const userId = userData.user.id;
-
-            // Filter stores to show only those owned by the current retailer
-            data.stores = data.stores.filter(
-              (store: any) => store?.ownerId === userId
-            );
-
-            // Update pagination data for filtered results
-            data.totalCount = data.stores.length;
-            data.totalPages = Math.ceil(data.stores.length / (limit || 20));
-          } else {
-            console.error("Failed to fetch user data for retailer filtering");
-            data.stores = [];
-            data.totalCount = 0;
-            data.totalPages = 1;
-          }
-        } catch (error) {
-          console.error(
-            "Error fetching user data for retailer filtering:",
-            error
-          );
-          data.stores = [];
-          data.totalCount = 0;
-          data.totalPages = 1;
-        }
-      }
+      // For RETAILER role, backend already filtered by ownerId via query param
 
       if (data.stores) {
         setStores(data.stores);

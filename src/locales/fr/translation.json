@@ -82,7 +82,9 @@
     "locationBasedCoupons": "Coupons et réductions basés sur la localisation",
     "login": "Se connecter",
     "signup": "S'inscrire",
-    "maybeLater": "Peut-être plus tard"
+    "maybeLater": "Peut-être plus tard",
+    "forLocationBasedDeals": "Pour des offres basées sur la localisation, connectez-vous à votre compte",
+    "loginForDeals": "Connexion pour les offres"
   },
   "editFlyer": "Modifier le Prospectus",
   "createFlyer": "Créer un Prospectus",
@@ -280,7 +282,16 @@
     "manageDeals": "Gérer les offres",
     "askLocationTitle": "Accès à la localisation requis",
     "askLocationMessage": "Nous avons besoin de votre emplacement pour vous montrer les meilleures offres à proximité.",
-    "enterLocation": "Entrez votre emplacement"
+    "enterLocation": "Entrez votre emplacement",
+    "antiWastePromo": {
+      "title": "Promouvoir l'Anti-Gaspillage, Protéger notre Planète",
+      "subtitle": "Rejoignez-nous pour lutter contre le gaspillage alimentaire tout en économisant. Découvrez des articles à prix réduit proches de la date d'expiration et réduisez votre impact environnemental.",
+      "point1": "Économisez avec des offres anti-gaspillage exclusives",
+      "point2": "Soutenez des achats durables et une consommation responsable",
+      "point3": "Aidez à réduire les déchets et à protéger l'environnement",
+      "cta": "Explorer les Articles Anti-Gaspillage",
+      "note": "Aucun produit affiché ici – découvrez-les sur la page Anti-Gaspillage"
+    }
   },
   "dashboard": {
     "title": "Tableau de bord",

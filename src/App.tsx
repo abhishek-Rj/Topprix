@@ -32,57 +32,65 @@ import LocationLoginPrompt from "./components/LocationLoginPrompt";
 import useLocationLoginPrompt from "./hooks/useLocationLoginPrompt";
 import AntiWaste from "./pages/AntiWaste";
 
-function App() {
+function AppContent() {
   const { showLocationDialog, handleLocationSet, handleCloseDialog } =
     useLocationDialog();
   const { showLoginPrompt, handleClosePrompt } = useLocationLoginPrompt();
 
   return (
     <>
+      <Routes>
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/stores" element={<RetailerStores />} />
+        <Route path="/stores/create-new-store" element={<CreateNewStore />} />
+        <Route path="/stores/edit-store/:id" element={<EditStore />} />
+        <Route path="/stores/store/:id" element={<StoreDetailPage />} />
+        <Route path="/explore/coupons" element={<CouponPage />} />
+        <Route path="/explore/flyers" element={<FlyerPage />} />
+        <Route path="/explore/anti-waste" element={<AntiWaste />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/shopping-lists" element={<ShoppingList />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/pricing-plans" element={<PricingPlans />} />
+        <Route path="/subscriptions" element={<Subscriptions />} />
+        <Route path="/deals" element={<Deals />} />
+        <Route path="/not-found" element={<NotFound />} />
+        <Route path="/user-dashboard" element={<UserDashboard />} />
+        <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
+        <Route path="/pdf-viewer/:flyerId" element={<PDFViewer />} />
+        <Route path="/flyers/:flyerId" element={<FlyerDetail />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/general-conditions" element={<GeneralConditions />} />
+        <Route path="/about" element={<AboutUs />} />
+        <Route path="/legal-notices" element={<LegalNotices />} />
+        <Route path="/contact" element={<ContactUs />} />
+      </Routes>
+
+      {/* Location Dialog */}
+      <LocationDialog
+        isOpen={showLocationDialog}
+        onClose={handleCloseDialog}
+        onLocationSet={handleLocationSet}
+      />
+
+      {/* Location Login Prompt */}
+      <LocationLoginPrompt
+        isOpen={showLoginPrompt}
+        onClose={handleClosePrompt}
+      />
+    </>
+  );
+}
+
+function App() {
+  return (
+    <>
       <BrowserRouter>
-        <Routes>
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/stores" element={<RetailerStores />} />
-          <Route path="/stores/create-new-store" element={<CreateNewStore />} />
-          <Route path="/stores/edit-store/:id" element={<EditStore />} />
-          <Route path="/stores/store/:id" element={<StoreDetailPage />} />
-          <Route path="/explore/coupons" element={<CouponPage />} />
-          <Route path="/explore/flyers" element={<FlyerPage />} />
-          <Route path="/explore/anti-waste" element={<AntiWaste />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/shopping-lists" element={<ShoppingList />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/pricing-plans" element={<PricingPlans />} />
-          <Route path="/subscriptions" element={<Subscriptions />} />
-          <Route path="/deals" element={<Deals />} />
-          <Route path="/not-found" element={<NotFound />} />
-          <Route path="/user-dashboard" element={<UserDashboard />} />
-          <Route path="/retailer-dashboard" element={<RetailerDashboard />} />
-          <Route path="/pdf-viewer/:flyerId" element={<PDFViewer />} />
-          <Route path="/flyers/:flyerId" element={<FlyerDetail />} />
-          <Route path="/privacy" element={<PrivacyPolicy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/general-conditions" element={<GeneralConditions />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/legal-notices" element={<LegalNotices />} />
-          <Route path="/contact" element={<ContactUs />} />
-        </Routes>
-
-        {/* Location Dialog */}
-        <LocationDialog
-          isOpen={showLocationDialog}
-          onClose={handleCloseDialog}
-          onLocationSet={handleLocationSet}
-        />
-
-        {/* Location Login Prompt */}
-        <LocationLoginPrompt
-          isOpen={showLoginPrompt}
-          onClose={handleClosePrompt}
-        />
+        <AppContent />
       </BrowserRouter>
     </>
   );

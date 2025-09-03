@@ -25,9 +25,11 @@ import useAuthenticate from "@/hooks/authenticationt";
 import { CouponCard } from "@/components/CouponCard";
 import { FlyerCard } from "@/components/FlyerCard";
 import baseUrl from "@/hooks/baseurl";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [coupons, setCoupons] = useState<any[]>([]);
   const [flyers, setFlyers] = useState<any[]>([]);
@@ -469,6 +471,61 @@ export default function Home() {
               </p>
             </motion.div>
           )}
+        </div>
+      </section>
+
+      {/* Anti-Waste Promo Section (third last section) */}
+      <section
+        className={`py-16 px-4 ${
+          userRole === "ADMIN"
+            ? "bg-gradient-to-br from-green-50 to-blue-50"
+            : "bg-gradient-to-br from-green-50 to-yellow-50"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="rounded-3xl p-8 sm:p-12 bg-white/70 backdrop-blur shadow-xl border border-green-100"
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
+              <div className="lg:col-span-2">
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+                  {t("home.antiWastePromo.title")}
+                </h2>
+                <p className="text-gray-700 text-lg mb-6">
+                  {t("home.antiWastePromo.subtitle")}
+                </p>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600">✓</span>
+                    <span>{t("home.antiWastePromo.point1")}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600">✓</span>
+                    <span>{t("home.antiWastePromo.point2")}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600">✓</span>
+                    <span>{t("home.antiWastePromo.point3")}</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="flex flex-col items-start lg:items-end gap-4">
+                <button
+                  onClick={() => navigate("/explore/anti-waste")}
+                  className="px-6 py-3 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md transition-colors"
+                >
+                  {t("home.antiWastePromo.cta")}
+                </button>
+                <span className="text-sm text-gray-500">
+                  {t("home.antiWastePromo.note")}
+                </span>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 

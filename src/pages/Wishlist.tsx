@@ -67,9 +67,9 @@ export default function WishlistPage() {
       }
       const userData = await userResponse.json();
 
-      // Then fetch the wishlist using the backend user ID
+      // Then fetch the wishlist using the documented wishlist endpoint
       const response = await fetch(
-        `${baseUrl}api/users/${userData.id}/wishlist`,
+        `${baseUrl}api/wishlist/${userData.id}?page=1&limit=20`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -160,22 +160,18 @@ export default function WishlistPage() {
       }
       const userData = await userResponse.json();
 
-      const response = await fetch(
-        `${baseUrl}api/users/${userData.id}/wishlist`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "user-email": user?.email || "",
-          },
-          body: JSON.stringify({
-            name: newItemName,
-            targetPrice: newTargetPrice
-              ? parseFloat(newTargetPrice)
-              : undefined,
-          }),
-        }
-      );
+      const response = await fetch(`${baseUrl}api/wishlist`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "user-email": user?.email || "",
+        },
+        body: JSON.stringify({
+          userId: userData.id,
+          name: newItemName,
+          targetPrice: newTargetPrice ? parseFloat(newTargetPrice) : undefined,
+        }),
+      });
 
       if (response.ok) {
         toast.success("Item added to wishlist successfully!");
@@ -194,7 +190,7 @@ export default function WishlistPage() {
 
   const updateWishlistItem = async (itemId: string) => {
     try {
-      const response = await fetch(`${baseUrl}api/wishlist-items/${itemId}`, {
+      const response = await fetch(`${baseUrl}api/wishlist/${itemId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -225,7 +221,7 @@ export default function WishlistPage() {
 
   const deleteWishlistItem = async (itemId: string) => {
     try {
-      const response = await fetch(`${baseUrl}api/wishlist-items/${itemId}`, {
+      const response = await fetch(`${baseUrl}api/wishlist/${itemId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

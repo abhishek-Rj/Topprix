@@ -1,7 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { FiMenu, FiX, FiSearch, FiUser } from "react-icons/fi";
+import {
+  FiMenu,
+  FiX,
+  FiSearch,
+  FiUser,
+  FiMapPin,
+  FiLogIn,
+} from "react-icons/fi";
 import SkeletonNav from "./ui/navbarSkeleton";
 import userLogout from "@/hooks/userLogout";
 import useAuthenticate from "@/hooks/authenticationt";
@@ -239,16 +246,13 @@ const Navigation = () => {
               ) : (
                 <Link
                   to="/login"
-                  className={`flex items-center text-sm font-medium ${
-                    isScrolled
-                      ? "text-gray-600 hover:text-yellow-600"
-                      : userRole === "ADMIN"
-                      ? "text-blue-100 hover:text-white"
-                      : "text-gray-600 hover:text-yellow-600"
-                  }`}
+                  className="flex items-center text-xs sm:text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md transition-colors whitespace-nowrap"
                 >
-                  <FiUser className="mr-1" />
-                  {t("signIn")}
+                  <FiMapPin className="mr-1 sm:mr-1.5 w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="hidden xs:inline">
+                    {t("location.loginForDeals")}
+                  </span>
+                  <span className="xs:hidden">Deals</span>
                 </Link>
               )}
             </div>

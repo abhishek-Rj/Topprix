@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { HiSearch, HiFilter, HiHeart, HiShoppingCart } from "react-icons/hi";
+import { useNavigate } from "react-router-dom";
+import { HiSearch, HiFilter } from "react-icons/hi";
 import { AntiWasteList } from "@/components/AntiWasteCard";
 import { motion } from "framer-motion";
 import Navigation from "../components/navigation";
@@ -38,6 +38,9 @@ interface PaginationData {
   currentPage: number;
   totalPages: number;
   items: AntiWasteItem[];
+  itemsPerPage?: number;
+  hasNextPage?: boolean;
+  hasPreviousPage?: boolean;
 }
 
 export default function AntiWaste() {
@@ -68,7 +71,6 @@ export default function AntiWaste() {
   const [nearMe, setNearMe] = useState(false);
 
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
 
   const conditions = [
     { value: "NEAR_EXPIRY", label: "Near Expiry" },
@@ -112,7 +114,7 @@ export default function AntiWaste() {
     return params.toString();
   };
 
-  const fetchAntiWasteItems = async (page: number = 1) => {
+  const fetchAntiWasteItems = async () => {
     setIsLoading(true);
     try {
       const queryString = buildQueryString();
@@ -124,7 +126,7 @@ export default function AntiWaste() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "user-email": localStorage.getItem("userEmail") || "",
+          "user-email": user?.email || "nine@gmail.com",
         },
       });
 
@@ -132,11 +134,38 @@ export default function AntiWaste() {
 
       if (data.data) {
         setItems(data.data);
+
+        // Normalize pagination fields from API
+        const apiPagination = data.pagination || {};
+        const totalFromApi =
+          apiPagination.totalItems ??
+          apiPagination.totalCount ??
+          apiPagination.total ??
+          apiPagination.count ??
+          0;
+        const limitFromApi =
+          apiPagination.itemsPerPage ?? apiPagination.limit ?? limit;
+        const currentFromApi =
+          apiPagination.currentPage ?? apiPagination.page ?? currentPage;
+        const totalPagesFromApi =
+          apiPagination.totalPages ??
+          (limitFromApi
+            ? Math.ceil(Number(totalFromApi) / Number(limitFromApi))
+            : 1);
+        const hasPrevFromApi =
+          apiPagination.hasPreviousPage ?? Number(currentFromApi) > 1;
+        const hasNextFromApi =
+          apiPagination.hasNextPage ??
+          Number(currentFromApi) < Number(totalPagesFromApi);
+
         setPaginationData({
-          totalCount: data.pagination?.totalItems || 0,
-          currentPage: data.pagination?.currentPage || 1,
-          totalPages: data.pagination?.totalPages || 1,
+          totalCount: Number(totalFromApi),
+          currentPage: Number(currentFromApi),
+          totalPages: Number(totalPagesFromApi),
           items: data.data,
+          itemsPerPage: Number(limitFromApi),
+          hasNextPage: Boolean(hasNextFromApi),
+          hasPreviousPage: Boolean(hasPrevFromApi),
         });
       } else {
         throw new Error("No anti-waste items found");
@@ -150,7 +179,7 @@ export default function AntiWaste() {
   };
 
   useEffect(() => {
-    fetchAntiWasteItems(currentPage);
+    fetchAntiWasteItems();
   }, [
     currentPage,
     searchTerm,
@@ -169,7 +198,7 @@ export default function AntiWaste() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
-    fetchAntiWasteItems(1);
+    fetchAntiWasteItems();
   };
 
   const handlePageChange = (page: number) => {
@@ -191,32 +220,6 @@ export default function AntiWaste() {
     setNearMe(false);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
-
-  const getConditionColor = (condition: string) => {
-    switch (condition) {
-      case "NEAR_EXPIRY":
-        return "bg-red-100 text-red-800";
-      case "SURPLUS_STOCK":
-        return "bg-blue-100 text-blue-800";
-      case "SEASONAL":
-        return "bg-orange-100 text-orange-800";
-      case "SLIGHTLY_DAMAGED":
-        return "bg-yellow-100 text-yellow-800";
-      case "SHORT_DATED":
-        return "bg-purple-100 text-purple-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getConditionLabel = (condition: string) => {
-    const found = conditions.find((c) => c.value === condition);
-    return found ? found.label : condition;
-  };
-
   if (loading) {
     return (
       <>
@@ -229,41 +232,47 @@ export default function AntiWaste() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div
+      className={`min-h-screen ${
+        userRole === "ADMIN"
+          ? "bg-gradient-to-b from-blue-50 to-white"
+          : "bg-gradient-to-b from-yellow-50 to-white"
+      }`}
+    >
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navigation />
       </div>
 
-      <main className="pt-20 pb-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className={`${!user ? "pt-36" : "pt-20"} pb-10`}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
           {/* Hero Section */}
-          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-6 sm:p-8 mb-8 text-white">
+          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 mb-6 sm:mb-8 text-white">
             <div className="text-center">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4">
                 {t("antiWaste.title")}
               </h1>
-              <p className="text-lg sm:text-xl text-green-100 max-w-2xl mx-auto">
+              <p className="text-sm sm:text-lg md:text-xl text-green-100 max-w-2xl mx-auto">
                 {t("antiWaste.subtitle")}
               </p>
             </div>
           </div>
 
           {/* Main Content */}
-          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-4 sm:p-6 md:p-8">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                   {t("antiWaste.browseItems")}
                 </h2>
-                <p className="text-gray-600 mt-1">
+                <p className="text-sm sm:text-base text-gray-600 mt-1">
                   {t("antiWaste.description")}
                 </p>
               </div>
               {(userRole === "RETAILER" || userRole === "ADMIN") && (
                 <button
                   onClick={() => navigate("/stores")}
-                  className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+                  className="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base"
                 >
                   {t("antiWaste.manageItems")}
                 </button>
@@ -271,42 +280,39 @@ export default function AntiWaste() {
             </div>
 
             {/* Search and Filters */}
-            <div className="mb-6 space-y-4">
+            <div className="mb-6 space-y-3 sm:space-y-4">
               <form
                 onSubmit={handleSearch}
-                className="flex flex-col sm:flex-row gap-2"
+                className="flex flex-col sm:flex-row gap-2 sm:gap-3"
               >
                 <div className="relative flex-1">
-                  <HiSearch
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                    size={20}
-                  />
+                  <HiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder={t("antiWaste.searchPlaceholder")}
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    className="w-full pl-9 sm:pl-10 pr-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-sm sm:text-base"
                   />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 sm:gap-3">
                   <button
                     type="submit"
-                    className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                    className="flex-1 sm:flex-none px-4 sm:px-6 py-2 sm:py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm sm:text-base"
                   >
                     {t("antiWaste.search")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`px-4 py-2.5 border border-gray-300 rounded-lg flex items-center gap-2 ${
+                    className={`px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg flex items-center gap-1.5 sm:gap-2 ${
                       showFilters
                         ? "bg-green-100 border-green-300"
                         : "bg-white hover:bg-gray-50"
                     }`}
                   >
-                    <HiFilter size={18} />
-                    <span className="hidden sm:inline">
+                    <HiFilter className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline text-sm sm:text-base">
                       {t("antiWaste.filters")}
                     </span>
                   </button>
@@ -319,9 +325,9 @@ export default function AntiWaste() {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="bg-gray-50 rounded-lg p-4 space-y-4"
+                  className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-3 sm:space-y-4"
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         {t("antiWaste.category")}
@@ -329,7 +335,7 @@ export default function AntiWaste() {
                       <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 text-sm"
                       >
                         <option value="">{t("antiWaste.allCategories")}</option>
                         {categories.map((category) => (
@@ -347,7 +353,7 @@ export default function AntiWaste() {
                       <select
                         value={selectedCondition}
                         onChange={(e) => setSelectedCondition(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 text-sm"
                       >
                         <option value="">{t("antiWaste.allConditions")}</option>
                         {conditions.map((condition) => (
@@ -367,7 +373,7 @@ export default function AntiWaste() {
                         value={minDiscount}
                         onChange={(e) => setMinDiscount(e.target.value)}
                         placeholder="20"
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 text-sm"
                       />
                     </div>
 
@@ -380,12 +386,12 @@ export default function AntiWaste() {
                         value={maxPrice}
                         onChange={(e) => setMaxPrice(e.target.value)}
                         placeholder="50"
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 text-sm"
                       />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         {t("antiWaste.sortBy")}
@@ -393,7 +399,7 @@ export default function AntiWaste() {
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 text-sm"
                       >
                         <option value="">{t("antiWaste.noSort")}</option>
                         <option value="price">
@@ -418,7 +424,7 @@ export default function AntiWaste() {
                       <select
                         value={sortOrder}
                         onChange={(e) => setSortOrder(e.target.value)}
-                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 text-sm"
                       >
                         <option value="desc">
                           {t("antiWaste.descending")}

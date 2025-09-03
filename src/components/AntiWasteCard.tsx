@@ -237,19 +237,19 @@ export const AntiWasteCard = ({
   return (
     <>
       <Card className="group hover:shadow-lg transition-all duration-300 border-0 shadow-md">
-        <CardContent className="p-3 sm:p-4">
+        <CardContent className="p-2 sm:p-3 md:p-4">
           {/* Header with store info and actions */}
           <div className="flex justify-between items-start mb-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {store?.logo && (
                 <img
                   src={store.logo}
                   alt={store.name}
-                  className="w-5 h-5 rounded-full object-cover"
+                  className="w-4 h-4 sm:w-5 sm:h-5 rounded-full object-cover"
                 />
               )}
               <div>
-                <h3 className="font-semibold text-xs text-gray-900">
+                <h3 className="font-semibold text-xs sm:text-sm text-gray-900">
                   {store?.name || t("antiWaste.unknownStore")}
                 </h3>
                 <p className="text-xs text-gray-500">{item.category}</p>
@@ -263,7 +263,7 @@ export const AntiWasteCard = ({
                 className="p-1 text-gray-600 hover:text-gray-800 transition-colors"
                 title={t("antiWaste.viewDetails")}
               >
-                <HiEye size={14} />
+                <HiEye className="w-3 h-3 sm:w-4 sm:h-4" />
               </button>
               {isAuthorized && (
                 <>
@@ -272,14 +272,14 @@ export const AntiWasteCard = ({
                     className="p-1 text-blue-600 hover:text-blue-800 transition-colors"
                     title={t("antiWaste.editItem")}
                   >
-                    <HiPencil size={14} />
+                    <HiPencil className="w-3 h-3 sm:w-4 sm:h-4" />
                   </button>
                   <button
                     onClick={() => setShowDeleteDialogueBox(true)}
                     className="p-1 text-red-600 hover:text-red-800 transition-colors"
                     title={t("antiWaste.deleteItem")}
                   >
-                    <HiTrash size={14} />
+                    <HiTrash className="w-3 h-3 sm:w-4 sm:h-4" />
                   </button>
                 </>
               )}
@@ -287,20 +287,20 @@ export const AntiWasteCard = ({
           </div>
 
           {/* Item image */}
-          <div className="relative mb-3">
+          <div className="relative mb-2 sm:mb-3">
             <img
               src={item.imageUrl || "/placeholder-image.jpg"}
               alt={item.name}
-              className="w-full h-24 sm:h-28 object-cover rounded-lg"
+              className="w-full h-20 sm:h-24 md:h-28 object-cover rounded-lg"
             />
             <div className="absolute top-1 left-1">
-              <span className="px-1.5 py-0.5 text-xs font-medium rounded-full border bg-white/90 backdrop-blur-sm">
+              <span className="px-1 sm:px-1.5 py-0.5 text-xs font-medium rounded-full border bg-white/90 backdrop-blur-sm">
                 -{discountPercentage}%
               </span>
             </div>
             <div className="absolute top-1 right-1">
               <span
-                className={`px-1.5 py-0.5 text-xs font-medium rounded-full border ${conditionBadge.className}`}
+                className={`px-1 sm:px-1.5 py-0.5 text-xs font-medium rounded-full border ${conditionBadge.className}`}
               >
                 {conditionBadge.text}
               </span>
@@ -308,8 +308,8 @@ export const AntiWasteCard = ({
           </div>
 
           {/* Item details */}
-          <div className="space-y-1.5 mb-3">
-            <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">
+          <div className="space-y-1 sm:space-y-1.5 mb-2 sm:mb-3">
+            <h4 className="font-semibold text-gray-900 text-xs sm:text-sm line-clamp-1">
               {item.name}
             </h4>
             <p className="text-gray-600 text-xs line-clamp-2">
@@ -318,7 +318,7 @@ export const AntiWasteCard = ({
 
             <div className="flex justify-between items-center">
               <div>
-                <span className="text-sm font-bold text-green-600">
+                <span className="text-xs sm:text-sm font-bold text-green-600">
                   ${parseFloat(item.discountedPrice).toFixed(2)}
                 </span>
                 <span className="text-xs text-gray-500 line-through ml-1">
@@ -332,11 +332,11 @@ export const AntiWasteCard = ({
           </div>
 
           {/* Date badge */}
-          <div className="mb-3">
+          <div className="mb-2 sm:mb-3">
             <span
-              className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full border ${dateBadge.className}`}
+              className={`inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-medium rounded-full border ${dateBadge.className}`}
             >
-              <HiCalendar size={10} />
+              <HiCalendar className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
               {dateBadge.text}
             </span>
           </div>
@@ -518,37 +518,31 @@ export const AntiWasteList = ({
       </div>
 
       {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
+      {pagination && (
         <div className="flex justify-center items-center gap-2">
           <button
-            onClick={() => {
-              console.log(
-                "Previous page clicked, current page:",
-                pagination.currentPage
-              );
-              onPageChange?.(pagination.currentPage - 1);
-            }}
-            disabled={pagination.currentPage <= 1}
+            onClick={() => onPageChange?.(pagination.currentPage - 1)}
+            disabled={
+              pagination.hasPreviousPage === false ||
+              pagination.currentPage <= 1
+            }
             className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {t("store.previous")}
+            {t("previous")}
           </button>
           <span className="px-3 py-2 text-sm text-gray-700">
-            {t("store.page")} {pagination.currentPage} {t("store.of")}{" "}
+            {t("page")} {pagination.currentPage} {t("of")}{" "}
             {pagination.totalPages}
           </span>
           <button
-            onClick={() => {
-              console.log(
-                "Next page clicked, current page:",
-                pagination.currentPage
-              );
-              onPageChange?.(pagination.currentPage + 1);
-            }}
-            disabled={pagination.currentPage >= pagination.totalPages}
+            onClick={() => onPageChange?.(pagination.currentPage + 1)}
+            disabled={
+              pagination.hasNextPage === false ||
+              pagination.currentPage >= pagination.totalPages
+            }
             className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {t("store.next")}
+            {t("next")}
           </button>
         </div>
       )}

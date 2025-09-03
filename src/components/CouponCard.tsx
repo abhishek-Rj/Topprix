@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import {
   HiX,
@@ -73,23 +72,25 @@ export const CouponCard = ({
   // Fetch user ID from backend when component mounts
   useEffect(() => {
     const fetchUserId = async () => {
-      if (!user?.email) return;
+      if (!localStorage.getItem("userEmail")) return;
 
       try {
-        const response = await fetch(`${baseUrl}user/${user.email}`);
+        const response = await fetch(
+          `${baseUrl}user/${localStorage.getItem("userEmail")}`
+        );
         if (!response.ok) {
           toast.error("Couldn't fetch user data");
           throw new Error("Couldn't fetch user data");
         }
         const userData = await response.json();
-        setUserId(userData?.id);
+        setUserId(userData?.user.id);
       } catch (error) {
         console.error("Error fetching user ID:", error);
       }
     };
 
     fetchUserId();
-  }, [user?.email]);
+  }, [localStorage.getItem("userEmail")]);
 
   const calculateDaysLeft = () => {
     const startDate = new Date(coupon.startDate);
@@ -182,10 +183,20 @@ export const CouponCard = ({
   }, [coupon.storeId]);
 
   const fetchShoppingLists = async () => {
-    if (!userId) return;
-
+    if (!userId) {
+      toast.error(t("pleaseLoginToAddToShoppingList"));
+      return;
+    }
     try {
-      const response = await fetch(`${baseUrl}shopping-lists/${userId}`);
+      const response = await fetch(
+        `${baseUrl}api/users/${userId}/shopping-lists`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": localStorage.getItem("userEmail") || "",
+          },
+        }
+      );
       if (response.ok) {
         const data = await response.json();
         setShoppingLists(data.shoppingLists || []);
@@ -203,13 +214,15 @@ export const CouponCard = ({
 
     try {
       const response = await fetch(
-        `${baseUrl}shopping-lists/${selectedListId}/items`,
+        `${baseUrl}api/shopping-lists/${selectedListId}/items`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "user-email": localStorage.getItem("userEmail") || "",
           },
           body: JSON.stringify({
+            name: coupon.title,
             couponId: coupon.id,
             quantity: quantity,
           }),
@@ -237,23 +250,21 @@ export const CouponCard = ({
     }
 
     try {
-      const response = await fetch(`${baseUrl}wishlist/${userId}/coupons`, {
-        method: isInWishlist ? "DELETE" : "POST",
+      const response = await fetch(`${baseUrl}api/wishlist`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "user-email": localStorage.getItem("userEmail") || "",
         },
-        body: isInWishlist
-          ? undefined
-          : JSON.stringify({ couponId: coupon.id }),
+        body: JSON.stringify({
+          userId: userId,
+          name: coupon.title,
+        }),
       });
 
       if (response.ok) {
-        setIsInWishlist(!isInWishlist);
-        toast.success(
-          isInWishlist
-            ? t("couponRemovedFromWishlist")
-            : t("couponAddedToWishlist")
-        );
+        setIsInWishlist(true);
+        toast.success(t("couponAddedToWishlist"));
       } else {
         toast.error(t("failedToUpdateWishlist"));
       }
@@ -274,7 +285,7 @@ export const CouponCard = ({
       const response = await fetch(`${baseUrl}coupons/${coupon.id}`, {
         method: "DELETE",
         headers: {
-          "user-email": user?.email || "",
+          "user-email": localStorage.getItem("userEmail") || "",
         },
       });
 
@@ -348,7 +359,10 @@ export const CouponCard = ({
                     <HiShoppingCart className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={addToWishlist}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      addToWishlist();
+                    }}
                     className={`p-1.5 sm:p-2 transition-colors rounded-full hover:bg-red-50 ${
                       isInWishlist
                         ? "text-red-500"
@@ -662,7 +676,7 @@ export const CouponCard = ({
                   <option value="">{t("chooseList")}</option>
                   {shoppingLists.map((list) => (
                     <option key={list.id} value={list.id}>
-                      {list.name}
+                      {list.title}
                     </option>
                   ))}
                 </select>

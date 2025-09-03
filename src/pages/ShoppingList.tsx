@@ -16,7 +16,7 @@ interface ShoppingListItem {
   flyerItemId?: string;
 }
 
-interface ShoppingList {  
+interface ShoppingList {
   id: string;
   title: string;
   userId: string;
@@ -28,7 +28,7 @@ interface ShoppingList {
 export default function ShoppingList() {
   const { user, userRole, loading } = useAuthenticate();
   const navigate = useNavigate();
-  const [userId, setUserId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null);
   const [shoppingLists, setShoppingLists] = useState<ShoppingList[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -38,31 +38,31 @@ export default function ShoppingList() {
   const [newItemName, setNewItemName] = useState("");
   const [newItemQuantity, setNewItemQuantity] = useState(1);
 
-  if (user === null) {
+  if (!loading && user === null) {
     navigate("/login");
   }
 
-  if (userRole == "ADMIN" || userRole == "RETAILER") {
+  if (!loading && (userRole == "ADMIN" || userRole == "RETAILER")) {
     navigate("/not-found");
   }
 
-  // Fetch backend user ID on mount
   useEffect(() => {
     const fetchUserId = async () => {
-      if (!user?.email) return;
-      
+      if (!localStorage.getItem("userEmail")) return;
+
       try {
-        const response = await fetch(`${baseUrl}user/${user.email}`);
+        const response = await fetch(
+          `${baseUrl}user/${localStorage.getItem("userEmail")}`
+        );
         if (!response.ok) {
           toast.error("Couldn't fetch user data");
           throw new Error("Couldn't fetch user data");
         }
-        
+
         const userData = await response.json();
-        const userIdentity = userData?.id;
+        const userIdentity = userData?.user.id;
         setUserId(userIdentity);
-        
-        // Only fetch shopping lists after we have the user ID
+
         if (userIdentity) {
           fetchShoppingLists(userIdentity);
         }
@@ -70,22 +70,25 @@ export default function ShoppingList() {
         console.error("Error fetching user ID:", error);
       }
     };
-    
+
     fetchUserId();
-  }, [user?.email]);
+  }, [localStorage.getItem("userEmail")]);
 
   const fetchShoppingLists = async (userIdentity: string) => {
     if (!userIdentity) return;
-    
+
     setIsLoading(true);
     try {
-      const response = await fetch(`${baseUrl}api/users/${userIdentity}/shopping-lists?includeItems=true`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "user-email": user?.email || "",
-        },
-      });
+      const response = await fetch(
+        `${baseUrl}api/users/${userIdentity}/shopping-lists?includeItems=true`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": localStorage.getItem("userEmail") || "",
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -109,7 +112,7 @@ export default function ShoppingList() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "user-email": user?.email || "",
+          "user-email": localStorage.getItem("userEmail") || "",
         },
         body: JSON.stringify({
           title: newListTitle.trim(),
@@ -139,7 +142,7 @@ export default function ShoppingList() {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          "user-email": user?.email || "",
+          "user-email": localStorage.getItem("userEmail") || "",
         },
       });
 
@@ -159,17 +162,20 @@ export default function ShoppingList() {
     if (!selectedList || !newItemName.trim()) return;
 
     try {
-      const response = await fetch(`${baseUrl}api/shopping-lists/${selectedList.id}/items`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "user-email": user?.email || "",
-        },
-        body: JSON.stringify({
-          name: newItemName.trim(),
-          quantity: newItemQuantity,
-        }),
-      });
+      const response = await fetch(
+        `${baseUrl}api/shopping-lists/${selectedList.id}/items`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": localStorage.getItem("userEmail") || "",
+          },
+          body: JSON.stringify({
+            name: newItemName.trim(),
+            quantity: newItemQuantity,
+          }),
+        }
+      );
 
       if (response.ok) {
         toast.success("Item added successfully");
@@ -186,16 +192,22 @@ export default function ShoppingList() {
     }
   };
 
-  const updateShoppingListItem = async (itemId: string, updates: Partial<ShoppingListItem>) => {
+  const updateShoppingListItem = async (
+    itemId: string,
+    updates: Partial<ShoppingListItem>
+  ) => {
     try {
-      const response = await fetch(`${baseUrl}api/shopping-list-items/${itemId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "user-email": user?.email || "",
-        },
-        body: JSON.stringify(updates),
-      });
+      const response = await fetch(
+        `${baseUrl}api/shopping-list-items/${itemId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": localStorage.getItem("userEmail") || "",
+          },
+          body: JSON.stringify(updates),
+        }
+      );
 
       if (response.ok) {
         toast.success("Item updated successfully");
@@ -213,13 +225,16 @@ export default function ShoppingList() {
     if (!confirm("Are you sure you want to delete this item?")) return;
 
     try {
-      const response = await fetch(`${baseUrl}api/shopping-list-items/${itemId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          "user-email": user?.email || "",
-        },
-      });
+      const response = await fetch(
+        `${baseUrl}api/shopping-list-items/${itemId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": localStorage.getItem("userEmail") || "",
+          },
+        }
+      );
 
       if (response.ok) {
         toast.success("Item deleted successfully");
@@ -253,7 +268,7 @@ export default function ShoppingList() {
       <div className="fixed top-0 left-0 right-0 z-50">
         <Navigation />
       </div>
-      
+
       <main className="flex-1 pt-20 pb-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
@@ -442,11 +457,17 @@ export default function ShoppingList() {
                 onKeyPress={(e) => e.key === "Enter" && addShoppingListItem()}
               />
               <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">Quantity:</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Quantity:
+                </label>
                 <input
                   type="number"
                   value={newItemQuantity}
-                  onChange={(e) => setNewItemQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                  onChange={(e) =>
+                    setNewItemQuantity(
+                      Math.max(1, parseInt(e.target.value) || 1)
+                    )
+                  }
                   min="1"
                   className="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500"
                 />
@@ -479,4 +500,4 @@ export default function ShoppingList() {
       <Footer />
     </div>
   );
-} 
+}

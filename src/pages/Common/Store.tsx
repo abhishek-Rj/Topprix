@@ -47,6 +47,10 @@ export default function StoreDetailPage() {
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
     []
   ); // Keep for backward compatibility, but not actively used
+  const [subcategoryToCategoryMap, setSubcategoryToCategoryMap] = useState<
+    Record<string, string>
+  >({});
+  const [parentCategoryIds, setParentCategoryIds] = useState<string[]>([]);
   const [barcodeFile, setBarcodeFile] = useState<File | null>(null);
   const [qrCodeFile, setQrCodeFile] = useState<File | null>(null);
   const [barcodePreview, setBarcodePreview] = useState<string | null>(null);
@@ -166,7 +170,7 @@ export default function StoreDetailPage() {
               method: "GET",
               headers: {
                 "Content-Type": "application/json",
-                "user-email": user?.email || "",
+                "user-email": localStorage.getItem("userEmail") || "",
               },
             }
           );
@@ -195,6 +199,41 @@ export default function StoreDetailPage() {
       setActiveTab("coupons");
     }
   }, []);
+
+  // Fetch categories with subcategories to build subcategory->category mapping
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${baseUrl}categories/with-subcategories`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const source = data.categories || data || [];
+        const map: Record<string, string> = {};
+        if (Array.isArray(source)) {
+          source.forEach((cat: any) => {
+            (cat.subcategories || []).forEach((sub: any) => {
+              if (sub?.id && cat?.id) map[sub.id] = cat.id;
+            });
+          });
+        }
+        setSubcategoryToCategoryMap(map);
+      } catch (e) {
+        // ignore
+      }
+    })();
+  }, []);
+
+  // Derive parent categoryIds from selected subcategory ids
+  useEffect(() => {
+    const parents = Array.from(
+      new Set(
+        selectedCategories
+          .map((subId) => subcategoryToCategoryMap[subId])
+          .filter((v): v is string => Boolean(v))
+      )
+    );
+    setParentCategoryIds(parents);
+  }, [selectedCategories, subcategoryToCategoryMap]);
 
   useEffect(() => {
     const fetchStoreDetails = async () => {
@@ -435,7 +474,8 @@ export default function StoreDetailPage() {
           title,
           description,
           storeId: id,
-          categoryIds: selectedCategories,
+          categoryIds: parentCategoryIds,
+          subcategoryIds: selectedCategories,
           imageUrl:
             fileType === "image"
               ? imageUrl || (isEditing ? selectedFlyer?.imageUrl : null)
@@ -624,7 +664,8 @@ export default function StoreDetailPage() {
           code,
           discount,
           storeId: id,
-          categoryIds: selectedCategories,
+          categoryIds: parentCategoryIds,
+          subcategoryIds: selectedCategories,
           barcodeUrl:
             barcodeUrl || (isEditing ? selectedCoupon.barcodeUrl : null),
           qrCodeUrl: qrCodeUrl || (isEditing ? selectedCoupon.qrCodeUrl : null),

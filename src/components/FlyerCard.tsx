@@ -1,12 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import {
-  HiPencil,
-  HiTrash,
-  HiShoppingCart,
-  HiHeart,
-  HiEye,
-} from "react-icons/hi";
+import { HiTrash, HiShoppingCart, HiHeart, HiEye } from "react-icons/hi";
 import baseUrl from "@/hooks/baseurl";
 import { toast } from "react-toastify";
 import useAuthenticate from "@/hooks/authenticationt";
@@ -75,23 +69,25 @@ export const FlyerCard = ({
   // Fetch user ID from backend when component mounts
   useEffect(() => {
     const fetchUserId = async () => {
-      if (!user?.email) return;
+      if (!localStorage.getItem("userEmail")) return;
 
       try {
-        const response = await fetch(`${baseUrl}user/${user.email}`);
+        const response = await fetch(
+          `${baseUrl}user/${localStorage.getItem("userEmail")}`
+        );
         if (!response.ok) {
           toast.error("Couldn't fetch user data");
           throw new Error("Couldn't fetch user data");
         }
         const userData = await response.json();
-        setUserId(userData?.id);
+        setUserId(userData?.user.id);
       } catch (error) {
         console.error("Error fetching user ID:", error);
       }
     };
 
     fetchUserId();
-  }, [user?.email]);
+  }, [localStorage.getItem("userEmail")]);
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -118,7 +114,7 @@ export const FlyerCard = ({
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "user-email": user?.email || "",
+            "user-email": localStorage.getItem("userEmail") || "",
           },
         }
       );
@@ -148,7 +144,7 @@ export const FlyerCard = ({
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "user-email": user?.email || "",
+            "user-email": localStorage.getItem("userEmail") || "",
           },
           body: JSON.stringify({
             name: flyer.title,
@@ -173,7 +169,7 @@ export const FlyerCard = ({
   };
 
   const addToWishlist = async () => {
-    if (!user) {
+    if (!localStorage.getItem("userEmail")) {
       toast.error("Please login to add items to wishlist");
       return;
     }
@@ -184,13 +180,14 @@ export const FlyerCard = ({
     }
 
     try {
-      const response = await fetch(`${baseUrl}api/users/${userId}/wishlist`, {
+      const response = await fetch(`${baseUrl}api/wishlist`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "user-email": user?.email || "",
+          "user-email": localStorage.getItem("userEmail") || "",
         },
         body: JSON.stringify({
+          userId: userId,
           name: flyer.title,
           flyerItemId: flyer.id,
         }),
@@ -297,7 +294,7 @@ export const FlyerCard = ({
       const response = await fetch(`${baseUrl}flyers/${flyer.id}`, {
         method: "DELETE",
         headers: {
-          "user-email": user?.email || "",
+          "user-email": localStorage.getItem("userEmail") || "",
         },
       });
 
@@ -320,16 +317,7 @@ export const FlyerCard = ({
     }
   };
 
-  const handleEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!isAuthorized) {
-      toast.error("You are not authorized to edit flyers");
-      return;
-    }
-    if (onEdit) {
-      onEdit(flyer);
-    }
-  };
+  // Edit handler not used in current UI
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -338,7 +326,7 @@ export const FlyerCard = ({
 
   const handleAddToShoppingList = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!user) {
+    if (!localStorage.getItem("userEmail")) {
       toast.error("Please login to add items to shopping list");
       return;
     }
@@ -442,7 +430,7 @@ export const FlyerCard = ({
                 )}
 
                 {/* Additional action buttons for authenticated USER role */}
-                {user && userRole === "USER" && (
+                {localStorage.getItem("userEmail") && userRole === "USER" && (
                   <>
                     <button
                       onClick={(e) => {

@@ -1,13 +1,22 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import useAuthenticate from "./authenticationt";
 
 export default function useLocationDialog() {
   const { user, userRole, userLatitude, userLongitude, loading } =
     useAuthenticate();
+  const location = useLocation();
   const [showLocationDialog, setShowLocationDialog] = useState(false);
 
   useEffect(() => {
     if (loading) return;
+
+    // Only show on home page
+    if (location.pathname !== "/") {
+      localStorage.removeItem("locationDialogShown");
+      setShowLocationDialog(false);
+      return;
+    }
 
     // Check if we've already shown the dialog for this session
     const hasShownDialog = localStorage.getItem("locationDialogShown");
@@ -39,7 +48,7 @@ export default function useLocationDialog() {
       // Mark that we've shown the dialog for this session
       localStorage.setItem("locationDialogShown", "true");
     }
-  }, [user, userRole, userLatitude, userLongitude, loading]);
+  }, [user, userRole, userLatitude, userLongitude, loading, location.pathname]);
 
   const handleLocationSet = () => {
     setShowLocationDialog(false);
