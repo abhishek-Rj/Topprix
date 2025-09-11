@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "../../components/navigation";
 import PredefinedCategorySelector from "@/components/PredefinedCategorySelector";
@@ -35,6 +35,9 @@ export default function CreateNewStore() {
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
     []
   ); // Keep for backward compatibility, but not actively used
+  const [subcategoryToCategoryMap, setSubcategoryToCategoryMap] = useState<
+    Record<string, string>
+  >({});
   const [isLoading, setIsLoading] = useState(false);
   const { user, userRole, loading } = useAuthenticate();
 
@@ -60,6 +63,30 @@ export default function CreateNewStore() {
   useState(() => {
     if (defaultDescription) setDescription(defaultDescription);
   });
+
+  // Build subcategory -> category mapping for deriving categoryId
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${baseUrl}categories/with-subcategories`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const source = data.categories || data || [];
+        const map: Record<string, string> = {};
+        if (Array.isArray(source)) {
+          source.forEach((cat: any) => {
+            (cat.subcategories || []).forEach((sub: any) => {
+              if (sub?.id && cat?.id) map[sub.id] = cat.id;
+            });
+          });
+        }
+        setSubcategoryToCategoryMap(map);
+      } catch (e) {
+        // ignore mapping failures
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -228,12 +255,29 @@ export default function CreateNewStore() {
         logoUrl = await getDownloadURL(fileRef);
       }
 
+      // Derive a parent categoryId from selected subcategoryIds
+      const parentCategoryIds = Array.from(
+        new Set(
+          selectedCategories
+            .map((subId) => subcategoryToCategoryMap[subId])
+            .filter((v): v is string => Boolean(v))
+        )
+      );
+
+      if (parentCategoryIds.length === 0) {
+        toast.error(
+          "Please select at least one subcategory to infer category."
+        );
+        setIsLoading(false);
+        return;
+      }
+
       const storeData = {
         name,
         description,
         address: address + ", " + zipCode + ", " + country,
         logo: logoUrl,
-        categoryIds: selectedCategories,
+        categoryIds: parentCategoryIds,
         latitude: coordinates.lat,
         longitude: coordinates.lon,
       };

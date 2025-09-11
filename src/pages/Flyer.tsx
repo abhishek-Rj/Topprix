@@ -39,8 +39,8 @@ export default function FlyerPage() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Will be set based on screen size
   const { user, userRole } = useAuthenticate();
-  const [categories, setCategories] = useState<any[]>([]);
-  const [userStores, setUserStores] = useState<any[]>([]);
+  const [categoriesFull, setCategoriesFull] = useState<any[]>([]);
+  const [subcategoriesFlat, setSubcategoriesFlat] = useState<any[]>([]);
 
   useEffect(() => {
     const category = searchParams.get("category") || "all";
@@ -48,46 +48,6 @@ export default function FlyerPage() {
     setSelectedCategory(category);
     setSelectedSubcategory(subcategory);
   }, [searchParams]);
-
-  // Fetch user's stores if they are a retailer
-  useEffect(() => {
-    const fetchUserStores = async () => {
-      if (userRole !== "RETAILER" || !user?.email) return;
-
-      try {
-        // First get the user ID
-        const userResponse = await fetch(`${baseUrl}user/${user.email}`);
-        if (!userResponse.ok) return;
-
-        const userData = await userResponse.json();
-        const userId = userData?.id;
-
-        if (!userId) return;
-
-        // Then fetch all stores and filter by ownerId
-        const storesResponse = await fetch(`${baseUrl}stores`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "user-email": user.email,
-          },
-        });
-
-        if (storesResponse.ok) {
-          const storesData = await storesResponse.json();
-          const retailerStores =
-            storesData.stores?.filter(
-              (store: any) => store?.ownerId === userId
-            ) || [];
-          setUserStores(retailerStores);
-        }
-      } catch (error) {
-        console.error("Error fetching user stores:", error);
-      }
-    };
-
-    fetchUserStores();
-  }, [userRole, user?.email]);
 
   // Set sidebar state based on screen size
   useEffect(() => {
@@ -105,10 +65,22 @@ export default function FlyerPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${baseUrl}categories`);
+        const response = await fetch(`${baseUrl}categories/with-subcategories`);
         if (response.ok) {
           const data = await response.json();
-          setCategories(data.categories || []);
+          const source = data.categories || data || [];
+          setCategoriesFull(Array.isArray(source) ? source : []);
+          const flattened = Array.isArray(source)
+            ? source.flatMap((cat: any) =>
+                (cat.subcategories || []).map((sub: any) => ({
+                  id: sub.id,
+                  name: sub.name,
+                  categoryId: cat.id,
+                  categoryName: cat.name,
+                }))
+              )
+            : [];
+          setSubcategoriesFlat(flattened);
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -121,240 +93,117 @@ export default function FlyerPage() {
   // Helper functions to get names from IDs
   const getCategoryName = (categoryId: string) => {
     if (categoryId === "all") return t("flyers.allCategories");
-
-    // Check if this is a main category name (French descriptions from API)
-    if (
-      [
-        "Magasins & Offres",
-        "Services & Professionnels",
-        "Loisirs & Tourisme",
-        "Auto / Moto / Mobilité",
-        "Immobilier",
-        "Annonces",
-      ].includes(categoryId)
-    ) {
-      return categoryId;
-    }
-
-    // This is a category ID, find the name
-    const category = categories.find((cat) => cat.id === categoryId);
+    const category = categoriesFull.find((cat: any) => cat.id === categoryId);
     return category?.name || categoryId;
   };
 
   const getSubcategoryName = (subcategoryId: string) => {
     if (subcategoryId === "all") return "";
-    const subcategory = categories.find((cat) => cat.id === subcategoryId);
-    return subcategory?.name || subcategoryId;
+    const sub = subcategoriesFlat.find((s: any) => s.id === subcategoryId);
+    return sub?.name || subcategoryId;
   };
 
-  // Calculate offset for pagination
-  const getOffset = (page: number) => {
-    return (page - 1) * itemsPerPage;
-  };
+  // Offset helper no longer used (switched to page/limit)
 
-  // Check if there are more pages available
-  const hasNextPage = () => {
-    if (!pagination) return false;
-    return pagination.total > pagination.offset + itemsPerPage;
-  };
-
-  // Check if there are previous pages
-  const hasPreviousPage = () => {
-    return currentPage > 1;
-  };
-
-  // Get total pages
-  const getTotalPages = () => {
-    if (!pagination) return 1;
-    return Math.ceil(pagination.total / itemsPerPage);
-  };
+  // Deprecated helpers (pagination now fully driven by backend). Keeping none to avoid unused warnings.
 
   useEffect(() => {
     const fetchFlyers = async () => {
       try {
         setLoading(true);
 
-        // For retailers, if they have no stores, show empty result
-        if (userRole === "RETAILER" && userStores.length === 0) {
-          setFlyers([]);
-          setPagination({
-            total: 0,
-            limit: itemsPerPage,
-            offset: 0,
-            currentPage: currentPage,
-            totalPages: 1,
-            hasNextPage: false,
-            hasPreviousPage: false,
-            itemsPerPage: itemsPerPage,
+        // Category filtering is handled directly via categoryId param.
+
+        // For retailers, use ownerId parameter
+        if (userRole === "RETAILER") {
+          const userEmail = user?.email || localStorage.getItem("userEmail");
+          if (!userEmail) {
+            setFlyers([]);
+            setPagination({
+              total: 0,
+              limit: itemsPerPage,
+              offset: 0,
+              currentPage: currentPage,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPreviousPage: false,
+              itemsPerPage: itemsPerPage,
+            });
+            return;
+          }
+
+          // Get user ID first
+          const userResp = await fetch(`${baseUrl}user/${userEmail}`, {
+            headers: { "user-email": userEmail },
           });
+          if (!userResp.ok) {
+            setFlyers([]);
+            setPagination({
+              total: 0,
+              limit: itemsPerPage,
+              offset: 0,
+              currentPage: currentPage,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPreviousPage: false,
+              itemsPerPage: itemsPerPage,
+            });
+            return;
+          }
+          const userData = await userResp.json();
+          const userId = userData?.user?.id || userData?.id;
+          if (!userId) {
+            setFlyers([]);
+            setPagination({
+              total: 0,
+              limit: itemsPerPage,
+              offset: 0,
+              currentPage: currentPage,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPreviousPage: false,
+              itemsPerPage: itemsPerPage,
+            });
+            return;
+          }
+
+          // Use ownerId parameter for retailers
+          let flyerUrl = `${baseUrl}flyers?ownerId=${encodeURIComponent(
+            userId
+          )}&page=${currentPage}&limit=${itemsPerPage}`;
+          if (selectedCategory !== "all") {
+            flyerUrl += `&categoryId=${selectedCategory}`;
+          }
+          if (sortBy === "active") {
+            flyerUrl += "&isActive=true";
+          } else if (sortBy === "inactive") {
+            flyerUrl += "&isActive=false";
+          }
+
+          const resp = await fetch(flyerUrl, {
+            headers: { "user-email": userEmail },
+          });
+          if (resp.ok) {
+            const sData = await resp.json();
+            setFlyers(sData.flyers || []);
+            setPagination(
+              sData.pagination || {
+                total: 0,
+                limit: itemsPerPage,
+                offset: 0,
+                currentPage: currentPage,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPreviousPage: false,
+                itemsPerPage: itemsPerPage,
+              }
+            );
+          }
           return;
         }
 
-        // If a main category is selected, fetch flyers from all its subcategories
-        if (
-          selectedCategory !== "all" &&
-          !categories.find((cat) => cat.id === selectedCategory)
-        ) {
-          // This is a main category name, fetch from all subcategories
-          const mainCategorySubcategories = categories.filter(
-            (cat) => cat.description === selectedCategory
-          );
-
-          if (mainCategorySubcategories.length > 0) {
-            let allFlyers: any[] = [];
-            let totalCount = 0;
-
-            // For retailers, fetch flyers from their stores only
-            if (userRole === "RETAILER") {
-              for (const store of userStores) {
-                for (const subcategory of mainCategorySubcategories) {
-                  let url = `${baseUrl}flyers?limit=100&offset=0&categoryId=${subcategory.id}&storeId=${store.id}`;
-
-                  // Add active/inactive filter
-                  if (sortBy === "active") {
-                    url += "&isActive=true";
-                  } else if (sortBy === "inactive") {
-                    url += "&isActive=false";
-                  }
-
-                  try {
-                    const response = await fetch(url);
-                    if (response.ok) {
-                      const data = await response.json();
-                      allFlyers = [...allFlyers, ...(data.flyers || [])];
-                      totalCount += data.pagination?.total || 0;
-                    }
-                  } catch (error) {
-                    console.error(
-                      `Error fetching flyers for subcategory ${subcategory.id} and store ${store.id}:`,
-                      error
-                    );
-                  }
-                }
-              }
-            } else {
-              // For non-retailers, fetch from all stores
-              for (const subcategory of mainCategorySubcategories) {
-                let url = `${baseUrl}flyers?limit=100&offset=0&categoryId=${subcategory.id}`;
-
-                // Add active/inactive filter
-                if (sortBy === "active") {
-                  url += "&isActive=true";
-                } else if (sortBy === "inactive") {
-                  url += "&isActive=false";
-                }
-
-                try {
-                  const response = await fetch(url);
-                  if (response.ok) {
-                    const data = await response.json();
-                    allFlyers = [...allFlyers, ...(data.flyers || [])];
-                    totalCount += data.pagination?.total || 0;
-                  }
-                } catch (error) {
-                  console.error(
-                    `Error fetching flyers for subcategory ${subcategory.id}:`,
-                    error
-                  );
-                }
-              }
-            }
-
-            // Apply pagination to the combined results
-            const startIndex = getOffset(currentPage);
-            const endIndex = startIndex + itemsPerPage;
-            const paginatedFlyers = allFlyers.slice(startIndex, endIndex);
-
-            setFlyers(paginatedFlyers);
-
-            // Create pagination info
-            const transformedPagination = {
-              total: allFlyers.length,
-              limit: itemsPerPage,
-              offset: startIndex,
-              currentPage: currentPage,
-              totalPages: Math.ceil(allFlyers.length / itemsPerPage),
-              hasNextPage: endIndex < allFlyers.length,
-              hasPreviousPage: currentPage > 1,
-              itemsPerPage: itemsPerPage,
-            };
-
-            setPagination(transformedPagination);
-            return;
-          }
-        }
-
-        // Regular single category or subcategory filtering
-        let url = `${baseUrl}flyers?limit=${itemsPerPage}&offset=${getOffset(
-          currentPage
-        )}`;
-
-        // Add store filter for retailers
-        if (userRole === "RETAILER" && userStores.length > 0) {
-          // If retailer has multiple stores, we need to fetch from each store
-          if (userStores.length === 1) {
-            url += `&storeId=${userStores[0].id}`;
-          } else {
-            // For multiple stores, we'll need to make multiple calls
-            let allFlyers: any[] = [];
-
-            for (const store of userStores) {
-              let storeUrl = `${baseUrl}flyers?limit=100&offset=0&storeId=${store.id}`;
-
-              // Add category filter if selected
-              if (selectedCategory !== "all") {
-                storeUrl += `&categoryId=${selectedCategory}`;
-              }
-
-              // Add subcategory filter if selected
-              if (selectedSubcategory !== "all") {
-                storeUrl += `&categoryId=${selectedSubcategory}`;
-              }
-
-              // Add active/inactive filter
-              if (sortBy === "active") {
-                storeUrl += "&isActive=true";
-              } else if (sortBy === "inactive") {
-                storeUrl += "&isActive=false";
-              }
-
-              try {
-                const response = await fetch(storeUrl);
-                if (response.ok) {
-                  const data = await response.json();
-                  allFlyers = [...allFlyers, ...(data.flyers || [])];
-                }
-              } catch (error) {
-                console.error(
-                  `Error fetching flyers for store ${store.id}:`,
-                  error
-                );
-              }
-            }
-
-            // Apply pagination to the combined results
-            const startIndex = getOffset(currentPage);
-            const endIndex = startIndex + itemsPerPage;
-            const paginatedFlyers = allFlyers.slice(startIndex, endIndex);
-
-            setFlyers(paginatedFlyers);
-
-            // Create pagination info
-            const transformedPagination = {
-              total: allFlyers.length,
-              limit: itemsPerPage,
-              offset: startIndex,
-              currentPage: currentPage,
-              totalPages: Math.ceil(allFlyers.length / itemsPerPage),
-              hasNextPage: endIndex < allFlyers.length,
-              hasPreviousPage: currentPage > 1,
-              itemsPerPage: itemsPerPage,
-            };
-
-            setPagination(transformedPagination);
-            return;
-          }
-        }
+        // Regular single category or subcategory filtering (use page & limit)
+        let url = `${baseUrl}flyers?page=${currentPage}&limit=${itemsPerPage}`;
 
         // Add category filter if selected
         if (selectedCategory !== "all") {
@@ -363,7 +212,7 @@ export default function FlyerPage() {
 
         // Add subcategory filter if selected (this will override the main category)
         if (selectedSubcategory !== "all") {
-          url += `&categoryId=${selectedSubcategory}`;
+          // temporarily ignore subcategory for now per request
         }
 
         // Add active/inactive filter
@@ -373,21 +222,48 @@ export default function FlyerPage() {
           url += "&isActive=false";
         }
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          headers: {
+            "user-email": user?.email || "",
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch flyers");
         }
         const data = await response.json();
         setFlyers(data.flyers || []);
 
-        // Transform the pagination data to match our expected format
+        // Normalize pagination coming from API to avoid NaN and naming mismatches
+        const apiPagination = data.pagination || {};
+        const totalFromApi =
+          apiPagination.total ??
+          apiPagination.totalCount ??
+          apiPagination.totalItems ??
+          apiPagination.count ??
+          0;
+        const limitFromApi =
+          apiPagination.limit ?? apiPagination.itemsPerPage ?? itemsPerPage;
+        const currentFromApi =
+          apiPagination.currentPage ?? apiPagination.page ?? currentPage;
+        const totalPagesFromApi =
+          apiPagination.totalPages ??
+          (limitFromApi
+            ? Math.ceil(Number(totalFromApi) / Number(limitFromApi))
+            : 1);
+        const hasPrevFromApi =
+          apiPagination.hasPreviousPage ?? Number(currentFromApi) > 1;
+        const hasNextFromApi =
+          apiPagination.hasNextPage ??
+          Number(currentFromApi) < Number(totalPagesFromApi);
+
         const transformedPagination = {
-          ...data.pagination,
-          currentPage: currentPage,
-          totalPages: getTotalPages(),
-          hasNextPage: hasNextPage(),
-          hasPreviousPage: hasPreviousPage(),
-          itemsPerPage: itemsPerPage,
+          total: Number(totalFromApi),
+          limit: Number(limitFromApi),
+          currentPage: Number(currentFromApi),
+          totalPages: Number(totalPagesFromApi),
+          hasNextPage: Boolean(hasNextFromApi),
+          hasPreviousPage: Boolean(hasPrevFromApi),
+          itemsPerPage: Number(limitFromApi),
         };
 
         setPagination(transformedPagination);
@@ -400,14 +276,7 @@ export default function FlyerPage() {
     };
 
     fetchFlyers();
-  }, [
-    selectedCategory,
-    selectedSubcategory,
-    sortBy,
-    currentPage,
-    userRole,
-    userStores,
-  ]);
+  }, [selectedCategory, selectedSubcategory, sortBy, currentPage, userRole]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -474,8 +343,8 @@ export default function FlyerPage() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Hero Section - Only show on first page */}
-          {currentPage === 1 && (
+          {/* Hero Section - Only show on first page for non-retailers */}
+          {currentPage === 1 && userRole !== "RETAILER" && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -493,7 +362,7 @@ export default function FlyerPage() {
             </motion.div>
           )}
 
-          {currentPage === 1 && (
+          {currentPage === 1 && userRole !== "RETAILER" && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

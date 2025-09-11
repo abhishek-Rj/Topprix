@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { HiSearch, HiFilter, HiPencil, HiTrash, HiPlus } from "react-icons/hi";
+import { HiSearch, HiFilter, HiPencil, HiTrash } from "react-icons/hi";
 import { motion } from "framer-motion";
 import Navigation from "../../components/navigation";
 import Footer from "../../components/Footer";
@@ -30,10 +30,17 @@ interface Store {
 }
 
 interface PaginationData {
-  totalCount: number;
   currentPage: number;
   totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+interface StoresResponse {
   stores: Store[];
+  pagination: PaginationData;
 }
 
 export default function RetailerStores() {
@@ -42,10 +49,12 @@ export default function RetailerStores() {
   const { user, loading } = useAuthenticate();
   const [stores, setStores] = useState<Store[]>([]);
   const [paginationData, setPaginationData] = useState<PaginationData>({
-    totalCount: 0,
     currentPage: 1,
     totalPages: 1,
-    stores: [],
+    totalItems: 0,
+    itemsPerPage: 20,
+    hasNextPage: false,
+    hasPreviousPage: false,
   });
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [confirmStoreName, setConfirmStoreName] = useState("");
@@ -59,6 +68,7 @@ export default function RetailerStores() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [limit, setLimit] = useState(20);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isNearbyMode, setIsNearbyMode] = useState<boolean>(false);
 
   const menuRef = useRef(null);
   const buttonRef = useRef(null);
@@ -67,9 +77,8 @@ export default function RetailerStores() {
 
   const navigate = useNavigate();
 
-  if (userRole === "USER") {
-    navigate("/not-found");
-  }
+  // Allow ADMIN users to access stores page for management purposes
+  // No redirect needed for ADMIN users
 
   const buildQueryString = () => {
     const params = new URLSearchParams();
@@ -83,11 +92,74 @@ export default function RetailerStores() {
     return params.toString();
   };
 
+  const buildNearbyQueryString = () => {
+    const params = new URLSearchParams();
+
+    if (searchTerm) params.append("search", searchTerm);
+    if (selectedCategories.length > 0)
+      params.append("categoryIds", selectedCategories.join(","));
+    if (limit) params.append("limit", limit.toString());
+    if (currentPage) params.append("page", currentPage.toString());
+    params.append("radius", "25"); // Default radius of 25km
+
+    return params.toString();
+  };
+
   const fetchStores = async (page: number = 1) => {
     setIsLoading(true);
     try {
-      const queryString = buildQueryString();
-      const url = `${baseUrl}stores${queryString ? `?${queryString}` : ""}`;
+      let url: string;
+
+      if (userRole === "ADMIN") {
+        // For admin: simple pagination with page and limit=20
+        url = `${baseUrl}stores?page=${page}&limit=20`;
+        setIsNearbyMode(false);
+      } else {
+        // Check if user has location data (for USER role and non-logged in users)
+        const userLatitude = localStorage.getItem("userLatitude");
+        const userLongitude = localStorage.getItem("userLongitude");
+        const hasLocation =
+          userLatitude &&
+          userLongitude &&
+          userLatitude !== "" &&
+          userLongitude !== "";
+
+        if (userRole === "USER" && hasLocation) {
+          // Use nearby stores API for logged-in users with location
+          const queryString = buildNearbyQueryString();
+          url = `${baseUrl}location/nearby-stores?latitude=${userLatitude}&longitude=${userLongitude}&${queryString}`;
+          setIsNearbyMode(true);
+        } else if (!user && hasLocation) {
+          // Use nearby stores API for non-logged in users with location
+          const queryString = buildNearbyQueryString();
+          url = `${baseUrl}location/nearby-stores?latitude=${userLatitude}&longitude=${userLongitude}&${queryString}`;
+          setIsNearbyMode(true);
+        } else {
+          // Use ownerId filter for retailers
+          if (userRole === "RETAILER") {
+            // fetch user id first
+            const userEmail =
+              localStorage.getItem("userEmail") || user?.email || "";
+            const userResp = await fetch(`${baseUrl}user/${userEmail}`, {
+              headers: {
+                "Content-Type": "application/json",
+                "user-email": user?.email || "",
+              },
+            });
+            const userData = userResp.ok ? await userResp.json() : null;
+            const ownerId = userData?.user?.id || userData?.id || "";
+            const queryString = buildQueryString();
+            const qs = new URLSearchParams(queryString);
+            if (ownerId) qs.set("ownerId", ownerId);
+            url = `${baseUrl}stores?${qs.toString()}`;
+          } else {
+            // Use regular stores API for all other cases
+            const queryString = buildQueryString();
+            url = `${baseUrl}stores${queryString ? `?${queryString}` : ""}`;
+          }
+          setIsNearbyMode(false);
+        }
+      }
 
       const response = await fetch(url, {
         method: "GET",
@@ -97,34 +169,13 @@ export default function RetailerStores() {
         },
       });
 
-      const data = await response.json();
+      const data: StoresResponse = await response.json();
 
-      const fetchUser = await fetch(
-        `${baseUrl}user/${localStorage.getItem("userEmail")}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "user-email": user?.email || "",
-          },
-        }
-      );
+      // For RETAILER role, backend already filtered by ownerId via query param
 
-      const userId = (await fetchUser.json()).id;
-      if (userRole === "RETAILER") {
-        data.stores = data.stores.filter(
-          (store: any) => store?.ownerId === userId
-        );
-      }
-
-      if (data.stores) {
+      if (data.stores && data.pagination) {
         setStores(data.stores);
-        setPaginationData({
-          totalCount: data.totalCount || 0,
-          currentPage: data.currentPage || 1,
-          totalPages: data.totalPages || 1,
-          stores: data.stores,
-        });
+        setPaginationData(data.pagination);
       } else {
         throw new Error("No stores found");
       }
@@ -148,15 +199,6 @@ export default function RetailerStores() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-  };
-
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
-    );
-    setCurrentPage(1);
   };
 
   const clearFilters = () => {
@@ -257,21 +299,29 @@ export default function RetailerStores() {
                     ? t("stores.allStores")
                     : userRole === "RETAILER"
                     ? t("stores.yourStores")
-                    : t("stores.title")}
+                    : t("stores.browseStores")}
                 </h1>
-                {(userRole === "RETAILER" || userRole === "ADMIN") && (
+                {userRole === "RETAILER" && (
                   <button
                     onClick={() => navigate("/stores/create-new-store")}
-                    className={`w-full sm:w-auto px-4 sm:px-5 py-2.5 sm:py-2 text-sm sm:text-base ${
-                      userRole === "ADMIN"
-                        ? "bg-blue-500 hover:bg-blue-700"
-                        : "bg-yellow-500 hover:bg-yellow-700"
-                    } hover:scale-105 text-white rounded-md transition`}
+                    className="w-full sm:w-auto px-4 sm:px-5 py-2.5 sm:py-2 text-sm sm:text-base bg-yellow-500 hover:bg-yellow-700 hover:scale-105 text-white rounded-md transition"
                   >
                     + {t("stores.createNewStore")}
                   </button>
                 )}
               </div>
+
+              {/* Nearby Stores Indicator */}
+              {isNearbyMode && (userRole === "USER" || !user) && (
+                <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-green-800 font-medium">
+                      {t("stores.showingNearbyStores")}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               {/* Search and Filters Section */}
               <div className="mb-6 space-y-4">
@@ -535,18 +585,16 @@ export default function RetailerStores() {
                 </div>
               )}
 
-              {/* Pagination Controls */}
-              {paginationData.totalPages > 1 && (
+              {/* Simple Pagination Controls for Admin */}
+              {userRole === "ADMIN" && paginationData.totalPages > 1 && (
                 <div className="flex justify-center items-center gap-4 mt-8">
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                    className={`px-6 py-2 rounded-md text-sm font-medium transition ${
                       currentPage === 1
                         ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : userRole === "ADMIN"
-                        ? "bg-blue-500 text-white hover:bg-blue-600"
-                        : "bg-yellow-500 text-white hover:bg-yellow-600"
+                        : "bg-blue-500 text-white hover:bg-blue-600"
                     }`}
                   >
                     {t("stores.previous")}
@@ -558,17 +606,65 @@ export default function RetailerStores() {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === paginationData.totalPages}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                    className={`px-6 py-2 rounded-md text-sm font-medium transition ${
                       currentPage === paginationData.totalPages
                         ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                        : userRole === "ADMIN"
-                        ? "bg-blue-500 text-white hover:bg-blue-600"
-                        : "bg-yellow-500 text-white hover:bg-yellow-600"
+                        : "bg-blue-500 text-white hover:bg-blue-600"
                     }`}
                   >
                     {t("stores.next")}
                   </button>
                 </div>
+              )}
+
+              {/* Pagination Info and Controls for other roles */}
+              {userRole !== "ADMIN" && paginationData.totalPages > 1 && (
+                <>
+                  {paginationData.totalItems > 0 && (
+                    <div className="text-center text-sm text-gray-600 mt-4">
+                      {t("stores.showing")}{" "}
+                      {(paginationData.currentPage - 1) *
+                        paginationData.itemsPerPage +
+                        1}{" "}
+                      -{" "}
+                      {Math.min(
+                        paginationData.currentPage *
+                          paginationData.itemsPerPage,
+                        paginationData.totalItems
+                      )}{" "}
+                      {t("stores.of")} {paginationData.totalItems}{" "}
+                      {t("stores.stores")}
+                    </div>
+                  )}
+                  <div className="flex justify-center items-center gap-4 mt-4">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={!paginationData.hasPreviousPage}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                        !paginationData.hasPreviousPage
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-yellow-500 text-white hover:bg-yellow-600"
+                      }`}
+                    >
+                      {t("stores.previous")}
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      {t("stores.page")} {paginationData.currentPage}{" "}
+                      {t("stores.of")} {paginationData.totalPages}
+                    </span>
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={!paginationData.hasNextPage}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition ${
+                        !paginationData.hasNextPage
+                          ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                          : "bg-yellow-500 text-white hover:bg-yellow-600"
+                      }`}
+                    >
+                      {t("stores.next")}
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           </div>

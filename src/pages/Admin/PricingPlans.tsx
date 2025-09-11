@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useRouteLoaderData } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Navigation from "../../components/navigation";
 import useAuthenticate from "../../hooks/authenticationt";
 import Loader from "../../components/loading";
@@ -13,13 +13,15 @@ import {
   FiCheck,
   FiX,
   FiCalendar,
-  FiTag,
   FiGlobe,
   FiSettings,
+  FiActivity,
+  FiStar,
 } from "react-icons/fi";
 import { motion } from "framer-motion";
 import Footer from "../../components/Footer";
 import { useTranslation } from "react-i18next";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PricingPlan {
   id: string;
@@ -210,7 +212,7 @@ export default function PricingPlans() {
         throw new Error("Failed to save pricing plan");
       }
 
-      const data = await response.json();
+      await response.json();
 
       if (editingPlan) {
         toast.success("Pricing plan updated successfully");
@@ -270,28 +272,27 @@ export default function PricingPlans() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <>
       <Navigation />
-      <main className="pt-20 pb-10 px-4 sm:px-6 lg:px-8">
+      <main className="pt-20 pb-10 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-8 bg-blue-100 p-4 rounded-2xl"
+            className="mb-8"
           >
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="bg-blue-100 p-3 rounded-full">
-                <FiDollarSign className="w-8 h-8 text-blue-600" />
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
-                Pricing Plans
+            <div className="p-6 bg-white border border-blue-500 shadow-sm rounded-none">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
+                <FiDollarSign className="h-8 w-8 text-blue-600" />
+                {t("pricingPlans.title")}
               </h1>
+              <p className="text-gray-600">{t("pricingPlans.subtitle")}</p>
+              <div className="mt-4 text-sm text-gray-500">
+                {t("pricingPlans.lastUpdated")}: {new Date().toLocaleString()}
+              </div>
             </div>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Manage subscription plans and pricing tiers
-            </p>
           </motion.div>
 
           {/* Action Bar */}
@@ -299,18 +300,38 @@ export default function PricingPlans() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="flex justify-between items-center mb-8"
+            className="mb-8"
           >
-            <div className="text-sm text-gray-600">
-              {plans.length} plan{plans.length !== 1 ? "s" : ""} available
-            </div>
-            <button
-              onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
-            >
-              <FiPlus className="w-5 h-5" />
-              Create New Plan
-            </button>
+            <Card className="bg-white border border-green-500 shadow-sm rounded-none">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <FiActivity className="h-5 w-5 text-green-500" />
+                      <span className="text-sm font-medium text-gray-600">
+                        {t("pricingPlans.totalPlans")}
+                      </span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {plans.length}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {plans.length !== 1
+                        ? t("pricingPlans.plans")
+                        : t("pricingPlans.plan")}{" "}
+                      {t("pricingPlans.available")}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-none hover:bg-blue-700 transition-colors shadow-sm hover:shadow-md border border-blue-600"
+                  >
+                    <FiPlus className="w-5 h-5" />
+                    {t("pricingPlans.createNewPlan")}
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
           </motion.div>
 
           {/* Pricing Plans Grid */}
@@ -320,85 +341,110 @@ export default function PricingPlans() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8"
           >
-            {plans.map((plan, index) => (
-              <motion.div
-                key={plan.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 * index }}
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
-              >
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-1">
-                        {plan.name}
-                      </h3>
-                      <p className="text-gray-600 text-sm">
-                        {plan.description}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEdit(plan)}
-                        className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                        title="Edit plan"
-                      >
-                        <FiEdit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(plan)}
-                        disabled={deletingPlanId === plan.id}
-                        className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
-                        title="Delete plan"
-                      >
-                        <FiTrash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+            {plans.map((plan, index) => {
+              const borderColors = [
+                "border-blue-500",
+                "border-green-500",
+                "border-purple-500",
+                "border-orange-500",
+                "border-teal-500",
+                "border-pink-500",
+              ];
+              const borderColor = borderColors[index % borderColors.length];
 
-                  <div className="mb-6">
-                    <div className="text-3xl font-bold text-gray-900 mb-1">
-                      {formatCurrency(plan.amount, plan.currency)}
-                    </div>
-                    <div className="text-sm text-gray-500 flex items-center gap-1">
-                      <FiCalendar className="w-4 h-4" />
-                      per {plan.interval}
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-gray-900 text-sm mb-3">
-                      Features:
-                    </h4>
-                    {plan.features.map((feature, featureIndex) => (
-                      <div
-                        key={featureIndex}
-                        className="flex items-center gap-2"
-                      >
-                        <FiCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        <span className="text-sm text-gray-600">{feature}</span>
+              return (
+                <motion.div
+                  key={plan.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 * index }}
+                >
+                  <Card
+                    className={`bg-white ${borderColor} shadow-sm rounded-none hover:shadow-md transition-shadow`}
+                  >
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle className="text-lg font-bold text-gray-900 mb-1">
+                            {plan.name}
+                          </CardTitle>
+                          <p className="text-sm text-gray-600">
+                            {plan.description}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(plan)}
+                            className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                            title="Edit plan"
+                          >
+                            <FiEdit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(plan)}
+                            disabled={deletingPlanId === plan.id}
+                            className="p-2 text-gray-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                            title="Delete plan"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
+                    </CardHeader>
 
-                <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Status:</span>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        plan.isActive
-                          ? "bg-green-100 text-green-800"
-                          : "bg-gray-100 text-gray-800"
-                      }`}
-                    >
-                      {plan.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                    <CardContent>
+                      <div className="mb-6">
+                        <div className="text-3xl font-bold text-gray-900 mb-1">
+                          {formatCurrency(plan.amount, plan.currency)}
+                        </div>
+                        <div className="text-sm text-gray-500 flex items-center gap-1">
+                          <FiCalendar className="w-4 h-4" />
+                          {t("pricingPlans.per")} {plan.interval}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-gray-900 text-sm mb-3 flex items-center gap-2">
+                          <FiStar className="w-4 h-4 text-yellow-500" />
+                          {t("pricingPlans.features")}:
+                        </h4>
+                        {plan.features.map((feature, featureIndex) => (
+                          <div
+                            key={featureIndex}
+                            className="flex items-center gap-2"
+                          >
+                            <FiCheck className="w-4 h-4 text-green-500 flex-shrink-0" />
+                            <span className="text-sm text-gray-600">
+                              {feature}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-6 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500 flex items-center gap-2">
+                            <FiActivity className="w-4 h-4" />
+                            {t("pricingPlans.status")}:
+                          </span>
+                          <span
+                            className={`px-2 py-1 text-xs font-medium ${
+                              plan.isActive
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {plan.isActive
+                              ? t("pricingPlans.active")
+                              : t("pricingPlans.inactive")}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
           </motion.div>
 
           {/* Empty State */}
@@ -408,23 +454,24 @@ export default function PricingPlans() {
               animate={{ opacity: 1 }}
               className="text-center py-12"
             >
-              <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-                <FiDollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  No Pricing Plans Yet
-                </h3>
-                <p className="text-gray-600 mb-6">
-                  Create your first pricing plan to start offering subscription
-                  options to retailers.
-                </p>
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <FiPlus className="w-5 h-5" />
-                  Create First Plan
-                </button>
-              </div>
+              <Card className="bg-white border border-orange-500 shadow-sm rounded-none">
+                <CardContent className="p-8">
+                  <FiDollarSign className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    {t("pricingPlans.noPlansYet")}
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {t("pricingPlans.noPlansDescription")}
+                  </p>
+                  <button
+                    onClick={() => setShowForm(true)}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-none hover:bg-blue-700 transition-colors border border-blue-600"
+                  >
+                    <FiPlus className="w-5 h-5" />
+                    {t("pricingPlans.createFirstPlan")}
+                  </button>
+                </CardContent>
+              </Card>
             </motion.div>
           )}
         </div>
@@ -437,7 +484,7 @@ export default function PricingPlans() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-white border border-blue-500 shadow-sm rounded-none max-w-2xl w-full max-h-[90vh] overflow-y-auto"
           >
             <div className="p-6 border-b border-gray-200">
               <div className="flex justify-between items-center">
@@ -469,7 +516,7 @@ export default function PricingPlans() {
                       setFormData((prev) => ({ ...prev, name: e.target.value }))
                     }
                     placeholder="e.g., Premium Retailer"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     required
                   />
                 </div>
@@ -488,7 +535,7 @@ export default function PricingPlans() {
                     }
                     placeholder="Describe what this plan offers"
                     rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     required
                   />
                 </div>
@@ -516,7 +563,7 @@ export default function PricingPlans() {
                         }))
                       }
                       placeholder="29.99"
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       required
                     />
                   </div>
@@ -538,7 +585,7 @@ export default function PricingPlans() {
                           currency: e.target.value,
                         }))
                       }
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none"
                     >
                       <option value="eur">EUR (€)</option>
                       <option value="usd">USD ($)</option>
@@ -564,7 +611,7 @@ export default function PricingPlans() {
                           interval: e.target.value,
                         }))
                       }
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none"
                     >
                       <option value="month">Monthly</option>
                       <option value="year">Yearly</option>
@@ -587,7 +634,7 @@ export default function PricingPlans() {
                         value={feature}
                         onChange={(e) => updateFeature(index, e.target.value)}
                         placeholder="e.g., Unlimited flyers"
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                       {formData.features.length > 1 && (
                         <button
@@ -623,7 +670,7 @@ export default function PricingPlans() {
                 <button
                   type="submit"
                   disabled={isCreating}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-6 py-3 bg-blue-600 text-white rounded-none hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isCreating ? (
                     <>
@@ -650,7 +697,7 @@ export default function PricingPlans() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4"
+            className="bg-white border border-red-500 shadow-sm rounded-none max-w-md w-full mx-4"
           >
             <div className="p-6">
               <div className="flex items-center gap-3 mb-4">
@@ -671,7 +718,7 @@ export default function PricingPlans() {
                 <p className="text-gray-700 mb-3">
                   {t("subscription.deletePlanConfirm")}
                 </p>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="bg-gray-50 rounded-none p-4 border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-1">
                     {planToDelete.name}
                   </h4>
@@ -692,7 +739,7 @@ export default function PricingPlans() {
                 </div>
 
                 {/* Warning Message */}
-                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-none p-4">
                   <div className="flex items-start gap-3">
                     <div className="w-5 h-5 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                       <svg
@@ -730,7 +777,7 @@ export default function PricingPlans() {
                 <button
                   onClick={confirmDelete}
                   disabled={deletingPlanId === planToDelete.id}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-red-600 text-white rounded-none hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {deletingPlanId === planToDelete.id ? (
                     <>
@@ -750,6 +797,6 @@ export default function PricingPlans() {
         </div>
       )}
       <Footer />
-    </div>
+    </>
   );
 }

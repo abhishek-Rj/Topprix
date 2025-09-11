@@ -49,8 +49,8 @@ export default function CouponPage() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Will be set based on screen size
   const itemsPerPage = 20; // Maximum 20 coupons per page as required
   const { user, userRole } = useAuthenticate();
-  const [categories, setCategories] = useState<any[]>([]);
-  const [userStores, setUserStores] = useState<any[]>([]);
+  const [categoriesFull, setCategoriesFull] = useState<any[]>([]);
+  const [subcategoriesFlat, setSubcategoriesFlat] = useState<any[]>([]);
 
   useEffect(() => {
     localStorage.setItem("sortBy", "all");
@@ -62,46 +62,6 @@ export default function CouponPage() {
     setSelectedCategory(category);
     setSelectedSubcategory(subcategory);
   }, [searchParams]);
-
-  // Fetch user's stores if they are a retailer
-  useEffect(() => {
-    const fetchUserStores = async () => {
-      if (userRole !== "RETAILER" || !user?.email) return;
-
-      try {
-        // First get the user ID
-        const userResponse = await fetch(`${baseUrl}user/${user.email}`);
-        if (!userResponse.ok) return;
-
-        const userData = await userResponse.json();
-        const userId = userData?.id;
-
-        if (!userId) return;
-
-        // Then fetch all stores and filter by ownerId
-        const storesResponse = await fetch(`${baseUrl}stores`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "user-email": user.email,
-          },
-        });
-
-        if (storesResponse.ok) {
-          const storesData = await storesResponse.json();
-          const retailerStores =
-            storesData.stores?.filter(
-              (store: any) => store?.ownerId === userId
-            ) || [];
-          setUserStores(retailerStores);
-        }
-      } catch (error) {
-        console.error("Error fetching user stores:", error);
-      }
-    };
-
-    fetchUserStores();
-  }, [userRole, user?.email]);
 
   // Set sidebar state based on screen size
   useEffect(() => {
@@ -119,10 +79,22 @@ export default function CouponPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${baseUrl}categories`);
+        const response = await fetch(`${baseUrl}categories/with-subcategories`);
         if (response.ok) {
           const data = await response.json();
-          setCategories(data.categories || []);
+          const source = data.categories || data || [];
+          setCategoriesFull(Array.isArray(source) ? source : []);
+          const flattened = Array.isArray(source)
+            ? source.flatMap((cat: any) =>
+                (cat.subcategories || []).map((sub: any) => ({
+                  id: sub.id,
+                  name: sub.name,
+                  categoryId: cat.id,
+                  categoryName: cat.name,
+                }))
+              )
+            : [];
+          setSubcategoriesFlat(flattened);
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -135,30 +107,14 @@ export default function CouponPage() {
   // Helper functions to get names from IDs
   const getCategoryName = (categoryId: string) => {
     if (categoryId === "all") return t("coupons.allCategories");
-
-    // Check if this is a main category name (French descriptions from API)
-    if (
-      [
-        "Magasins & Offres",
-        "Services & Professionnels",
-        "Loisirs & Tourisme",
-        "Auto / Moto / Mobilité",
-        "Immobilier",
-        "Annonces",
-      ].includes(categoryId)
-    ) {
-      return categoryId;
-    }
-
-    // This is a category ID, find the name
-    const category = categories.find((cat) => cat.id === categoryId);
+    const category = categoriesFull.find((cat: any) => cat.id === categoryId);
     return category?.name || categoryId;
   };
 
   const getSubcategoryName = (subcategoryId: string) => {
     if (subcategoryId === "all") return "";
-    const subcategory = categories.find((cat) => cat.id === subcategoryId);
-    return subcategory?.name || subcategoryId;
+    const sub = subcategoriesFlat.find((s: any) => s.id === subcategoryId);
+    return sub?.name || subcategoryId;
   };
 
   useEffect(() => {
@@ -171,182 +127,98 @@ export default function CouponPage() {
 
     const fetchCoupons = async () => {
       try {
-        // For retailers, if they have no stores, show empty result
-        if (userRole === "RETAILER" && userStores.length === 0) {
-          setCoupons([]);
-          setPagination({
-            total: 0,
-            page: currentPage,
-            limit: itemsPerPage,
-            totalPages: 1,
-            hasNextPage: false,
-            hasPreviousPage: false,
-            currentPage: currentPage,
-            itemsPerPage: itemsPerPage,
-          });
-          return;
-        }
+        // Category filtering is handled directly via categoryId param.
 
-        // If a main category is selected, fetch coupons from all its subcategories
-        if (
-          selectedCategory !== "all" &&
-          !categories.find((cat) => cat.id === selectedCategory)
-        ) {
-          // This is a main category name, fetch from all subcategories
-          const mainCategorySubcategories = categories.filter(
-            (cat) => cat.description === selectedCategory
-          );
-
-          if (mainCategorySubcategories.length > 0) {
-            let allCoupons: any[] = [];
-
-            // For retailers, fetch coupons from their stores only
-            if (userRole === "RETAILER") {
-              for (const store of userStores) {
-                for (const subcategory of mainCategorySubcategories) {
-                  let url = `${baseUrl}coupons?page=1&limit=100&categoryId=${subcategory.id}&storeId=${store.id}`;
-
-                  // Add active/inactive filter
-                  if (sortBy === "inactive") {
-                    url += "&active=false";
-                  } else if (sortBy === "active") {
-                    url += "&active=true";
-                  }
-
-                  try {
-                    const response = await fetch(url);
-                    if (response.ok) {
-                      const data = await response.json();
-                      allCoupons = [...allCoupons, ...(data.coupons || [])];
-                    }
-                  } catch (error) {
-                    console.error(
-                      `Error fetching coupons for subcategory ${subcategory.id} and store ${store.id}:`,
-                      error
-                    );
-                  }
-                }
-              }
-            } else {
-              // For non-retailers, fetch from all stores
-              for (const subcategory of mainCategorySubcategories) {
-                let url = `${baseUrl}coupons?page=1&limit=100&categoryId=${subcategory.id}`;
-
-                // Add active/inactive filter
-                if (sortBy === "inactive") {
-                  url += "&active=false";
-                } else if (sortBy === "active") {
-                  url += "&active=true";
-                }
-
-                try {
-                  const response = await fetch(url);
-                  if (response.ok) {
-                    const data = await response.json();
-                    allCoupons = [...allCoupons, ...(data.coupons || [])];
-                  }
-                } catch (error) {
-                  console.error(
-                    `Error fetching coupons for subcategory ${subcategory.id}:`,
-                    error
-                  );
-                }
-              }
-            }
-
-            // Apply pagination to the combined results
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const paginatedCoupons = allCoupons.slice(startIndex, endIndex);
-
-            setCoupons(paginatedCoupons);
-
-            // Create pagination info
-            const transformedPagination = {
-              total: allCoupons.length,
+        // For retailers, use ownerId parameter
+        if (userRole === "RETAILER") {
+          const userEmail = user?.email || localStorage.getItem("userEmail");
+          if (!userEmail) {
+            setCoupons([]);
+            setPagination({
+              total: 0,
               page: currentPage,
               limit: itemsPerPage,
-              totalPages: Math.ceil(allCoupons.length / itemsPerPage),
-              hasNextPage: endIndex < allCoupons.length,
-              hasPreviousPage: currentPage > 1,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPreviousPage: false,
               currentPage: currentPage,
               itemsPerPage: itemsPerPage,
-            };
-
-            setPagination(transformedPagination);
+            });
             return;
           }
+
+          // Get user ID first
+          const userResp = await fetch(`${baseUrl}user/${userEmail}`, {
+            headers: { "user-email": userEmail },
+          });
+          if (!userResp.ok) {
+            setCoupons([]);
+            setPagination({
+              total: 0,
+              page: currentPage,
+              limit: itemsPerPage,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPreviousPage: false,
+              currentPage: currentPage,
+              itemsPerPage: itemsPerPage,
+            });
+            return;
+          }
+          const userData = await userResp.json();
+          const userId = userData?.user?.id || userData?.id;
+          if (!userId) {
+            setCoupons([]);
+            setPagination({
+              total: 0,
+              page: currentPage,
+              limit: itemsPerPage,
+              totalPages: 1,
+              hasNextPage: false,
+              hasPreviousPage: false,
+              currentPage: currentPage,
+              itemsPerPage: itemsPerPage,
+            });
+            return;
+          }
+
+          // Use ownerId parameter for retailers
+          let couponUrl = `${baseUrl}coupons?ownerId=${encodeURIComponent(
+            userId
+          )}&page=${currentPage}&limit=${itemsPerPage}`;
+          if (selectedCategory !== "all") {
+            couponUrl += `&categoryId=${selectedCategory}`;
+          }
+          if (sortBy === "active") {
+            couponUrl += "&active=true";
+          } else if (sortBy === "inactive") {
+            couponUrl += "&active=false";
+          }
+
+          const resp = await fetch(couponUrl, {
+            headers: { "user-email": userEmail },
+          });
+          if (resp.ok) {
+            const sData = await resp.json();
+            setCoupons(sData.coupons || []);
+            setPagination(
+              sData.pagination || {
+                total: 0,
+                page: currentPage,
+                limit: itemsPerPage,
+                totalPages: 1,
+                hasNextPage: false,
+                hasPreviousPage: false,
+                currentPage: currentPage,
+                itemsPerPage: itemsPerPage,
+              }
+            );
+          }
+          return;
         }
 
         // Regular single category or subcategory filtering
         let url = `${baseUrl}coupons?page=${currentPage}&limit=${itemsPerPage}`;
-
-        // Add store filter for retailers
-        if (userRole === "RETAILER" && userStores.length > 0) {
-          // If retailer has multiple stores, we need to fetch from each store
-          if (userStores.length === 1) {
-            url += `&storeId=${userStores[0].id}`;
-          } else {
-            // For multiple stores, we'll need to make multiple calls
-            let allCoupons: any[] = [];
-
-            for (const store of userStores) {
-              let storeUrl = `${baseUrl}coupons?page=1&limit=100&storeId=${store.id}`;
-
-              // Add active/inactive filter
-              if (sortBy === "inactive") {
-                storeUrl += "&active=false";
-              } else if (sortBy === "active") {
-                storeUrl += "&active=true";
-              }
-
-              // Add category filter if selected
-              if (selectedCategory !== "all") {
-                storeUrl += `&categoryId=${selectedCategory}`;
-              }
-
-              // Add subcategory filter if selected
-              if (selectedSubcategory !== "all") {
-                storeUrl += `&categoryId=${selectedSubcategory}`;
-              }
-
-              try {
-                const response = await fetch(storeUrl);
-                if (response.ok) {
-                  const data = await response.json();
-                  allCoupons = [...allCoupons, ...(data.coupons || [])];
-                }
-              } catch (error) {
-                console.error(
-                  `Error fetching coupons for store ${store.id}:`,
-                  error
-                );
-              }
-            }
-
-            // Apply pagination to the combined results
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const paginatedCoupons = allCoupons.slice(startIndex, endIndex);
-
-            setCoupons(paginatedCoupons);
-
-            // Create pagination info
-            const transformedPagination = {
-              total: allCoupons.length,
-              page: currentPage,
-              limit: itemsPerPage,
-              totalPages: Math.ceil(allCoupons.length / itemsPerPage),
-              hasNextPage: endIndex < allCoupons.length,
-              hasPreviousPage: currentPage > 1,
-              currentPage: currentPage,
-              itemsPerPage: itemsPerPage,
-            };
-
-            setPagination(transformedPagination);
-            return;
-          }
-        }
 
         // Add active/inactive filter
         if (sortBy === "inactive") {
@@ -362,19 +234,49 @@ export default function CouponPage() {
 
         // Add subcategory filter if selected (this will override the main category)
         if (selectedSubcategory !== "all") {
-          url += `&categoryId=${selectedSubcategory}`;
+          // temporarily ignore subcategory for now per request
         }
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          headers: {
+            "user-email": user?.email || "",
+          },
+        });
         if (response.ok) {
           const data = await response.json();
           setCoupons(data.coupons || []);
 
-          // Transform pagination to ensure consistent format
+          // Normalize pagination to avoid NaN and naming mismatches
+          const apiPagination = data.pagination || {};
+          const totalFromApi =
+            apiPagination.total ??
+            apiPagination.totalCount ??
+            apiPagination.totalItems ??
+            apiPagination.count ??
+            0;
+          const limitFromApi =
+            apiPagination.limit ?? apiPagination.itemsPerPage ?? itemsPerPage;
+          const currentFromApi =
+            apiPagination.currentPage ?? apiPagination.page ?? currentPage;
+          const totalPagesFromApi =
+            apiPagination.totalPages ??
+            (limitFromApi
+              ? Math.ceil(Number(totalFromApi) / Number(limitFromApi))
+              : 1);
+          const hasPrevFromApi =
+            apiPagination.hasPreviousPage ?? Number(currentFromApi) > 1;
+          const hasNextFromApi =
+            apiPagination.hasNextPage ??
+            Number(currentFromApi) < Number(totalPagesFromApi);
+
           const transformedPagination = {
-            ...data.pagination,
-            currentPage: currentPage,
-            itemsPerPage: itemsPerPage,
+            total: Number(totalFromApi),
+            limit: Number(limitFromApi),
+            currentPage: Number(currentFromApi),
+            totalPages: Number(totalPagesFromApi),
+            hasNextPage: Boolean(hasNextFromApi),
+            hasPreviousPage: Boolean(hasPrevFromApi),
+            itemsPerPage: Number(limitFromApi),
           };
 
           setPagination(transformedPagination);
@@ -386,14 +288,7 @@ export default function CouponPage() {
       }
     };
     fetchCoupons();
-  }, [
-    currentPage,
-    sortBy,
-    selectedCategory,
-    selectedSubcategory,
-    userRole,
-    userStores,
-  ]);
+  }, [currentPage, sortBy, selectedCategory, selectedSubcategory, userRole]);
 
   const handleEdit = () => {
     // Placeholder for edit functionality
@@ -433,7 +328,7 @@ export default function CouponPage() {
         } ${userRole === "ADMIN" ? "bg-blue-50" : "bg-yellow-50"}`}
       >
         <div className="max-w-7xl mx-auto px-4">
-          {currentPage === 1 ? (
+          {currentPage === 1 && userRole !== "RETAILER" ? (
             <>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

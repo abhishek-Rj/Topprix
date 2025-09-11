@@ -22,10 +22,18 @@ interface FloatingSidebarProps {
   userRole?: string;
 }
 
+interface Subcategory {
+  id: string;
+  name: string;
+  description?: string | null;
+  categoryId: string;
+}
+
 interface Category {
   id: string;
   name: string;
   description: string;
+  subcategories?: Subcategory[];
 }
 
 export default function FloatingSidebar({
@@ -44,16 +52,17 @@ export default function FloatingSidebar({
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isOpenOnMobile, setIsOpenOnMobile] = useState(false);
+  // const [isOpenOnMobile, setIsOpenOnMobile] = useState(false);
 
   // Fetch categories from database
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${baseUrl}categories`);
+        const response = await fetch(`${baseUrl}categories/with-subcategories`);
         if (response.ok) {
           const data = await response.json();
-          setCategories(data.categories || []);
+          const source = data.categories || data || [];
+          setCategories(Array.isArray(source) ? source : []);
         } else {
           console.error("Failed to fetch categories");
         }
@@ -66,16 +75,6 @@ export default function FloatingSidebar({
 
     fetchCategories();
   }, []);
-
-  // Group categories by main category (description)
-  const groupedCategories = categories.reduce((acc, category) => {
-    const mainCategory = category.description;
-    if (!acc[mainCategory]) {
-      acc[mainCategory] = [];
-    }
-    acc[mainCategory].push(category);
-    return acc;
-  }, {} as Record<string, Category[]>);
 
   // Define category icons and priorities - Updated to match French API responses
   const categoryMetadata = {
@@ -131,27 +130,17 @@ export default function FloatingSidebar({
   const colors =
     accentColorClasses[accentColor as keyof typeof accentColorClasses];
 
-  const toggleCategoryExpansion = (categoryName: string) => {
+  const toggleCategoryExpansion = (categoryId: string) => {
     setExpandedCategories((prev) =>
-      prev.includes(categoryName)
-        ? prev.filter((id) => id !== categoryName)
-        : [...prev, categoryName]
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
     );
   };
 
   const handleCategorySelect = (categoryId: string) => {
-    // If it's a main category name (description), pass it directly
-    if (groupedCategories[categoryId]) {
-      // This is a main category (description), select it directly
-      onCategoryChange(categoryId);
-      // Reset subcategory selection
-      onSubcategoryChange("all");
-    } else {
-      // This is a direct category ID (subcategory)
-      onCategoryChange(categoryId);
-      // Reset subcategory when category changes
-      onSubcategoryChange("all");
-    }
+    onCategoryChange(categoryId);
+    onSubcategoryChange("all");
   };
 
   const handleSubcategorySelect = (subcategoryId: string) => {
@@ -256,95 +245,101 @@ export default function FloatingSidebar({
                     )}
                   </button>
 
-                  {Object.entries(groupedCategories)
-                    .sort(([a], [b]) => {
-                      const aMeta =
-                        categoryMetadata[a as keyof typeof categoryMetadata];
-                      const bMeta =
-                        categoryMetadata[b as keyof typeof categoryMetadata];
-                      return (
-                        (aMeta?.priority || 999) - (bMeta?.priority || 999)
-                      );
-                    })
-                    .map(([mainCategory, subcategories]) => {
+                  {categories
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((category) => {
                       const metadata =
                         categoryMetadata[
-                          mainCategory as keyof typeof categoryMetadata
+                          category.name as keyof typeof categoryMetadata
                         ];
-                      if (!metadata) return null;
+                      const icon = metadata?.icon || "📁";
+                      const isExpanded = expandedCategories.includes(
+                        category.id
+                      );
 
                       return (
                         <div
-                          key={mainCategory}
+                          key={category.id}
                           className="border border-gray-200 rounded-lg"
                         >
                           <button
                             onClick={() => {
-                              // If main category is already selected, just toggle expansion
-                              if (selectedCategory === mainCategory) {
-                                toggleCategoryExpansion(mainCategory);
-                              } else {
-                                // Select the main category and expand it
-                                handleCategorySelect(mainCategory);
-                                if (
-                                  !expandedCategories.includes(mainCategory)
-                                ) {
-                                  toggleCategoryExpansion(mainCategory);
-                                }
-                              }
+                              // Select the category only; expansion is controlled by the arrow button
+                              handleCategorySelect(category.id);
                             }}
                             className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-between ${
-                              selectedCategory === mainCategory
+                              selectedCategory === category.id
                                 ? `${colors.bgLight} ${colors.text} font-medium`
                                 : "text-gray-700 hover:bg-gray-50"
                             }`}
                           >
                             <div className="flex items-center gap-2">
-                              <span className="text-lg">{metadata.icon}</span>
-                              <span>{mainCategory}</span>
-                              {metadata.isTop && (
+                              <span className="text-lg">{icon}</span>
+                              <span>{category.name}</span>
+                              {metadata?.isTop && (
                                 <HiStar className="text-yellow-500" size={16} />
                               )}
                             </div>
-                            {expandedCategories.includes(mainCategory) ? (
-                              <HiChevronDown
-                                size={16}
-                                className="text-gray-400"
-                              />
-                            ) : (
-                              <HiChevronRight
-                                size={16}
-                                className="text-gray-400"
-                              />
-                            )}
+                            <span>
+                              {isExpanded ? (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleCategoryExpansion(category.id);
+                                  }}
+                                  className="p-1 rounded-md hover:bg-gray-100"
+                                  aria-label="Collapse subcategories"
+                                >
+                                  <HiChevronDown
+                                    size={16}
+                                    className="text-gray-400"
+                                  />
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleCategoryExpansion(category.id);
+                                  }}
+                                  className="p-1 rounded-md hover:bg-gray-100"
+                                  aria-label="Expand subcategories"
+                                >
+                                  <HiChevronRight
+                                    size={16}
+                                    className="text-gray-400"
+                                  />
+                                </button>
+                              )}
+                            </span>
                           </button>
 
-                          {/* Subcategories */}
-                          {expandedCategories.includes(mainCategory) && (
+                          {isExpanded && (
                             <div className="border-t border-gray-200 bg-gray-50 p-3 space-y-2">
-                              {subcategories.map((subcategory) => (
-                                <button
-                                  key={subcategory.id}
-                                  onClick={() =>
-                                    handleSubcategorySelect(subcategory.id)
-                                  }
-                                  className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 flex items-center justify-between ${
-                                    selectedSubcategory === subcategory.id
-                                      ? `${colors.bgLight} ${colors.text} font-medium`
-                                      : "text-gray-600 hover:bg-gray-100"
-                                  }`}
-                                >
-                                  <span className="text-sm">
-                                    {subcategory.name}
-                                  </span>
-                                  {selectedSubcategory === subcategory.id && (
-                                    <HiChevronRight
-                                      size={14}
-                                      className={colors.text}
-                                    />
-                                  )}
-                                </button>
-                              ))}
+                              {(category.subcategories || []).map(
+                                (subcategory) => (
+                                  <button
+                                    key={subcategory.id}
+                                    onClick={() =>
+                                      handleSubcategorySelect(subcategory.id)
+                                    }
+                                    className={`w-full text-left px-3 py-2 rounded-lg transition-all duration-200 flex items-center justify-between ${
+                                      selectedSubcategory === subcategory.id
+                                        ? `${colors.bgLight} ${colors.text} font-medium`
+                                        : "text-gray-600 hover:bg-gray-100"
+                                    }`}
+                                  >
+                                    <span className="text-sm">
+                                      {subcategory.name}
+                                    </span>
+                                    {selectedSubcategory === subcategory.id && (
+                                      <HiChevronRight
+                                        size={14}
+                                        className={colors.text}
+                                      />
+                                    )}
+                                  </button>
+                                )
+                              )}
                             </div>
                           )}
                         </div>

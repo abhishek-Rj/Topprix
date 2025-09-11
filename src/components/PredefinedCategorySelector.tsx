@@ -4,10 +4,18 @@ import useAuthenticate from "@/hooks/authenticationt";
 import baseUrl from "@/hooks/baseurl";
 import { useTranslation } from "react-i18next";
 
+interface Subcategory {
+  id: string;
+  name: string;
+  description?: string | null;
+  categoryId: string;
+}
+
 interface Category {
   id: string;
   name: string;
   description: string;
+  subcategories?: Subcategory[];
 }
 
 interface Props {
@@ -29,14 +37,15 @@ export default function PredefinedCategorySelector({
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch categories from database
+  // Fetch categories with nested subcategories from database
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${baseUrl}categories`);
+        const response = await fetch(`${baseUrl}categories/with-subcategories`);
         if (response.ok) {
           const data = await response.json();
-          setCategories(data.categories || data || []); // Handle different response formats
+          const source = data.categories || data || [];
+          setCategories(Array.isArray(source) ? source : []);
         } else {
           console.error("Failed to fetch categories. Status:", response.status);
         }
@@ -50,16 +59,6 @@ export default function PredefinedCategorySelector({
     fetchCategories();
   }, []);
 
-  // Group categories by main category (description)
-  const groupedCategories = categories.reduce((acc, category) => {
-    const mainCategory = category.description;
-    if (!acc[mainCategory]) {
-      acc[mainCategory] = [];
-    }
-    acc[mainCategory].push(category);
-    return acc;
-  }, {} as Record<string, Category[]>);
-
   // Define category icons and priorities - Updated to match French API responses
   const categoryMetadata = {
     "Magasins & Offres": { icon: "⭐", priority: 1, isTop: true },
@@ -70,11 +69,11 @@ export default function PredefinedCategorySelector({
     Annonces: { icon: "📢", priority: 6, isTop: false },
   };
 
-  const toggleCategoryExpansion = (categoryName: string) => {
+  const toggleCategoryExpansion = (categoryId: string) => {
     setExpandedCategories((prev) =>
-      prev.includes(categoryName)
-        ? prev.filter((id) => id !== categoryName)
-        : [...prev, categoryName]
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
     );
   };
 
@@ -91,6 +90,15 @@ export default function PredefinedCategorySelector({
 
   const isSubcategorySelected = (subcategoryId: string) =>
     selectedCategories.includes(subcategoryId);
+
+  const findSubcategoryName = (subId: string): string | undefined => {
+    for (const cat of categories) {
+      for (const sub of cat.subcategories || []) {
+        if (sub.id === subId) return sub.name;
+      }
+    }
+    return undefined;
+  };
 
   const accentColor = userRole === "ADMIN" ? "blue" : "yellow";
   const accentColorClasses = {
@@ -153,19 +161,13 @@ export default function PredefinedCategorySelector({
             <p className="text-sm">{t("checkDatabaseConnection")}</p>
           </div>
         ) : (
-          Object.entries(groupedCategories)
-            .sort(([a], [b]) => {
-              const aMeta =
-                categoryMetadata[a as keyof typeof categoryMetadata];
-              const bMeta =
-                categoryMetadata[b as keyof typeof categoryMetadata];
-              return (aMeta?.priority || 999) - (bMeta?.priority || 999);
-            })
-            .map(([mainCategory, subcategories]) => {
+          categories
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((category) => {
               const metadata =
-                categoryMetadata[mainCategory as keyof typeof categoryMetadata];
-
-              // If no metadata found, create a default one for unknown categories
+                categoryMetadata[
+                  category.name as keyof typeof categoryMetadata
+                ];
               const displayMetadata = metadata || {
                 icon: "📁",
                 priority: 999,
@@ -174,27 +176,27 @@ export default function PredefinedCategorySelector({
 
               return (
                 <div
-                  key={mainCategory}
+                  key={category.id}
                   className="border border-gray-200 rounded-lg"
                 >
                   {/* Category Header */}
                   <button
                     type="button"
-                    onClick={() => toggleCategoryExpansion(mainCategory)}
+                    onClick={() => toggleCategoryExpansion(category.id)}
                     className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-200 flex items-center justify-between group ${
-                      expandedCategories.includes(mainCategory)
+                      expandedCategories.includes(category.id)
                         ? `${colors.bgLight} ${colors.text} font-medium shadow-sm`
                         : "hover:bg-gray-50 hover:shadow-sm"
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{displayMetadata.icon}</span>
-                      <span className="font-medium">{mainCategory}</span>
+                      <span className="font-medium">{category.name}</span>
                       {displayMetadata.isTop && (
                         <HiStar className="text-yellow-500" size={16} />
                       )}
                     </div>
-                    {expandedCategories.includes(mainCategory) ? (
+                    {expandedCategories.includes(category.id) ? (
                       <HiChevronDown size={20} className="text-gray-400" />
                     ) : (
                       <HiChevronRight size={20} className="text-gray-400" />
@@ -202,32 +204,38 @@ export default function PredefinedCategorySelector({
                   </button>
 
                   {/* Subcategories */}
-                  {expandedCategories.includes(mainCategory) && (
+                  {expandedCategories.includes(category.id) && (
                     <div className="border-t border-gray-200 bg-gray-50 p-4 space-y-3">
-                      {subcategories.map((subcategory) => (
-                        <div
-                          key={subcategory.id}
-                          className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200"
-                        >
-                          <input
-                            type="checkbox"
-                            id={subcategory.id}
-                            checked={isSubcategorySelected(subcategory.id)}
-                            onChange={() =>
-                              handleSubcategoryToggle(subcategory.id)
-                            }
-                            className={`w-4 h-4 rounded ${colors.ring} ${colors.text} focus:ring-2 focus:ring-offset-2 transition-all`}
-                          />
-                          <label
-                            htmlFor={subcategory.id}
-                            className="flex-1 text-sm cursor-pointer hover:text-gray-700 transition-colors"
-                          >
-                            <div className="font-medium">
-                              {subcategory.name}
-                            </div>
-                          </label>
+                      {(category.subcategories || []).length === 0 ? (
+                        <div className="text-sm text-gray-500">
+                          {t("noCategoriesAvailable")}
                         </div>
-                      ))}
+                      ) : (
+                        (category.subcategories || []).map((subcategory) => (
+                          <div
+                            key={subcategory.id}
+                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all duration-200"
+                          >
+                            <input
+                              type="checkbox"
+                              id={subcategory.id}
+                              checked={isSubcategorySelected(subcategory.id)}
+                              onChange={() =>
+                                handleSubcategoryToggle(subcategory.id)
+                              }
+                              className={`w-4 h-4 rounded ${colors.ring} ${colors.text} focus:ring-2 focus:ring-offset-2 transition-all`}
+                            />
+                            <label
+                              htmlFor={subcategory.id}
+                              className="flex-1 text-sm cursor-pointer hover:text-gray-700 transition-colors"
+                            >
+                              <div className="font-medium">
+                                {subcategory.name}
+                              </div>
+                            </label>
+                          </div>
+                        ))
+                      )}
                     </div>
                   )}
                 </div>
@@ -246,14 +254,14 @@ export default function PredefinedCategorySelector({
             {t("selectedCategories")}: {selectedCategories.length}
           </h4>
           <div className="flex flex-wrap gap-2">
-            {selectedCategories.map((catId) => {
-              const category = categories.find((c) => c.id === catId);
+            {selectedCategories.map((subId) => {
+              const name = findSubcategoryName(subId) || subId;
               return (
                 <span
-                  key={catId}
+                  key={subId}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium ${colors.bg} text-white shadow-sm hover:scale-105 transition-transform`}
                 >
-                  {category?.name}
+                  {name}
                 </span>
               );
             })}

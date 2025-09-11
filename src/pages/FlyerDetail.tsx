@@ -6,9 +6,7 @@ import {
   HiChevronLeft,
   HiChevronRight,
   HiCalendar,
-  HiLocationMarker,
   HiTag,
-  HiExternalLink,
 } from "react-icons/hi";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -17,7 +15,6 @@ import { toast } from "react-toastify";
 import baseUrl from "@/hooks/baseurl";
 import Loader from "@/components/loading";
 import { useTranslation } from "react-i18next";
-import { FaStore } from "react-icons/fa";
 
 // Set up PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -33,7 +30,7 @@ export default function FlyerDetail() {
   const [store, setStore] = useState<any>(null);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [isLoadingPdf, setIsLoadingPdf] = useState<boolean>(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [isPdfFile, setIsPdfFile] = useState<boolean | null>(null);
 
   // Add CSS for zoom functionality
   useEffect(() => {
@@ -142,10 +139,9 @@ export default function FlyerDetail() {
     };
   }, []);
 
-  // Check if the flyer is a PDF
-  const isPdf = flyer?.imageUrl?.toLowerCase().includes(".pdf");
+  const extensionThinksPdf = flyer?.imageUrl?.toLowerCase().includes(".pdf");
+  const isPdf = isPdfFile ?? extensionThinksPdf;
 
-  // Fetch flyer data
   useEffect(() => {
     const fetchFlyer = async () => {
       if (!flyerId) {
@@ -155,14 +151,18 @@ export default function FlyerDetail() {
       }
 
       try {
-        const response = await fetch(`${baseUrl}flyers/${flyerId}`);
+        const response = await fetch(`${baseUrl}flyers/${flyerId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": localStorage.getItem("userEmail") || "",
+          },
+        });
         if (!response.ok) {
           throw new Error("Failed to fetch flyer");
         }
         const data = await response.json();
-        setFlyer(data);
+        setFlyer(data.flyer);
 
-        // Fetch store data if available
         if (data.storeId) {
           const storeResponse = await fetch(`${baseUrl}store/${data.storeId}`);
           if (storeResponse.ok) {
@@ -179,6 +179,28 @@ export default function FlyerDetail() {
 
     fetchFlyer();
   }, [flyerId, navigate]);
+
+  useEffect(() => {
+    const detectPdf = async () => {
+      if (!flyer?.imageUrl) {
+        setIsPdfFile(null);
+        return;
+      }
+      if (flyer.imageUrl.toLowerCase().includes(".pdf")) {
+        setIsPdfFile(true);
+        return;
+      }
+      try {
+        const resp = await fetch(flyer.imageUrl, { method: "GET" });
+        const ct = resp.headers.get("content-type") || "";
+        setIsPdfFile(ct.toLowerCase().includes("pdf"));
+      } catch (_err) {
+        setIsPdfFile(false);
+      }
+    };
+
+    detectPdf();
+  }, [flyer?.imageUrl]);
 
   const calculateDaysLeft = () => {
     if (!flyer?.startDate || !flyer?.endDate)
