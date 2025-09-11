@@ -1,14 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import {
-  FiMenu,
-  FiX,
-  FiSearch,
-  FiUser,
-  FiMapPin,
-  FiLogIn,
-} from "react-icons/fi";
+import { FiMenu, FiX, FiMapPin } from "react-icons/fi";
 import SkeletonNav from "./ui/navbarSkeleton";
 import userLogout from "@/hooks/userLogout";
 import useAuthenticate from "@/hooks/authenticationt";
@@ -16,7 +9,6 @@ import useAuthenticate from "@/hooks/authenticationt";
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -63,6 +55,7 @@ const Navigation = () => {
       { name: t("navigation.yourStores"), path: "/stores" },
       { name: t("navigation.yourFlyers"), path: "/explore/flyers" },
       { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
+      { name: t("navigation.antiWaste"), path: "/explore/anti-waste" },
       { name: t("navigation.profile"), path: "/profile" },
     ];
   }
@@ -71,9 +64,10 @@ const Navigation = () => {
     navLinks = [
       { name: t("navigation.dashboard"), path: "/admin-dashboard" },
       { name: t("navigation.pricingPlans"), path: "/admin/pricing-plans" },
-      { name: t("navigation.yourStores"), path: "/stores" },
-      { name: t("navigation.yourFlyers"), path: "/explore/flyers" },
-      { name: t("navigation.yourCoupons"), path: "/explore/coupons" },
+      { name: t("navigation.stores"), path: "/stores" },
+      { name: t("navigation.flyer"), path: "/explore/flyers" },
+      { name: t("navigation.coupon"), path: "/explore/coupons" },
+      { name: t("navigation.antiWaste"), path: "/explore/anti-waste" },
       { name: t("navigation.profile"), path: "/profile" },
     ];
   }
@@ -85,21 +79,21 @@ const Navigation = () => {
           isScrolled
             ? "bg-white shadow-md py-2"
             : userRole === "ADMIN"
-            ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-4"
-            : "bg-yellow-50 py-4"
+            ? "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 py-3 sm:py-4"
+            : "bg-yellow-50 py-3 sm:py-4"
         }`}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-3 sm:px-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <img
                 src="/logowb.png"
                 alt="Topprix"
-                className="h-10 w-10 rounded-lg"
+                className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg"
               />
               <span
-                className={`text-2xl font-bold ${
+                className={`text-xl sm:text-2xl font-bold ${
                   isScrolled
                     ? "text-yellow-600"
                     : userRole === "ADMIN"
@@ -111,7 +105,7 @@ const Navigation = () => {
               </span>
             </Link>
 
-            <nav className="hidden md:flex items-center space-x-6">
+            <nav className="hidden lg:flex items-center space-x-4 xl:space-x-6">
               {navLinks.map((link: any) => (
                 <Link
                   key={link.path}
@@ -133,11 +127,34 @@ const Navigation = () => {
               ))}
             </nav>
 
-            <div className="hidden md:flex items-center space-x-6">
+            {/* Tablet Navigation - Show fewer items */}
+            <nav className="hidden md:flex lg:hidden items-center space-x-3">
+              {navLinks.slice(0, 4).map((link: any) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`text-xs hover:scale-105 transition-transform font-medium ${
+                    location.pathname === link.path
+                      ? userRole === "ADMIN"
+                        ? "text-white border-b-2 border-white pb-1"
+                        : "text-yellow-600 border-b-2 border-yellow-600 pb-1"
+                      : isScrolled
+                      ? "text-gray-800 hover:text-yellow-600"
+                      : userRole === "ADMIN"
+                      ? "text-blue-100 hover:text-white"
+                      : "text-gray-800 hover:text-yellow-600"
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="hidden md:flex items-center space-x-3 lg:space-x-6">
               {/* Language Selector */}
               <div className="relative group">
                 <button
-                  className={`font-medium text-sm ${
+                  className={`font-medium text-xs lg:text-sm ${
                     isScrolled
                       ? "text-gray-600 hover:text-yellow-600"
                       : userRole === "ADMIN"
@@ -183,7 +200,7 @@ const Navigation = () => {
                     }`}
                   >
                     <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+                      className={`w-6 h-6 lg:w-8 lg:h-8 rounded-full flex items-center justify-center font-semibold text-xs lg:text-sm ${
                         userRole === "ADMIN"
                           ? "bg-white text-blue-600"
                           : "bg-yellow-200 text-yellow-800"
@@ -220,14 +237,6 @@ const Navigation = () => {
                         </Link>
                       </>
                     )}
-                    {userRole === "ADMIN" && (
-                      <Link
-                        to="/stores"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-yellow-50"
-                      >
-                        {t("navigation.yourStores")}
-                      </Link>
-                    )}
                     <button
                       onClick={async () => {
                         try {
@@ -263,9 +272,9 @@ const Navigation = () => {
               className="md:hidden p-2"
             >
               {isMenuOpen ? (
-                <FiX className="h-6 w-6" />
+                <FiX className="h-5 w-5 sm:h-6 sm:w-6" />
               ) : (
-                <FiMenu className="h-6 w-6" />
+                <FiMenu className="h-5 w-5 sm:h-6 sm:w-6" />
               )}
             </button>
           </div>

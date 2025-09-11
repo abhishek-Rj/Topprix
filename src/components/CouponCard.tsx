@@ -2,15 +2,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import {
   HiX,
-  HiPencil,
   HiTrash,
   HiShoppingCart,
   HiHeart,
-  HiEye,
-  HiTag,
-  HiCalendar,
   HiExternalLink,
   HiLocationMarker,
+  HiPencil,
 } from "react-icons/hi";
 import clsx from "clsx";
 import baseUrl from "@/hooks/baseurl";
@@ -347,6 +344,18 @@ export const CouponCard = ({
                   <HiTrash className="w-4 h-4" />
                 </button>
               )}
+              {isAuthorized && onEdit && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onEdit(coupon);
+                  }}
+                  className="p-1.5 sm:p-2 text-blue-600 sm:hover:text-blue-700 transition-colors rounded-full hover:bg-blue-50"
+                  title={t("edit")}
+                >
+                  <HiPencil className="w-4 h-4" />
+                </button>
+              )}
 
               {/* User action buttons */}
               {user && userRole === "USER" && (
@@ -494,6 +503,7 @@ export const CouponCard = ({
                         value={coupon.code}
                         isCode={true}
                       />
+                      <DetailRow label="Store" value={store?.name || ""} />
                       <DetailRow
                         label="Valid From"
                         value={new Date(coupon.startDate).toLocaleDateString()}

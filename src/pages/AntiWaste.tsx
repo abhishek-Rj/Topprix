@@ -117,7 +117,31 @@ export default function AntiWaste() {
   const fetchAntiWasteItems = async () => {
     setIsLoading(true);
     try {
-      const queryString = buildQueryString();
+      let queryString = buildQueryString();
+
+      // For retailers, we need to get the user ID first
+      if (userRole === "RETAILER" && user?.email) {
+        const userEmail = user.email;
+
+        // First get the user ID from the backend
+        const userResponse = await fetch(`${baseUrl}user/${userEmail}`);
+        if (!userResponse.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const userData = await userResponse.json();
+        const userId = userData?.user.id;
+
+        if (!userId) {
+          throw new Error("User ID not found");
+        }
+
+        // Add ownerId to the query string
+        const params = new URLSearchParams(queryString);
+        params.set("ownerId", userId);
+        queryString = params.toString();
+      }
+
       const url = `${baseUrl}api/anti-waste-items${
         queryString ? `?${queryString}` : ""
       }`;

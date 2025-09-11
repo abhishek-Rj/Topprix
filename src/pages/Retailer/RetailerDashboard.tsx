@@ -2,184 +2,214 @@ import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import {
   FiTrendingUp,
-  FiUsers,
   FiShoppingBag,
-  FiDollarSign,
   FiEye,
-  FiHeart,
-  FiShare2,
-  FiCalendar,
-  FiMapPin,
-  FiStar,
   FiTag,
+  FiUsers,
+  FiCalendar,
 } from "react-icons/fi";
 import baseUrl from "../../hooks/baseurl";
 import useAuthenticate from "../../hooks/authenticationt";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  AreaChart,
-  Area,
-} from "recharts";
 import Navigation from "../../components/navigation";
 import Footer from "../../components/Footer";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
 
-// Mock data for charts
-const salesData = [
-  { month: "Jan", sales: 12000, views: 4500, conversions: 320 },
-  { month: "Feb", sales: 15000, views: 5200, conversions: 410 },
-  { month: "Mar", sales: 18000, views: 6100, conversions: 520 },
-  { month: "Apr", sales: 22000, views: 7300, conversions: 680 },
-  { month: "May", sales: 25000, views: 8900, conversions: 750 },
-  { month: "Jun", sales: 28000, views: 10200, conversions: 890 },
-];
+interface DashboardData {
+  totalStores: number;
+  totalFlyers: number;
+  totalCoupons: number;
+  loading: boolean;
+}
 
-const categoryData = [
-  { name: "Electronics", value: 35, color: "#3B82F6" },
-  { name: "Fashion", value: 25, color: "#EF4444" },
-  { name: "Home & Garden", value: 20, color: "#10B981" },
-  { name: "Sports", value: 15, color: "#F59E0B" },
-  { name: "Books", value: 5, color: "#8B5CF6" },
-];
+interface Flyer {
+  id: string;
+  title: string;
+  description: string;
+  isPremium: boolean;
+  endDate: string;
+}
 
-const storePerformance = [
-  { store: "Main Store", revenue: 45000, customers: 1200, rating: 4.8 },
-  { store: "Downtown", revenue: 32000, customers: 890, rating: 4.6 },
-  { store: "Mall Location", revenue: 28000, customers: 750, rating: 4.4 },
-];
+interface Coupon {
+  id: string;
+  title: string;
+  description: string;
+  isOnline: boolean;
+  endDate: string;
+}
 
-const recentActivity = [
-  {
-    type: "New Coupon",
-    title: "Summer Sale 20% Off",
-    time: "2 hours ago",
-    status: "active",
-  },
-  {
-    type: "Flyer Update",
-    title: "Weekly Deals Updated",
-    time: "4 hours ago",
-    status: "active",
-  },
-  {
-    type: "Customer Review",
-    title: "5-star review received",
-    time: "6 hours ago",
-    status: "positive",
-  },
-  {
-    type: "Sales Milestone",
-    title: "Monthly target achieved",
-    time: "1 day ago",
-    status: "success",
-  },
-];
+interface CategoryTrendsAnalytics {
+  categoryInfo: {
+    id: string;
+    name: string;
+    description: string;
+  };
+  performanceScore: {
+    orderScore: number;
+    rank: number;
+    performanceLevel: string;
+  };
+}
+
+interface CategoryTrendsResponse {
+  analytics: CategoryTrendsAnalytics[];
+  summary: {
+    analysisTimeframe: string;
+    totalCategoriesAnalyzed: number;
+    topCategoriesShown: number;
+    aggregateOrderMetrics: {
+      totalOrdersAcrossCategories: number;
+      totalCompletedOrders: number;
+      totalEngagementScore: number;
+      totalUniqueCustomers: number;
+      averageOrderCompletionRate: number;
+    };
+    topPerformers: {
+      mostOrders: string;
+      highestEngagement: string;
+      bestCompletion: string;
+    };
+  };
+}
 
 export default function RetailerDashboard() {
   const { t } = useTranslation();
-  const { user, userRole } = useAuthenticate();
-  const [dashboardData, setDashboardData] = useState({
+  const { userRole } = useAuthenticate();
+  const [dashboardData, setDashboardData] = useState<DashboardData>({
     totalStores: 0,
     totalFlyers: 0,
     totalCoupons: 0,
-    activeFlyers: 0,
     loading: true,
   });
-  const [allStores, setAllStores] = useState<any[]>([]);
+
+  const [recentFlyers, setRecentFlyers] = useState<Flyer[]>([]);
+  const [recentCoupons, setRecentCoupons] = useState<Coupon[]>([]);
+  const [categoryTrendsData, setCategoryTrendsData] = useState<
+    CategoryTrendsAnalytics[]
+  >([]);
+  const [categorySummary, setCategorySummary] = useState<
+    CategoryTrendsResponse["summary"] | null
+  >(null);
+  const [categoryLoading, setCategoryLoading] = useState(true);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      if (!user?.email || userRole !== "RETAILER") return;
+      const userEmail = localStorage.getItem("userEmail");
+      if (!userEmail || userRole !== "RETAILER") return;
 
       try {
+        setDashboardData((prev) => ({ ...prev, loading: true }));
+
         // First get the user ID from the backend
-        const userResponse = await fetch(`${baseUrl}user/${user.email}`);
+        const userResponse = await fetch(`${baseUrl}user/${userEmail}`);
         if (!userResponse.ok) return;
 
         const userData = await userResponse.json();
-        const userId = userData?.id;
+        const userId = userData?.user.id;
 
         if (!userId) return;
 
-        // Then fetch all stores and filter by ownerId
-        const storesResponse = await fetch(`${baseUrl}stores`, {
-          headers: {
-            "Content-Type": "application/json",
-            "user-email": user.email,
-          },
-        });
+        // Fetch stores with ownerId
+        const storesResponse = await fetch(
+          `${baseUrl}stores?ownerId=${userId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "user-email": userEmail,
+            },
+          }
+        );
 
+        let totalStores = 0;
         if (storesResponse.ok) {
           const storesData = await storesResponse.json();
-          const retailerStores =
-            storesData.stores?.filter(
-              (store: any) => store?.ownerId === userId
-            ) || [];
-
-          const totalStores = retailerStores.length;
-
-          // Fetch flyers from retailer's stores
-          let totalFlyers = 0;
-          let totalCoupons = 0;
-          let activeFlyers = 0;
-
-          for (const store of retailerStores) {
-            // Fetch flyers for this store
-            const flyersResponse = await fetch(
-              `${baseUrl}flyers?storeId=${store.id}&limit=1000`
-            );
-            if (flyersResponse.ok) {
-              const flyersData = await flyersResponse.json();
-              totalFlyers += flyersData.flyers?.length || 0;
-
-              // Count active flyers
-              const storeActiveFlyers =
-                flyersData.flyers?.filter((flyer: any) => flyer.active === true)
-                  .length || 0;
-              activeFlyers += storeActiveFlyers;
-            }
-
-            // Fetch coupons for this store
-            const couponsResponse = await fetch(
-              `${baseUrl}coupons?storeId=${store.id}&limit=1000`
-            );
-            if (couponsResponse.ok) {
-              const couponsData = await couponsResponse.json();
-              const storeCoupons = couponsData.coupons?.length || 0;
-              totalCoupons += storeCoupons;
-            }
-          }
-
-          setDashboardData({
-            totalStores,
-            totalFlyers,
-            totalCoupons,
-            activeFlyers,
-            loading: false,
-          });
-
-          // Set all stores for the Store Performance section
-          setAllStores(retailerStores);
+          totalStores = storesData.pagination?.totalItems || 0;
         }
+
+        // Fetch flyers with ownerId for total count
+        const flyersTotalResponse = await fetch(
+          `${baseUrl}flyers?ownerId=${userId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "user-email": userEmail,
+            },
+          }
+        );
+
+        let totalFlyers = 0;
+        if (flyersTotalResponse.ok) {
+          const flyersTotalData = await flyersTotalResponse.json();
+          totalFlyers = flyersTotalData.pagination?.totalCount || 0;
+        }
+
+        // Fetch flyers with ownerId for recent items
+        const flyersResponse = await fetch(
+          `${baseUrl}flyers?ownerId=${userId}&limit=3`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "user-email": userEmail,
+            },
+          }
+        );
+
+        let recentFlyersData: Flyer[] = [];
+        if (flyersResponse.ok) {
+          const flyersData = await flyersResponse.json();
+          recentFlyersData = flyersData.flyers?.slice(0, 3) || [];
+        }
+
+        // Fetch coupons with ownerId for total count
+        const couponsTotalResponse = await fetch(
+          `${baseUrl}coupons?ownerId=${userId}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "user-email": userEmail,
+            },
+          }
+        );
+
+        let totalCoupons = 0;
+        if (couponsTotalResponse.ok) {
+          const couponsTotalData = await couponsTotalResponse.json();
+          totalCoupons = couponsTotalData.pagination?.totalCount || 0;
+        }
+
+        // Fetch coupons with ownerId for recent items
+        const couponsResponse = await fetch(
+          `${baseUrl}coupons?ownerId=${userId}&limit=3`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "user-email": userEmail,
+            },
+          }
+        );
+
+        let recentCouponsData: Coupon[] = [];
+        if (couponsResponse.ok) {
+          const couponsData = await couponsResponse.json();
+          recentCouponsData = couponsData.coupons?.slice(0, 3) || [];
+        }
+
+        setDashboardData({
+          totalStores,
+          totalFlyers,
+          totalCoupons,
+          loading: false,
+        });
+
+        setRecentFlyers(recentFlyersData);
+        setRecentCoupons(recentCouponsData);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
         setDashboardData((prev) => ({ ...prev, loading: false }));
@@ -187,330 +217,625 @@ export default function RetailerDashboard() {
     };
 
     fetchDashboardData();
-  }, [user?.email, userRole]);
+  }, [userRole]);
+
+  // Fetch category trends data
+  useEffect(() => {
+    const fetchCategoryTrends = async () => {
+      const userEmail = localStorage.getItem("userEmail");
+      if (!userEmail) return;
+
+      try {
+        setCategoryLoading(true);
+        const response = await fetch(`${baseUrl}analytics/categories/trends`, {
+          headers: {
+            "Content-Type": "application/json",
+            "user-email": userEmail,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data: CategoryTrendsResponse = await response.json();
+        setCategoryTrendsData(data.analytics);
+        setCategorySummary(data.summary);
+        setCategoryError(null);
+      } catch (error) {
+        console.error("Error fetching category trends:", error);
+        setCategoryError(
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch category trends data"
+        );
+      } finally {
+        setCategoryLoading(false);
+      }
+    };
+
+    fetchCategoryTrends();
+  }, []);
+
+  if (dashboardData.loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center">
+            <div className="text-gray-500">{t("dashboard.loading")}</div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50">
+    <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <main className="pt-20 pb-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-8"
-          >
-            <div className="p-8 rounded-3xl bg-gradient-to-r from-yellow-100/80 to-orange-100/80">
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-                {t("dashboard.title")}
-              </h1>
-              <p className="text-gray-600">{t("dashboard.welcome")}</p>
+
+      <div className="container mx-auto px-2 sm:px-4 pt-20 sm:pt-24 lg:pt-20 pb-6 sm:pb-8 space-y-4 sm:space-y-6 lg:space-y-8">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="p-4 sm:p-6 bg-white border border-yellow-500 shadow-sm rounded-none">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+              {t("dashboard.title")}
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600">
+              {t("dashboard.subtitle")}
+            </p>
+            <div className="text-xs sm:text-sm text-gray-500 mt-2">
+              {t("dashboard.lastUpdated")}: {new Date().toLocaleString()}
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
 
-          {/* Key Metrics */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-          >
-            <Card className="bg-white/80 backdrop-blur-sm border-green-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {t("dashboard.activeFlyers")}
-                </CardTitle>
-                <FiEye className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900">
-                  {dashboardData.loading
-                    ? "..."
-                    : dashboardData.activeFlyers.toLocaleString()}
-                </div>
-                <p className="text-xs text-green-600 flex items-center mt-1">
-                  <FiTrendingUp className="w-3 h-3 mr-1" />
-                  Active Now
-                </p>
-              </CardContent>
-            </Card>
+        {/* Quick Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+            <a href="/explore/flyers" className="block">
+              <Card className="bg-white border border-green-500 shadow-sm rounded-none hover:shadow-md transition-shadow h-full">
+                <CardHeader className="pb-2 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <FiEye className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
+                    {t("dashboard.quickActions.viewFlyers")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    {t("dashboard.quickActions.createAndManageFlyers")}
+                  </p>
+                </CardContent>
+              </Card>
+            </a>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-orange-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+            <a href="/explore/coupons" className="block">
+              <Card className="bg-white border border-blue-500 shadow-sm rounded-none hover:shadow-md transition-shadow h-full">
+                <CardHeader className="pb-2 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <FiTag className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                    {t("dashboard.quickActions.viewCoupons")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    {t("dashboard.quickActions.createAndManageCoupons")}
+                  </p>
+                </CardContent>
+              </Card>
+            </a>
+
+            <a href="/stores" className="block">
+              <Card className="bg-white border border-orange-500 shadow-sm rounded-none hover:shadow-md transition-shadow h-full">
+                <CardHeader className="pb-2 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <FiShoppingBag className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" />
+                    {t("dashboard.quickActions.viewStores")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    {t("dashboard.quickActions.createAndManageStores")}
+                  </p>
+                </CardContent>
+              </Card>
+            </a>
+          </div>
+        </motion.div>
+
+        {/* Key Metrics */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            {/* Total Stores */}
+            <Card className="bg-white border border-green-500 shadow-sm rounded-none">
+              <CardHeader className="pb-2 p-3 sm:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                  <FiShoppingBag className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
                   {t("dashboard.totalStores")}
                 </CardTitle>
-                <FiShoppingBag className="h-4 w-4 text-orange-600" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900">
-                  {dashboardData.loading
-                    ? "..."
-                    : dashboardData.totalStores.toLocaleString()}
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                  {dashboardData.totalStores}
                 </div>
-                <p className="text-xs text-green-600 flex items-center mt-1">
-                  <FiTrendingUp className="w-3 h-3 mr-1" />
-                  Your Stores
+                <p className="text-xs text-gray-500 mt-1">
+                  {t("dashboard.storesDescription")}
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-red-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+            {/* Total Flyers */}
+            <Card className="bg-white border border-orange-500 shadow-sm rounded-none">
+              <CardHeader className="pb-2 p-3 sm:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                  <FiEye className="h-3 w-3 sm:h-4 sm:w-4 text-orange-500" />
                   {t("dashboard.totalFlyers")}
                 </CardTitle>
-                <FiEye className="h-4 w-4 text-red-600" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900">
-                  {dashboardData.loading
-                    ? "..."
-                    : dashboardData.totalFlyers.toLocaleString()}
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                  {dashboardData.totalFlyers}
                 </div>
-                <p className="text-xs text-green-600 flex items-center mt-1">
-                  <FiTrendingUp className="w-3 h-3 mr-1" />
-                  Total Flyers
+                <p className="text-xs text-gray-500 mt-1">
+                  {t("dashboard.flyersDescription")}
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="bg-white/80 backdrop-blur-sm border-yellow-200">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
+            {/* Total Coupons */}
+            <Card className="bg-white border border-red-500 shadow-sm rounded-none">
+              <CardHeader className="pb-2 p-3 sm:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                  <FiTag className="h-3 w-3 sm:h-4 sm:w-4 text-red-500" />
                   {t("dashboard.totalCoupons")}
                 </CardTitle>
-                <FiTag className="h-4 w-4 text-yellow-600" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-gray-900">
-                  {dashboardData.loading
-                    ? "..."
-                    : dashboardData.totalCoupons.toLocaleString()}
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                  {dashboardData.totalCoupons}
                 </div>
-                <p className="text-xs text-green-600 flex items-center mt-1">
-                  <FiTrendingUp className="w-3 h-3 mr-1" />
-                  Total Coupons
+                <p className="text-xs text-gray-500 mt-1">
+                  {t("dashboard.couponsDescription")}
                 </p>
               </CardContent>
             </Card>
-          </motion.div>
 
-          {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            {/* Sales Chart */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              <Card className="bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>{t("dashboard.platformStats")}</CardTitle>
-                  <CardDescription>
-                    Monthly sales performance and trends
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={salesData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line
-                        type="monotone"
-                        dataKey="sales"
-                        stroke="#F59E0B"
-                        strokeWidth={2}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="views"
-                        stroke="#EF4444"
-                        strokeWidth={2}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Category Distribution */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <Card className="bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>{t("dashboard.userDistribution")}</CardTitle>
-                  <CardDescription>
-                    Product category performance
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={categoryData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) =>
-                          `${name} ${((percent || 0) * 100).toFixed(0)}%`
-                        }
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {categoryData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </motion.div>
+            {/* Total Content */}
+            <Card className="bg-white border border-yellow-500 shadow-sm rounded-none">
+              <CardHeader className="pb-2 p-3 sm:p-4">
+                <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                  <FiTrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-500" />
+                  {t("dashboard.totalContent")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0">
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">
+                  {dashboardData.totalFlyers + dashboardData.totalCoupons}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {t("dashboard.contentDescription")}
+                </p>
+              </CardContent>
+            </Card>
           </div>
+        </motion.div>
 
-          {/* Store Performance and Recent Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Store Performance */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <Card className="bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>{t("dashboard.allStores")}</CardTitle>
-                  <CardDescription>All your stores</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {dashboardData.loading ? (
-                      <div className="text-center py-8 text-gray-500">
-                        {t("dashboard.loading")}
-                      </div>
-                    ) : allStores.length === 0 ? (
-                      <div className="text-center py-8 text-gray-500">
-                        {t("dashboard.noStores")}
-                      </div>
-                    ) : (
-                      allStores.map((store, index) => (
-                        <div
-                          key={store.id || store.name || index}
-                          className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div className="flex-shrink-0">
-                              <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                                <span className="text-yellow-600 font-semibold">
-                                  {index + 1}
-                                </span>
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">
-                                {store.name ||
-                                  store.storeName ||
-                                  "Unnamed Store"}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                {store.address ||
-                                  store.location ||
-                                  "Location not specified"}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Badge
-                              variant={
-                                store.status === "active" || store.isActive
-                                  ? "default"
-                                  : "secondary"
-                              }
+        {/* Recent Flyers and Coupons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+            {/* Recent Flyers */}
+            <Card className="bg-white border border-purple-500 shadow-sm rounded-none">
+              <CardHeader className="p-3 sm:p-4">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                  <FiEye className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />
+                  {t("dashboard.recentFlyers")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0">
+                {recentFlyers.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentFlyers.map((flyer) => (
+                      <div
+                        key={flyer.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-none border"
+                      >
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">
+                            {flyer.title}
+                          </h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span
+                              className={`text-xs px-2 py-1 rounded-none ${
+                                flyer.isPremium
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
                             >
-                              {store.status === "active" || store.isActive
-                                ? t("dashboard.active")
+                              {flyer.isPremium
+                                ? t("dashboard.isPremium")
                                 : t("dashboard.inactive")}
-                            </Badge>
-                            <div className="flex items-center">
-                              <FiMapPin className="w-4 h-4 text-gray-400" />
-                              <span className="ml-1 text-sm text-gray-600">
-                                {store.city || store.region || "N/A"}
-                              </span>
-                            </div>
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {t("dashboard.expires")}:{" "}
+                              {new Date(flyer.endDate).toLocaleDateString()}
+                            </span>
                           </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Recent Activity */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-              <Card className="bg-white/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle>{t("dashboard.recentActivity")}</CardTitle>
-                  <CardDescription>
-                    Latest store activities and updates
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {recentActivity.map((activity, index) => (
-                      <div key={index} className="flex items-start space-x-4">
-                        <div className="flex-shrink-0">
-                          <div
-                            className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              activity.status === "success"
-                                ? "bg-green-100"
-                                : activity.status === "active"
-                                ? "bg-blue-100"
-                                : activity.status === "positive"
-                                ? "bg-yellow-100"
-                                : "bg-gray-100"
-                            }`}
-                          >
-                            {activity.status === "success" && (
-                              <FiTrendingUp className="w-4 h-4 text-green-600" />
-                            )}
-                            {activity.status === "active" && (
-                              <FiEye className="w-4 h-4 text-blue-600" />
-                            )}
-                            {activity.status === "positive" && (
-                              <FiStar className="w-4 h-4 text-yellow-600" />
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900">
-                            {activity.title}
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            {activity.time}
-                          </p>
                         </div>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <FiEye className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                    <p>{t("dashboard.noFlyers")}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Recent Coupons */}
+            <Card className="bg-white border border-indigo-500 shadow-sm rounded-none">
+              <CardHeader className="p-3 sm:p-4">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+                  <FiTag className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-500" />
+                  {t("dashboard.recentCoupons")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-3 sm:p-4 pt-0">
+                {recentCoupons.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentCoupons.map((coupon) => (
+                      <div
+                        key={coupon.id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded-none border"
+                      >
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">
+                            {coupon.title}
+                          </h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span
+                              className={`text-xs px-2 py-1 rounded-none ${
+                                coupon.isOnline
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              {coupon.isOnline
+                                ? t("dashboard.isOnline")
+                                : t("dashboard.inactive")}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {t("dashboard.expires")}:{" "}
+                              {new Date(coupon.endDate).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <FiTag className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                    <p>{t("dashboard.noCoupons")}</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </motion.div>
+
+        {/* Category Analytics Section */}
+        {categoryLoading ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <Card className="bg-white border border-gray-300 shadow-sm rounded-none">
+              <CardContent className="p-4 sm:p-8">
+                <div className="text-center">
+                  <div className="text-gray-500">{t("dashboard.loading")}</div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : categoryError ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <Card className="bg-white border border-red-500 shadow-sm rounded-none">
+              <CardContent className="p-4 sm:p-8">
+                <div className="text-center">
+                  <div className="text-red-500 mb-2">⚠️</div>
+                  <div className="text-gray-900 font-semibold mb-2">
+                    {t("dashboard.error")}
+                  </div>
+                  <div className="text-gray-600">{categoryError}</div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : categoryTrendsData.length > 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
+              {/* Category Performance Metrics */}
+              <Card className="bg-white border border-emerald-500 shadow-sm rounded-none">
+                <CardHeader className="pb-2 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <FiTrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500" />
+                    {t("dashboard.categoryAnalytics.topPerformers")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        {t("dashboard.categoryAnalytics.mostOrders")}
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {categorySummary?.topPerformers.mostOrders || "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        {t("dashboard.categoryAnalytics.highestEngagement")}
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {categorySummary?.topPerformers.highestEngagement ||
+                          "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        {t("dashboard.categoryAnalytics.bestCompletion")}
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {categorySummary?.topPerformers.bestCompletion || "N/A"}
+                      </span>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-            </motion.div>
-          </div>
-        </div>
-      </main>
+
+              {/* Overall Metrics */}
+              <Card className="bg-white border border-cyan-500 shadow-sm rounded-none">
+                <CardHeader className="pb-2 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <FiUsers className="h-3 w-3 sm:h-4 sm:w-4 text-cyan-500" />
+                    {t("dashboard.categoryAnalytics.overallMetrics")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        {t("dashboard.categoryAnalytics.totalOrders")}
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {categorySummary?.aggregateOrderMetrics
+                          .totalOrdersAcrossCategories || 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        {t("dashboard.categoryAnalytics.totalCustomers")}
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {categorySummary?.aggregateOrderMetrics
+                          .totalUniqueCustomers || 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        {t("dashboard.categoryAnalytics.completionRate")}
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {categorySummary?.aggregateOrderMetrics.averageOrderCompletionRate.toFixed(
+                          1
+                        ) || 0}
+                        %
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Analysis Period */}
+              <Card className="bg-white border border-violet-500 shadow-sm rounded-none">
+                <CardHeader className="pb-2 p-3 sm:p-4">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
+                    <FiCalendar className="h-3 w-3 sm:h-4 sm:w-4 text-violet-500" />
+                    {t("dashboard.categoryAnalytics.analysisPeriod")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 sm:p-4 pt-0">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        {t("dashboard.categoryAnalytics.timeframe")}
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {categorySummary?.analysisTimeframe || "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        {t("dashboard.categoryAnalytics.categoriesAnalyzed")}
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {categorySummary?.totalCategoriesAnalyzed || 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs sm:text-sm text-gray-600">
+                        {t("dashboard.categoryAnalytics.topCategoriesShown")}
+                      </span>
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {categorySummary?.topCategoriesShown || 0}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Category Performance Chart */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+              >
+                <Card className="bg-white border border-rose-500 shadow-sm rounded-none">
+                  <CardHeader>
+                    <CardTitle>
+                      {t("dashboard.categoryAnalytics.categoryPerformance")}
+                    </CardTitle>
+                    <CardDescription>
+                      {t(
+                        "dashboard.categoryAnalytics.categoryPerformanceDescription"
+                      )}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {categoryTrendsData.slice(0, 5).map((category) => (
+                        <div
+                          key={category.categoryInfo.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-none border"
+                        >
+                          <div className="flex-1">
+                            <h4 className="font-medium text-gray-900">
+                              {category.categoryInfo.name}
+                            </h4>
+                            <p className="text-sm text-gray-600 truncate">
+                              {category.categoryInfo.description}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span
+                                className={`text-xs px-2 py-1 rounded-none ${
+                                  category.performanceScore.performanceLevel ===
+                                  "high"
+                                    ? "bg-green-100 text-green-800"
+                                    : category.performanceScore
+                                        .performanceLevel === "medium"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                Rank #{category.performanceScore.rank}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                Score: {category.performanceScore.orderScore}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.55 }}
+              >
+                <Card className="bg-white border border-lime-500 shadow-sm rounded-none">
+                  <CardHeader>
+                    <CardTitle>
+                      {t("dashboard.categoryAnalytics.engagementDistribution")}
+                    </CardTitle>
+                    <CardDescription>
+                      {t(
+                        "dashboard.categoryAnalytics.engagementDistributionDescription"
+                      )}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {categoryTrendsData.map((category) => (
+                        <div
+                          key={category.categoryInfo.id}
+                          className="flex items-center justify-between p-2 bg-gray-50 rounded-none border"
+                        >
+                          <div className="flex-1">
+                            <h4 className="text-sm font-medium text-gray-900">
+                              {category.categoryInfo.name}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span
+                                className={`text-xs px-2 py-1 rounded-none ${
+                                  category.performanceScore.performanceLevel ===
+                                  "high"
+                                    ? "bg-green-100 text-green-800"
+                                    : category.performanceScore
+                                        .performanceLevel === "medium"
+                                    ? "bg-yellow-100 text-yellow-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {category.performanceScore.performanceLevel}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="mb-8"
+          >
+            <Card className="bg-white border border-gray-300 shadow-sm rounded-none">
+              <CardContent className="p-8">
+                <div className="text-center">
+                  <div className="text-gray-500 mb-2">📊</div>
+                  <div className="text-gray-900 font-semibold mb-2">
+                    {t("dashboard.categoryAnalytics.noData")}
+                  </div>
+                  <div className="text-gray-600">
+                    {t("dashboard.categoryAnalytics.noDataDescription")}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </div>
+
       <Footer />
     </div>
   );

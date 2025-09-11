@@ -3,6 +3,9 @@ import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
+import StoreAnalytics from "./pages/Admin/StoreAnalytics";
+import FlyerAnalytics from "./pages/Admin/FlyerAnalytics";
+import CouponAnalytics from "./pages/Admin/CouponAnalytics";
 import PricingPlans from "./pages/Admin/PricingPlans";
 import Subscriptions from "./pages/Retailer/Subscriptions";
 import UserDashboard from "./pages/Dashboard";
@@ -54,6 +57,9 @@ function AppContent() {
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/shopping-lists" element={<ShoppingList />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/store-analytics" element={<StoreAnalytics />} />
+        <Route path="/admin/flyer-analytics" element={<FlyerAnalytics />} />
+        <Route path="/admin/coupon-analytics" element={<CouponAnalytics />} />
         <Route path="/admin/pricing-plans" element={<PricingPlans />} />
         <Route path="/subscriptions" element={<Subscriptions />} />
         <Route path="/deals" element={<Deals />} />
