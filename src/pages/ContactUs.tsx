@@ -381,7 +381,7 @@ export default function ContactUs() {
                     Contact partenariat
                   </h4>
                   <a
-                    href="mailto:direction@topprix.re"
+                    href="mailto:fedric@topprix.re"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors duration-200"
                   >
                     <svg
@@ -400,7 +400,7 @@ export default function ContactUs() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    direction@topprix.re
+                    fedric@topprix.re
                   </a>
                 </div>
               </div>
