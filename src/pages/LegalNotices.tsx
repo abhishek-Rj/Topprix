@@ -1,9 +1,7 @@
-import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import Footer from "../components/Footer";
 
 export default function LegalNotices() {
-  const { t } = useTranslation();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(["editor", "hosting"])
   );
@@ -186,29 +184,45 @@ export default function LegalNotices() {
                         <p className="font-semibold text-gray-900 mb-2">
                           🏢 Hébergeur
                         </p>
-                        <p className="text-gray-900">Vercel Inc.</p>
+                        <p className="text-gray-900">OVHcloud — OVH SAS</p>
                       </div>
                       <div className="bg-white p-4 rounded-lg border border-gray-200">
                         <p className="font-semibold text-gray-900 mb-2">
                           📍 Adresse
                         </p>
                         <p className="text-gray-900">
-                          340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis
+                          2 rue Kellermann - 59100 Roubaix — France
+                        </p>
+                      </div>
+                      <div className="bg-white p-4 rounded-lg border border-gray-200">
+                        <p className="font-semibold text-gray-900 mb-2">
+                          🆔 SIRET
+                        </p>
+                        <p className="text-gray-900">
+                          424761 419 00045 — RCS Lille Métropole
                         </p>
                       </div>
                     </div>
                     <div className="space-y-3">
                       <div className="bg-white p-4 rounded-lg border border-gray-200">
                         <p className="font-semibold text-gray-900 mb-2">
-                          🌐 Site web
+                          💰 Capital social
                         </p>
-                        <p className="text-gray-900">vercel.com</p>
+                        <p className="text-gray-900">10 069 020 €</p>
                       </div>
                       <div className="bg-white p-4 rounded-lg border border-gray-200">
                         <p className="font-semibold text-gray-900 mb-2">
-                          📧 Contact
+                          🌐 Site web
                         </p>
-                        <p className="text-gray-900">privacy@vercel.com</p>
+                        <p className="text-gray-900">www.ovhcloud.com</p>
+                      </div>
+                      <div className="bg-white p-4 rounded-lg border border-gray-200">
+                        <p className="font-semibold text-gray-900 mb-2">
+                          📞 Téléphone
+                        </p>
+                        <p className="text-gray-900">
+                          1007 (appel gratuit depuis un poste fixe en France)
+                        </p>
                       </div>
                     </div>
                   </div>
