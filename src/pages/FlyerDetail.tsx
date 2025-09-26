@@ -145,7 +145,7 @@ export default function FlyerDetail() {
   useEffect(() => {
     const fetchFlyer = async () => {
       if (!flyerId) {
-        toast.error("No flyer ID provided");
+        toast.error(t("flyerPreview.fetchError"));
         navigate("/explore/flyers");
         return;
       }
@@ -172,7 +172,7 @@ export default function FlyerDetail() {
         }
       } catch (err) {
         console.error("Error fetching flyer:", err);
-        toast.error("Failed to load flyer");
+        toast.error(t("flyerPreview.fetchError"));
         navigate("/explore/flyers");
       }
     };
@@ -298,7 +298,9 @@ export default function FlyerDetail() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
-          <span className="text-lg text-gray-500 mt-4">Loading flyer...</span>
+          <span className="text-lg text-gray-500 mt-4">
+            {t("flyerPreview.loading")}
+          </span>
         </div>
       </div>
     );
@@ -315,7 +317,7 @@ export default function FlyerDetail() {
               className="flex items-center text-white/80 hover:text-white transition-colors"
             >
               <HiArrowLeft className="w-4 h-4 mr-1" />
-              Back
+              {t("flyerPreview.back")}
             </button>
 
             <div className="flex-1 text-center mx-4">
@@ -335,10 +337,10 @@ export default function FlyerDetail() {
                   document.body.style.transform = "scale(1)";
                   document.documentElement.style.zoom = "100%";
                   document.documentElement.style.transform = "scale(1)";
-                  toast.success("Zoom reset to 100%");
+                  toast.success(t("flyerPreview.zoomReset"));
                 }}
                 className="p-1.5 text-white/80 hover:text-white transition-colors"
-                title="Reset zoom to 100%"
+                title={t("flyerPreview.resetZoom")}
               >
                 <svg
                   className="w-5 h-5"
@@ -380,7 +382,7 @@ export default function FlyerDetail() {
               <div className="flex items-center gap-1">
                 <HiCalendar className="w-4 h-4 text-gray-500" />
                 <span className="text-gray-600">
-                  Valid until: {formatDate(flyer.endDate)}
+                  {t("flyerPreview.validUntil")}: {formatDate(flyer.endDate)}
                 </span>
               </div>
             </div>
@@ -407,7 +409,7 @@ export default function FlyerDetail() {
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"
                   />
                 </svg>
-                <span>Use Ctrl+Scroll or pinch to zoom</span>
+                <span>{t("flyerPreview.zoomInstructions")}</span>
               </div>
             </div>
           </div>
@@ -423,7 +425,7 @@ export default function FlyerDetail() {
               <div className="flex flex-col items-center justify-center h-full">
                 <Loader />
                 <span className="text-lg text-gray-500 mt-4">
-                  Loading Flyer...
+                  {t("flyerPreview.loading")}
                 </span>
               </div>
             )}
@@ -436,7 +438,7 @@ export default function FlyerDetail() {
               onLoadStart={() => setIsLoadingPdf(true)}
               onLoadError={(error) => {
                 console.error("Error loading PDF:", error);
-                toast.error("Failed to load PDF");
+                toast.error(t("flyerPreview.pdfLoadError"));
                 setIsLoadingPdf(false);
               }}
               error={
@@ -444,7 +446,9 @@ export default function FlyerDetail() {
                   <div className="text-red-600 text-2xl font-bold mb-4">
                     PDF
                   </div>
-                  <p className="text-gray-500">Failed to load PDF</p>
+                  <p className="text-gray-500">
+                    {t("flyerPreview.pdfLoadError")}
+                  </p>
                 </div>
               }
             >
@@ -468,7 +472,7 @@ export default function FlyerDetail() {
                 }}
               >
                 <div className="flex gap-6 h-full">
-                  {Array.from(new Array(numPages || 1), (el, index) => (
+                  {Array.from(new Array(numPages || 1), (_, index) => (
                     <div
                       key={`page_${index + 1}`}
                       className="flex-shrink-0 flex items-center justify-center"

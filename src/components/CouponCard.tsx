@@ -181,7 +181,7 @@ export const CouponCard = ({
 
   const fetchShoppingLists = async () => {
     if (!userId) {
-      toast.error(t("pleaseLoginToAddToShoppingList"));
+      toast.error(t("couponPreview.pleaseLoginToAddToShoppingList"));
       return;
     }
     try {
@@ -205,7 +205,7 @@ export const CouponCard = ({
 
   const addToShoppingList = async () => {
     if (!userId || !selectedListId) {
-      toast.error(t("pleaseSelectShoppingList"));
+      toast.error(t("couponPreview.pleaseSelectShoppingList"));
       return;
     }
 
@@ -227,12 +227,12 @@ export const CouponCard = ({
       );
 
       if (response.ok) {
-        toast.success(t("couponAddedToShoppingList"));
+        toast.success(t("couponPreview.couponAddedToShoppingList"));
         setShowShoppingListModal(false);
         setSelectedListId("");
         setQuantity(1);
       } else {
-        toast.error(t("failedToAddToShoppingList"));
+        toast.error(t("couponPreview.failedToAddToShoppingList"));
       }
     } catch (error) {
       console.error("Error adding to shopping list:", error);
@@ -242,7 +242,7 @@ export const CouponCard = ({
 
   const addToWishlist = async () => {
     if (!userId) {
-      toast.error(t("pleaseLoginToAddToWishlist"));
+      toast.error(t("couponPreview.pleaseLoginToAddToWishlist"));
       return;
     }
 
@@ -261,9 +261,9 @@ export const CouponCard = ({
 
       if (response.ok) {
         setIsInWishlist(true);
-        toast.success(t("couponAddedToWishlist"));
+        toast.success(t("couponPreview.couponAddedToWishlist"));
       } else {
-        toast.error(t("failedToUpdateWishlist"));
+        toast.error(t("couponPreview.failedToUpdateWishlist"));
       }
     } catch (error) {
       console.error("Error updating wishlist:", error);
@@ -274,7 +274,7 @@ export const CouponCard = ({
   const handleDelete = async () => {
     setIsDeleting(true);
     if (!isAuthorized) {
-      toast.error(t("notAuthorized"));
+      toast.error(t("couponPreview.notAuthorized"));
       return;
     }
 
@@ -287,7 +287,7 @@ export const CouponCard = ({
       });
 
       if (response.ok) {
-        toast.success(t("couponDeletedSuccessfully"));
+        toast.success(t("couponPreview.couponDeletedSuccessfully"));
         if (onDelete) {
           onDelete(coupon.id);
         }
@@ -298,7 +298,7 @@ export const CouponCard = ({
         throw new Error("Failed to delete coupon");
       }
     } catch (error) {
-      toast.error(t("deleteError"));
+      toast.error(t("couponPreview.deleteError"));
     } finally {
       setIsDeleting(false);
       setShowDeleteDialogueBox(false);
@@ -313,7 +313,7 @@ export const CouponCard = ({
   const handleAddToShoppingList = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!userId) {
-      toast.error(t("pleaseLoginToAddToShoppingList"));
+      toast.error(t("couponPreview.pleaseLoginToAddToShoppingList"));
       return;
     }
     fetchShoppingLists();
@@ -339,7 +339,7 @@ export const CouponCard = ({
                 <button
                   onClick={handleDeleteClick}
                   className="p-1.5 sm:p-2 text-red-600 sm:hover:text-red-700 transition-colors rounded-full hover:bg-red-50"
-                  title={t("deleteCoupon")}
+                  title={t("couponPreview.deleteCoupon")}
                 >
                   <HiTrash className="w-4 h-4" />
                 </button>
@@ -351,7 +351,7 @@ export const CouponCard = ({
                     onEdit(coupon);
                   }}
                   className="p-1.5 sm:p-2 text-blue-600 sm:hover:text-blue-700 transition-colors rounded-full hover:bg-blue-50"
-                  title={t("edit")}
+                  title={t("couponPreview.edit")}
                 >
                   <HiPencil className="w-4 h-4" />
                 </button>
@@ -379,8 +379,8 @@ export const CouponCard = ({
                     }`}
                     title={
                       isInWishlist
-                        ? t("removeFromWishlist")
-                        : t("addToWishlist")
+                        ? t("couponPreview.removeFromWishlist")
+                        : t("couponPreview.addToWishlist")
                     }
                   >
                     <HiHeart size={16} />
@@ -458,8 +458,8 @@ export const CouponCard = ({
                         }`}
                         title={
                           isInWishlist
-                            ? t("removeFromWishlist")
-                            : t("addToWishlist")
+                            ? t("couponPreview.removeFromWishlist")
+                            : t("couponPreview.addToWishlist")
                         }
                       >
                         <HiHeart className="w-5 h-5" />
@@ -471,7 +471,7 @@ export const CouponCard = ({
                       onClick={handleDeleteClick}
                       disabled={isDeleting}
                       className="p-2 text-red-600 sm:hover:text-red-700 transition-colors disabled:opacity-50"
-                      title={t("deleteCoupon")}
+                      title={t("couponPreview.deleteCoupon")}
                     >
                       <HiTrash className="w-5 h-5" />
                     </button>
@@ -490,52 +490,59 @@ export const CouponCard = ({
                 <div className="space-y-6">
                   <section>
                     <h3 className="text-xl font-bold text-yellow-600 mb-4 border-b border-yellow-100 pb-2">
-                      Coupon Details
+                      {t("couponPreview.title")}
                     </h3>
                     <div className="bg-yellow-50/70 rounded-2xl p-5 sm:p-6 shadow-inner space-y-4">
                       <DetailRow
-                        label="Discount"
+                        label={t("couponPreview.discount")}
                         value={coupon.discount}
                         isDiscount={true}
                       />
                       <DetailRow
-                        label="Code"
+                        label={t("couponPreview.code")}
                         value={coupon.code}
                         isCode={true}
                       />
-                      <DetailRow label="Store" value={store?.name || ""} />
                       <DetailRow
-                        label="Valid From"
+                        label={t("couponPreview.store")}
+                        value={store?.name || t("couponPreview.unknownStore")}
+                      />
+                      <DetailRow
+                        label={t("couponPreview.validFrom")}
                         value={new Date(coupon.startDate).toLocaleDateString()}
                       />
                       <DetailRow
-                        label="Valid Until"
+                        label={t("couponPreview.validUntil")}
                         value={new Date(coupon.endDate).toLocaleDateString()}
                       />
                       <DetailRow
-                        label="Status"
+                        label={t("couponPreview.status")}
                         value={
                           calculateDaysLeft().status.charAt(0).toUpperCase() +
                           calculateDaysLeft().status.slice(1)
                         }
                       />
                       <DetailRow
-                        label="Type"
-                        value={coupon.isPremium ? "Premium" : "Standard"}
+                        label={t("couponPreview.type")}
+                        value={
+                          coupon.isPremium
+                            ? t("couponPreview.premium")
+                            : t("couponPreview.standard")
+                        }
                       />
                       <div className="flex justify-between items-center text-xs sm:text-sm">
                         <span className="text-gray-600 font-medium">
-                          Usage:
+                          {t("couponPreview.usage")}:
                         </span>
                         <div className="flex gap-2">
                           {coupon.isOnline && (
                             <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                              Online
+                              {t("couponPreview.online")}
                             </span>
                           )}
                           {coupon.isInStore && (
                             <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                              In Store
+                              {t("couponPreview.inStore")}
                             </span>
                           )}
                         </div>
@@ -545,7 +552,7 @@ export const CouponCard = ({
 
                   <section>
                     <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                      Categories
+                      {t("couponPreview.categories")}
                     </h3>
                     <div className="flex flex-wrap gap-2">
                       {coupon.categories?.map((cat: any) => (
@@ -562,7 +569,7 @@ export const CouponCard = ({
                   {coupon.description && (
                     <section>
                       <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                        Description
+                        {t("couponPreview.description")}
                       </h3>
                       <p className="text-gray-600">{coupon.description}</p>
                     </section>
@@ -574,7 +581,7 @@ export const CouponCard = ({
                   {/* Store Information */}
                   <section>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-                      Store Information
+                      {t("couponPreview.storeInformation")}
                     </h3>
                     <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                       <div>
@@ -599,14 +606,18 @@ export const CouponCard = ({
 
                       {store.phone && (
                         <div className="text-sm text-gray-600">
-                          <span className="font-medium">Phone: </span>
+                          <span className="font-medium">
+                            {t("couponPreview.phone")}:{" "}
+                          </span>
                           {store.phone}
                         </div>
                       )}
 
                       {store.email && (
                         <div className="text-sm text-gray-600">
-                          <span className="font-medium">Email: </span>
+                          <span className="font-medium">
+                            {t("couponPreview.email")}:{" "}
+                          </span>
                           {store.email}
                         </div>
                       )}
@@ -619,7 +630,7 @@ export const CouponCard = ({
                             rel="noopener noreferrer"
                             className="text-yellow-600 hover:text-yellow-700 flex items-center gap-1"
                           >
-                            Visit Website
+                            {t("couponPreview.visitWebsite")}
                             <HiExternalLink className="w-3 h-3" />
                           </a>
                         </div>
@@ -630,13 +641,13 @@ export const CouponCard = ({
                   {/* Barcode and QR Code */}
                   <section>
                     <h3 className="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-                      Codes
+                      {t("couponPreview.codes")}
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                       {coupon.barcodeUrl && (
                         <div className="text-center">
                           <h4 className="text-sm font-medium text-gray-700 mb-2">
-                            Barcode
+                            {t("couponPreview.barcode")}
                           </h4>
                           <img
                             src={coupon.barcodeUrl}
@@ -648,7 +659,7 @@ export const CouponCard = ({
                       {coupon.qrCodeUrl && (
                         <div className="text-center">
                           <h4 className="text-sm font-medium text-gray-700 mb-2">
-                            QR Code
+                            {t("couponPreview.qrCode")}
                           </h4>
                           <img
                             src={coupon.qrCodeUrl}
@@ -671,19 +682,19 @@ export const CouponCard = ({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {t("addToShoppingList")}
+              {t("couponPreview.addToShoppingList")}
             </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("selectShoppingList")}
+                  {t("couponPreview.selectShoppingList")}
                 </label>
                 <select
                   value={selectedListId}
                   onChange={(e) => setSelectedListId(e.target.value)}
                   className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                 >
-                  <option value="">{t("chooseList")}</option>
+                  <option value="">{t("couponPreview.chooseList")}</option>
                   {shoppingLists.map((list) => (
                     <option key={list.id} value={list.id}>
                       {list.title}
@@ -693,7 +704,7 @@ export const CouponCard = ({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("quantity")}
+                  {t("couponPreview.quantity")}
                 </label>
                 <input
                   type="number"
@@ -709,13 +720,13 @@ export const CouponCard = ({
                 onClick={() => setShowShoppingListModal(false)}
                 className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
               >
-                {t("cancel")}
+                {t("couponPreview.cancel")}
               </button>
               <button
                 onClick={addToShoppingList}
                 className="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-md transition-colors"
               >
-                {t("addToList")}
+                {t("couponPreview.addToList")}
               </button>
             </div>
           </div>

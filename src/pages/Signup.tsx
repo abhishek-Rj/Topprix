@@ -173,7 +173,7 @@ export default function Signup() {
               className="rounded-lg hover:scale-105 transition-transform"
             />
             <div className="font-sans text-2xl md:text-3xl font-bold text-white hover:scale-105 transition-transform">
-              Topprix
+              Topprix.re
             </div>
           </div>
 

@@ -76,7 +76,7 @@ export const FlyerCard = ({
           `${baseUrl}user/${localStorage.getItem("userEmail")}`
         );
         if (!response.ok) {
-          toast.error("Couldn't fetch user data");
+          toast.error(t("flyerPreview.fetchError"));
           throw new Error("Couldn't fetch user data");
         }
         const userData = await response.json();
@@ -103,7 +103,7 @@ export const FlyerCard = ({
 
   const fetchShoppingLists = async () => {
     if (!userId) {
-      toast.error("User data not available. Please try again.");
+      toast.error(t("flyerPreview.userDataError"));
       return;
     }
 
@@ -127,13 +127,13 @@ export const FlyerCard = ({
       }
     } catch (error) {
       console.error("Error fetching shopping lists:", error);
-      toast.error("Failed to fetch shopping lists");
+      toast.error(t("flyerPreview.shoppingListError"));
     }
   };
 
   const addToShoppingList = async () => {
     if (!selectedListId || !userId) {
-      toast.error("Please select a shopping list");
+      toast.error(t("flyerPreview.pleaseSelectShoppingList"));
       return;
     }
 
@@ -155,7 +155,7 @@ export const FlyerCard = ({
       );
 
       if (response.ok) {
-        toast.success("Item added to shopping list successfully");
+        toast.success(t("flyerPreview.itemAddedToShoppingList"));
         setShowShoppingListModal(false);
         setSelectedListId("");
         setQuantity(1);
@@ -164,18 +164,18 @@ export const FlyerCard = ({
       }
     } catch (error) {
       console.error("Error adding item to shopping list:", error);
-      toast.error("Failed to add item to shopping list");
+      toast.error(t("flyerPreview.failedToAddToShoppingList"));
     }
   };
 
   const addToWishlist = async () => {
     if (!localStorage.getItem("userEmail")) {
-      toast.error("Please login to add items to wishlist");
+      toast.error(t("flyerPreview.pleaseLoginToAddToWishlist"));
       return;
     }
 
     if (!userId) {
-      toast.error("User data not available. Please try again.");
+      toast.error(t("flyerPreview.userDataError"));
       return;
     }
 
@@ -194,13 +194,13 @@ export const FlyerCard = ({
       });
 
       if (response.ok) {
-        toast.success("Added to wishlist successfully!");
+        toast.success(t("flyerPreview.addedToWishlist"));
       } else {
         throw new Error("Failed to add to wishlist");
       }
     } catch (error) {
       console.error("Error adding to wishlist:", error);
-      toast.error("Failed to add to wishlist");
+      toast.error(t("flyerPreview.failedToAddToWishlist"));
     }
   };
 
@@ -286,7 +286,7 @@ export const FlyerCard = ({
   const handleDelete = async () => {
     setIsDeleting(true);
     if (!isAuthorized) {
-      toast.error(t("notAuthorized"));
+      toast.error(t("flyerPreview.notAuthorized"));
       return;
     }
 
@@ -299,7 +299,7 @@ export const FlyerCard = ({
       });
 
       if (response.ok) {
-        toast.success(t("deleteSuccess"));
+        toast.success(t("flyerPreview.deleteSuccess"));
         if (onDelete) {
           onDelete(flyer.id);
         }
@@ -310,7 +310,7 @@ export const FlyerCard = ({
         throw new Error("Failed to delete flyer");
       }
     } catch (error) {
-      toast.error(t("deleteError"));
+      toast.error(t("flyerPreview.deleteError"));
     } finally {
       setIsDeleting(false);
       setShowDeleteDialogueBox(false);
@@ -327,7 +327,7 @@ export const FlyerCard = ({
   const handleAddToShoppingList = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!localStorage.getItem("userEmail")) {
-      toast.error("Please login to add items to shopping list");
+      toast.error(t("flyerPreview.pleaseLoginToAddToShoppingList"));
       return;
     }
     fetchShoppingLists();
@@ -413,7 +413,7 @@ export const FlyerCard = ({
                     setShowPreviewModal(true);
                   }}
                   className="p-1.5 bg-white/90 hover:bg-white text-blue-600 hover:text-blue-700 rounded-full shadow-sm transition-colors"
-                  title="Preview Flyer"
+                  title={t("flyerPreview.previewFlyer")}
                 >
                   <HiEye size={14} />
                 </button>
@@ -423,7 +423,7 @@ export const FlyerCard = ({
                   <button
                     onClick={handleDeleteClick}
                     className="p-1.5 bg-white/90 hover:bg-white text-red-600 hover:text-red-700 rounded-full shadow-sm transition-colors"
-                    title={t("deleteFlyer")}
+                    title={t("flyerPreview.deleteFlyer")}
                   >
                     <HiTrash size={14} />
                   </button>
@@ -438,7 +438,7 @@ export const FlyerCard = ({
                         handleAddToShoppingList(e);
                       }}
                       className="p-1.5 bg-white/90 hover:bg-white text-green-600 hover:text-green-700 rounded-full shadow-sm transition-colors"
-                      title="Add to Shopping List"
+                      title={t("flyerPreview.addToShoppingList")}
                     >
                       <HiShoppingCart size={14} />
                     </button>
@@ -454,8 +454,8 @@ export const FlyerCard = ({
                       }`}
                       title={
                         isInWishlist
-                          ? "Remove from Wishlist"
-                          : "Add to Wishlist"
+                          ? t("flyerPreview.removeFromWishlist")
+                          : t("flyerPreview.addToWishlist")
                       }
                     >
                       <HiHeart size={14} />
@@ -482,19 +482,19 @@ export const FlyerCard = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {t("addToShoppingList")}
+              {t("flyerPreview.addToShoppingList")}
             </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("selectShoppingList")}
+                  {t("flyerPreview.selectShoppingList")}
                 </label>
                 <select
                   value={selectedListId}
                   onChange={(e) => setSelectedListId(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  <option value="">{t("chooseList")}</option>
+                  <option value="">{t("flyerPreview.chooseList")}</option>
                   {shoppingLists.map((list) => (
                     <option key={list.id} value={list.id}>
                       {list.title}
@@ -504,7 +504,7 @@ export const FlyerCard = ({
               </div>
               <div className="flex items-center gap-2">
                 <label className="text-sm font-medium text-gray-700">
-                  {t("quantity")}
+                  {t("flyerPreview.quantity")}
                 </label>
                 <input
                   type="number"
@@ -526,14 +526,14 @@ export const FlyerCard = ({
                 }}
                 className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md sm:hover:bg-gray-50"
               >
-                Cancel
+                {t("flyerPreview.cancel")}
               </button>
               <button
                 onClick={addToShoppingList}
                 disabled={!selectedListId}
                 className="px-4 py-2 bg-green-500 sm:hover:bg-green-600 disabled:bg-gray-300 text-white rounded-md transition"
               >
-                {t("addToList")}
+                {t("flyerPreview.addToList")}
               </button>
             </div>
           </div>

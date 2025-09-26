@@ -7,6 +7,10 @@ import StoreAnalytics from "./pages/Admin/StoreAnalytics";
 import FlyerAnalytics from "./pages/Admin/FlyerAnalytics";
 import CouponAnalytics from "./pages/Admin/CouponAnalytics";
 import PricingPlans from "./pages/Admin/PricingPlans";
+import UserManagement from "./pages/Admin/UserManagement";
+import StoreManagement from "./pages/Admin/StoreManagement";
+import FlyerManagement from "./pages/Admin/FlyerManagement";
+import CouponManagement from "./pages/Admin/CouponManagement";
 import Subscriptions from "./pages/Retailer/Subscriptions";
 import UserDashboard from "./pages/Dashboard";
 import Deals from "./pages/Deals";
@@ -34,6 +38,7 @@ import useLocationDialog from "./hooks/useLocationDialog";
 import LocationLoginPrompt from "./components/LocationLoginPrompt";
 import useLocationLoginPrompt from "./hooks/useLocationLoginPrompt";
 import AntiWaste from "./pages/AntiWaste";
+import { AdminSidebarProvider } from "./contexts/AdminSidebarContext";
 
 function AppContent() {
   const { showLocationDialog, handleLocationSet, handleCloseDialog } =
@@ -61,6 +66,10 @@ function AppContent() {
         <Route path="/admin/flyer-analytics" element={<FlyerAnalytics />} />
         <Route path="/admin/coupon-analytics" element={<CouponAnalytics />} />
         <Route path="/admin/pricing-plans" element={<PricingPlans />} />
+        <Route path="/admin/user-management" element={<UserManagement />} />
+        <Route path="/admin/store-management" element={<StoreManagement />} />
+        <Route path="/admin/flyer-management" element={<FlyerManagement />} />
+        <Route path="/admin/coupon-management" element={<CouponManagement />} />
         <Route path="/subscriptions" element={<Subscriptions />} />
         <Route path="/deals" element={<Deals />} />
         <Route path="/not-found" element={<NotFound />} />
@@ -96,7 +105,9 @@ function App() {
   return (
     <>
       <BrowserRouter>
-        <AppContent />
+        <AdminSidebarProvider>
+          <AppContent />
+        </AdminSidebarProvider>
       </BrowserRouter>
     </>
   );
