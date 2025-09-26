@@ -1,9 +1,11 @@
 import { useState } from "react";
 import Footer from "../components/Footer";
+import { useTranslation } from "react-i18next";
+import i18n from "../lib/i18n";
 
 export default function LegalNotices() {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(["editor", "hosting"])
+    new Set(["information-accuracy", "service-disclaimer"])
   );
 
   const toggleSection = (sectionId: string) => {
@@ -37,15 +39,18 @@ export default function LegalNotices() {
                 </svg>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-4">
-                Mentions Légales
+                {i18n.language === "fr" ? "Mentions Légales" : "Legal Notices"}
               </h1>
               <p className="text-xl md:text-2xl text-gray-200">
-                www.topprix.re
+                www.topprix.mu
               </p>
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 inline-block">
               <p className="text-lg text-white font-medium">
-                📅 Dernière mise à jour : Août 2025
+                📅{" "}
+                {i18n.language === "fr"
+                  ? "Dernière mise à jour : Août 2025"
+                  : "Last updated: August 2025"}
               </p>
             </div>
           </div>
@@ -53,10 +58,19 @@ export default function LegalNotices() {
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="space-y-8">
-            {/* Section 1: Éditeur du site */}
+            {/* Introduction */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <p className="text-gray-700 text-lg leading-relaxed">
+                {i18n.language === "fr"
+                  ? "Ce site web est exploité par KLIKLOKAL enregistré sous le gouvernement français. En accédant et en utilisant ce site web, vous acceptez les termes et conditions suivants :"
+                  : "This website is operated by KLIKLOKAL registered under French government. By accessing and using this website, you agree to the following terms and conditions:"}
+              </p>
+            </div>
+
+            {/* Section 1: Information Accuracy */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
-                onClick={() => toggleSection("editor")}
+                onClick={() => toggleSection("information-accuracy")}
                 className="w-full p-6 text-left bg-blue-50 hover:bg-blue-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
@@ -65,12 +79,16 @@ export default function LegalNotices() {
                       1
                     </div>
                     <h3 className="text-xl font-bold text-gray-900">
-                      Éditeur du site
+                      {i18n.language === "fr"
+                        ? "Exactitude des Informations"
+                        : "Information Accuracy"}
                     </h3>
                   </div>
                   <svg
                     className={`w-5 h-5 text-blue-500 transform transition-transform duration-200 ${
-                      expandedSections.has("editor") ? "rotate-180" : ""
+                      expandedSections.has("information-accuracy")
+                        ? "rotate-180"
+                        : ""
                     }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -83,73 +101,21 @@ export default function LegalNotices() {
                   </svg>
                 </div>
               </button>
-              {expandedSections.has("editor") && (
+              {expandedSections.has("information-accuracy") && (
                 <div className="p-6 bg-gray-50 border-t border-gray-200">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          🏪 Nom commercial
-                        </p>
-                        <p className="text-gray-900">Topprix.re</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          🏢 Raison sociale
-                        </p>
-                        <p className="text-gray-900">KLIKLOKAL</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          📋 Forme juridique
-                        </p>
-                        <p className="text-gray-900">SASU</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          🆔 SIRET
-                        </p>
-                        <p className="text-gray-900">940 539 398 00013</p>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          📍 Adresse
-                        </p>
-                        <p className="text-gray-900">
-                          56 Rue du Général de Gaulle, 97400, Saint-Denis
-                          Réunion
-                        </p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          📧 Contact
-                        </p>
-                        <p className="text-gray-900">contact@topprix.re</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          📞 Téléphone
-                        </p>
-                        <p className="text-gray-900">0693039840</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          🌐 Site web
-                        </p>
-                        <p className="text-gray-900">www.topprix.re</p>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="text-gray-700 leading-relaxed">
+                    {i18n.language === "fr"
+                      ? "Tout le contenu fourni sur ce site web est uniquement à des fins d'information générale. Bien que nous fassions tous les efforts pour assurer l'exactitude et l'actualité des informations, KLIKLOKAL ne donne aucune garantie, représentation ou assurance, expresse ou implicite, concernant l'exhaustivité, la fiabilité ou l'adéquation de tout contenu, service ou matériel disponible sur ce site web."
+                      : "All content provided on this website is for general informational purposes only. While we make every effort to ensure the accuracy and timeliness of information, KLIKLOKAL makes no warranties, representations, or guarantees, express or implied, regarding the completeness, reliability, or suitability of any content, services, or materials available on this website."}
+                  </p>
                 </div>
               )}
             </div>
 
-            {/* Section 2: Hébergement */}
+            {/* Section 2: Service Disclaimer */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
-                onClick={() => toggleSection("hosting")}
+                onClick={() => toggleSection("service-disclaimer")}
                 className="w-full p-6 text-left bg-green-50 hover:bg-green-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
@@ -158,12 +124,16 @@ export default function LegalNotices() {
                       2
                     </div>
                     <h3 className="text-xl font-bold text-gray-900">
-                      Hébergement
+                      {i18n.language === "fr"
+                        ? "Avertissement sur les Services"
+                        : "Service Disclaimer"}
                     </h3>
                   </div>
                   <svg
                     className={`w-5 h-5 text-green-500 transform transition-transform duration-200 ${
-                      expandedSections.has("hosting") ? "rotate-180" : ""
+                      expandedSections.has("service-disclaimer")
+                        ? "rotate-180"
+                        : ""
                     }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -176,64 +146,21 @@ export default function LegalNotices() {
                   </svg>
                 </div>
               </button>
-              {expandedSections.has("hosting") && (
+              {expandedSections.has("service-disclaimer") && (
                 <div className="p-6 bg-gray-50 border-t border-gray-200">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          🏢 Hébergeur
-                        </p>
-                        <p className="text-gray-900">OVHcloud — OVH SAS</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          📍 Adresse
-                        </p>
-                        <p className="text-gray-900">
-                          2 rue Kellermann - 59100 Roubaix — France
-                        </p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          🆔 SIRET
-                        </p>
-                        <p className="text-gray-900">
-                          424761 419 00045 — RCS Lille Métropole
-                        </p>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          💰 Capital social
-                        </p>
-                        <p className="text-gray-900">10 069 020 €</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          🌐 Site web
-                        </p>
-                        <p className="text-gray-900">www.ovhcloud.com</p>
-                      </div>
-                      <div className="bg-white p-4 rounded-lg border border-gray-200">
-                        <p className="font-semibold text-gray-900 mb-2">
-                          📞 Téléphone
-                        </p>
-                        <p className="text-gray-900">
-                          1007 (appel gratuit depuis un poste fixe en France)
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="text-gray-700 leading-relaxed">
+                    {i18n.language === "fr"
+                      ? "Les services décrits sur ce site web sont sujets à changement sans préavis. Rien sur ce site web ne constitue une offre contraignante sauf indication explicite par écrit."
+                      : "The services described on this website are subject to change without prior notice. Nothing on this website constitutes a binding offer unless explicitly stated in writing."}
+                  </p>
                 </div>
               )}
             </div>
 
-            {/* Section 3: Propriété intellectuelle */}
+            {/* Section 3: Limitation of Liability */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
-                onClick={() => toggleSection("intellectual-property")}
+                onClick={() => toggleSection("limitation-liability")}
                 className="w-full p-6 text-left bg-purple-50 hover:bg-purple-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
@@ -242,11 +169,103 @@ export default function LegalNotices() {
                       3
                     </div>
                     <h3 className="text-xl font-bold text-gray-900">
-                      Propriété intellectuelle
+                      {i18n.language === "fr"
+                        ? "Limitation de Responsabilité"
+                        : "Limitation of Liability"}
                     </h3>
                   </div>
                   <svg
                     className={`w-5 h-5 text-purple-500 transform transition-transform duration-200 ${
+                      expandedSections.has("limitation-liability")
+                        ? "rotate-180"
+                        : ""
+                    }`}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </button>
+              {expandedSections.has("limitation-liability") && (
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
+                  <p className="text-gray-700 leading-relaxed">
+                    {i18n.language === "fr"
+                      ? "KLIKLOKAL ne peut être tenu responsable de tout dommage direct, indirect, fortuit ou consécutif résultant de l'utilisation, ou de l'impossibilité d'utiliser, ce site web ou ses services. Les utilisateurs sont responsables de s'assurer que tout service ou information répond à leurs exigences spécifiques."
+                      : "KLIKLOKAL shall not be held liable for any direct, indirect, incidental, or consequential damages arising out of the use of, or inability to use, this website or its services. Users are responsible for ensuring that any services or information meet their specific requirements."}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Section 4: Third-Party Links */}
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+              <button
+                onClick={() => toggleSection("third-party-links")}
+                className="w-full p-6 text-left bg-orange-50 hover:bg-orange-100 transition-colors duration-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-orange-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      4
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {i18n.language === "fr"
+                        ? "Liens Tiers"
+                        : "Third-Party Links"}
+                    </h3>
+                  </div>
+                  <svg
+                    className={`w-5 h-5 text-orange-500 transform transition-transform duration-200 ${
+                      expandedSections.has("third-party-links")
+                        ? "rotate-180"
+                        : ""
+                    }`}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </button>
+              {expandedSections.has("third-party-links") && (
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
+                  <p className="text-gray-700 leading-relaxed">
+                    {i18n.language === "fr"
+                      ? "Ce site web peut contenir des liens vers des sites web externes exploités par des tiers. KLIKLOKAL n'a aucun contrôle sur le contenu ou les pratiques de ces sites externes et n'accepte aucune responsabilité ou obligation à leur égard."
+                      : "This website may contain links to external websites operated by third parties. KLIKLOKAL has no control over the content or practices of these external sites and accepts no responsibility or liability for them."}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Section 5: Intellectual Property */}
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+              <button
+                onClick={() => toggleSection("intellectual-property")}
+                className="w-full p-6 text-left bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-indigo-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      5
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      {i18n.language === "fr"
+                        ? "Propriété Intellectuelle"
+                        : "Intellectual Property"}
+                    </h3>
+                  </div>
+                  <svg
+                    className={`w-5 h-5 text-indigo-500 transform transition-transform duration-200 ${
                       expandedSections.has("intellectual-property")
                         ? "rotate-180"
                         : ""
@@ -264,59 +283,33 @@ export default function LegalNotices() {
               </button>
               {expandedSections.has("intellectual-property") && (
                 <div className="p-6 bg-gray-50 border-t border-gray-200">
-                  <p className="text-gray-700 mb-4">
-                    L'ensemble de ce site relève de la législation française et
-                    internationale sur le droit d'auteur et la propriété
-                    intellectuelle.
+                  <p className="text-gray-700 leading-relaxed">
+                    {i18n.language === "fr"
+                      ? "Tout le contenu, y compris mais sans s'y limiter, les textes, images, graphiques et logos, sont la propriété de KLIKLOKAL ou de ses concédants de licence, sauf indication contraire. L'utilisation, la reproduction ou la distribution non autorisée de tout matériel est strictement interdite."
+                      : "All content, including but not limited to text, images, graphics, and logos, are the property of KLIKLOKAL or its licensors, unless otherwise stated. Unauthorized use, reproduction, or distribution of any material is strictly prohibited."}
                   </p>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                        <span className="text-purple-600">📝</span>
-                        Contenu protégé
-                      </h4>
-                      <ul className="space-y-2 text-gray-700 text-sm">
-                        <li>• Textes et articles</li>
-                        <li>• Images et graphiques</li>
-                        <li>• Logos et marques</li>
-                        <li>• Structure du site</li>
-                      </ul>
-                    </div>
-                    <div className="bg-white p-4 rounded-lg border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                        <span className="text-purple-600">⚠️</span>
-                        Utilisation interdite
-                      </h4>
-                      <ul className="space-y-2 text-gray-700 text-sm">
-                        <li>• Reproduction sans autorisation</li>
-                        <li>• Distribution commerciale</li>
-                        <li>• Modification du contenu</li>
-                        <li>• Utilisation à des fins illégales</li>
-                      </ul>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
 
-            {/* Section 4: Responsabilité */}
+            {/* Section 6: Jurisdiction */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
-                onClick={() => toggleSection("responsibility")}
-                className="w-full p-6 text-left bg-orange-50 hover:bg-orange-100 transition-colors duration-200"
+                onClick={() => toggleSection("jurisdiction")}
+                className="w-full p-6 text-left bg-red-50 hover:bg-red-100 transition-colors duration-200"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-orange-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                      4
+                    <div className="w-8 h-8 bg-red-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      6
                     </div>
                     <h3 className="text-xl font-bold text-gray-900">
-                      Limitation de responsabilité
+                      {i18n.language === "fr" ? "Juridiction" : "Jurisdiction"}
                     </h3>
                   </div>
                   <svg
-                    className={`w-5 h-5 text-orange-500 transform transition-transform duration-200 ${
-                      expandedSections.has("responsibility") ? "rotate-180" : ""
+                    className={`w-5 h-5 text-red-500 transform transition-transform duration-200 ${
+                      expandedSections.has("jurisdiction") ? "rotate-180" : ""
                     }`}
                     fill="currentColor"
                     viewBox="0 0 20 20"
@@ -329,52 +322,13 @@ export default function LegalNotices() {
                   </svg>
                 </div>
               </button>
-              {expandedSections.has("responsibility") && (
+              {expandedSections.has("jurisdiction") && (
                 <div className="p-6 bg-gray-50 border-t border-gray-200">
-                  <p className="text-gray-700 mb-4">
-                    Topprix.re s'efforce d'assurer l'exactitude des informations
-                    diffusées mais ne peut garantir leur exhaustivité.
+                  <p className="text-gray-700 leading-relaxed">
+                    {i18n.language === "fr"
+                      ? "Cette notice légale est régie par et interprétée conformément aux lois de l'île de La Réunion/France. Tout litige découlant de l'utilisation de ce site web sera soumis à la juridiction exclusive des tribunaux compétents en France."
+                      : "This legal notice is governed by and construed in accordance with the laws of Reunion Island/France. Any disputes arising from the use of this website shall be subject to the exclusive jurisdiction of the competent courts in France."}
                   </p>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
-                      <div className="w-6 h-6 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <svg
-                          className="w-4 h-4 text-orange-600"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                      <span className="text-gray-700">
-                        Les informations sont fournies "en l'état" sans garantie
-                        d'aucune sorte
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
-                      <div className="w-6 h-6 bg-orange-100 rounded-lg flex items-center justify-center">
-                        <svg
-                          className="w-4 h-4 text-orange-600"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                      <span className="text-gray-700">
-                        Topprix.re ne peut être tenu responsable des dommages
-                        directs ou indirects
-                      </span>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
@@ -386,16 +340,19 @@ export default function LegalNotices() {
               <div className="text-2xl">ℹ️</div>
               <div>
                 <h3 className="text-lg font-semibold text-blue-800 mb-2">
-                  Informations complémentaires
+                  {i18n.language === "fr"
+                    ? "Informations complémentaires"
+                    : "Additional Information"}
                 </h3>
                 <p className="text-blue-800">
-                  Pour toute question concernant ces mentions légales ou pour
-                  exercer vos droits, contactez-nous à{" "}
+                  {i18n.language === "fr"
+                    ? "Pour plus d'informations, veuillez nous contacter à :"
+                    : "For further information, please contact us at:"}{" "}
                   <a
-                    href="mailto:contact@topprix.re"
+                    href="mailto:contact@clicklocal.mu"
                     className="font-semibold underline hover:text-blue-900"
                   >
-                    contact@topprix.re
+                    contact@clicklocal.mu
                   </a>
                 </p>
               </div>
@@ -406,26 +363,34 @@ export default function LegalNotices() {
           <div className="mt-8 text-center">
             <div className="bg-gray-50 rounded-lg p-6 inline-block">
               <p className="text-gray-600 mb-4">
-                Pour plus d'informations légales, consultez également nos
+                {i18n.language === "fr"
+                  ? "Pour plus d'informations légales, consultez également nos"
+                  : "For more legal information, also check our"}
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <a
                   href="/terms"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors duration-200"
                 >
-                  Conditions d'Utilisation
+                  {i18n.language === "fr"
+                    ? "Conditions d'Utilisation"
+                    : "Terms of Use"}
                 </a>
                 <a
                   href="/general-conditions"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors duration-200"
                 >
-                  Conditions de Vente
+                  {i18n.language === "fr"
+                    ? "Conditions de Vente"
+                    : "Terms of Sale"}
                 </a>
                 <a
                   href="/privacy-policy"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
-                  Politique de Confidentialité
+                  {i18n.language === "fr"
+                    ? "Politique de Confidentialité"
+                    : "Privacy Policy"}
                 </a>
               </div>
             </div>

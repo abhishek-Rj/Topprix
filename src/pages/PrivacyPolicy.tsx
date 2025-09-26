@@ -41,7 +41,7 @@ export default function PrivacyPolicy() {
               <h1 className="text-4xl md:text-6xl font-bold mb-4">
                 Politique de Confidentialité
               </h1>
-              <p className="text-xl md:text-2xl text-green-100">Topprix.re</p>
+              <p className="text-xl md:text-2xl text-green-100">Topprix.mu</p>
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 inline-block">
               <p className="text-lg text-white font-medium">
@@ -73,7 +73,7 @@ export default function PrivacyPolicy() {
               </h2>
             </div>
             <p className="text-lg text-gray-700 leading-relaxed text-center">
-              Chez Topprix.re, nous accordons une importance capitale à la
+              Chez Topprix.mu, nous accordons une importance capitale à la
               protection de votre vie privée et de vos données personnelles.
               Cette politique de confidentialité vous explique de manière claire
               et transparente quelles données nous collectons, pourquoi nous les
@@ -116,7 +116,7 @@ export default function PrivacyPolicy() {
               {expandedSections.has("legal") && (
                 <div className="p-6 bg-gray-50 border-t border-gray-200">
                   <p className="text-gray-700 mb-4">
-                    Topprix.re est une marque appartenant à la société :
+                    Topprix.mu est une marque appartenant à la société :
                   </p>
                   <div className="bg-white p-6 rounded-lg border border-gray-200">
                     <div className="grid md:grid-cols-2 gap-6">
@@ -134,7 +134,7 @@ export default function PrivacyPolicy() {
                       </div>
                       <div>
                         <p className="text-gray-700 mb-2">
-                          📧 contact@topprix.re
+                          📧 contact@topprix.mu
                         </p>
                         <p className="text-gray-700 mb-3">📞 0693039840</p>
                         <div>
@@ -443,10 +443,10 @@ export default function PrivacyPolicy() {
                   confidentialité ou pour exercer vos droits, contactez-nous à :
                 </p>
                 <a
-                  href="mailto:contact@topprix.re"
+                  href="mailto:contact@topprix.mu"
                   className="font-semibold text-blue-600 hover:text-blue-800 underline"
                 >
-                  contact@topprix.re
+                  contact@topprix.mu
                 </a>
               </div>
             </div>

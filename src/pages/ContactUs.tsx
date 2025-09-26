@@ -3,7 +3,6 @@ import { useState } from "react";
 import Footer from "../components/Footer";
 
 export default function ContactUs() {
-  const { t } = useTranslation();
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
     new Set(["company", "responsibilities"])
   );
@@ -46,7 +45,7 @@ export default function ContactUs() {
               <h1 className="text-4xl md:text-6xl font-bold mb-4">
                 Nous Contacter
               </h1>
-              <p className="text-xl md:text-2xl text-teal-100">Topprix.re</p>
+              <p className="text-xl md:text-2xl text-teal-100">Topprix.mu</p>
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 inline-block">
               <p className="text-lg text-white font-medium">
@@ -90,7 +89,7 @@ export default function ContactUs() {
             {expandedSections.has("company") && (
               <div className="p-6 bg-gray-50 border-t border-gray-200">
                 <p className="text-gray-700 mb-4">
-                  La société KLIKLOKAL, éditrice du site Topprix.re, met à
+                  La société KLIKLOKAL, éditrice du site Topprix.mu, met à
                   disposition un service de contact dédié à la gestion des
                   demandes, signalements et réclamations liés à l'utilisation de
                   la plateforme.
@@ -113,7 +112,7 @@ export default function ContactUs() {
                           <p className="font-semibold text-gray-900">
                             Nom commercial
                           </p>
-                          <p className="text-gray-700">Topprix.re</p>
+                          <p className="text-gray-700">Topprix.mu</p>
                         </div>
                       </div>
                     </div>
@@ -136,10 +135,10 @@ export default function ContactUs() {
                         <div>
                           <p className="font-semibold text-gray-900">E-mail</p>
                           <a
-                            href="mailto:contact@topprix.re"
+                            href="mailto:contact@clicklocal.mu"
                             className="text-teal-600 hover:text-teal-800 underline"
                           >
-                            contact@topprix.re
+                            contact@clicklocal.mu
                           </a>
                         </div>
                       </div>
@@ -183,7 +182,7 @@ export default function ContactUs() {
             {expandedSections.has("responsibilities") && (
               <div className="p-6 bg-gray-50 border-t border-gray-200">
                 <p className="text-gray-700 mb-4">
-                  Avant de nous contacter, veuillez noter que Topprix.re agit
+                  Avant de nous contacter, veuillez noter que Topprix.mu agit
                   uniquement en tant que plateforme de diffusion. Les offres
                   publiées relèvent exclusivement de la responsabilité des
                   commerçants partenaires.
@@ -197,7 +196,7 @@ export default function ContactUs() {
                 </div>
                 <div className="bg-white p-4 rounded-lg border border-gray-200">
                   <h4 className="font-semibold text-gray-900 mb-3">
-                    Topprix.re n'intervient pas dans :
+                    Topprix.mu n'intervient pas dans :
                   </h4>
                   <ul className="space-y-2 text-gray-700">
                     <li>
@@ -381,7 +380,7 @@ export default function ContactUs() {
                     Contact partenariat
                   </h4>
                   <a
-                    href="mailto:fedric@topprix.re"
+                    href="mailto:fedric@topprix.mu"
                     className="inline-flex items-center gap-2 px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition-colors duration-200"
                   >
                     <svg
@@ -400,7 +399,7 @@ export default function ContactUs() {
                         clipRule="evenodd"
                       />
                     </svg>
-                    fedric@topprix.re
+                    fedric@topprix.mu
                   </a>
                 </div>
               </div>
@@ -487,7 +486,7 @@ export default function ContactUs() {
             </div>
             <div className="text-center">
               <a
-                href="mailto:contact@topprix.re"
+                href="mailto:contact@clicklocal.mu"
                 className="inline-flex items-center gap-3 px-8 py-4 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors duration-200 text-lg"
               >
                 <svg
@@ -506,7 +505,7 @@ export default function ContactUs() {
                     clipRule="evenodd"
                   />
                 </svg>
-                Envoyer un e-mail à contact@topprix.re
+                Envoyer un e-mail à contact@clicklocal.mu
               </a>
             </div>
           </div>

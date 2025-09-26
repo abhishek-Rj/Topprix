@@ -7,16 +7,10 @@ import {
   HiX,
   HiShoppingBag,
   HiStar,
-  HiUsers,
   HiTrendingUp,
   HiCheckCircle,
 } from "react-icons/hi";
-import {
-  FaStore,
-  FaRegSmile,
-  FaRegHeart,
-  FaRegMoneyBillAlt,
-} from "react-icons/fa";
+import { FaStore, FaRegSmile, FaRegMoneyBillAlt } from "react-icons/fa";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import Footer from "../components/Footer";
@@ -26,6 +20,7 @@ import { CouponCard } from "@/components/CouponCard";
 import { FlyerCard } from "@/components/FlyerCard";
 import baseUrl from "@/hooks/baseurl";
 import { useTranslation } from "react-i18next";
+import i18n from "../lib/i18n";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -33,21 +28,21 @@ export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [coupons, setCoupons] = useState<any[]>([]);
   const [flyers, setFlyers] = useState<any[]>([]);
-  const { user, userRole, loading } = useAuthenticate();
+  const { user, userRole } = useAuthenticate();
 
   useEffect(() => {
     try {
       (async () => {
         const fetchCoupons = await fetch(`${baseUrl}coupons?limit=3`);
         if (!fetchCoupons.ok) {
-          toast.error("Une erreur s'est produite");
-          throw new Error("Impossible de récupérer les coupons");
+          toast.error(t("error.generic"));
+          throw new Error(t("error.fetchCoupons"));
         }
         setCoupons((await fetchCoupons.json()).coupons);
       })();
     } catch (error) {
       console.error("Error fetching coupons:", error);
-      toast.error("Impossible de récupérer les coupons");
+      toast.error(t("error.fetchCoupons"));
     }
   }, []);
 
@@ -56,14 +51,14 @@ export default function Home() {
       (async () => {
         const fetchFlyers = await fetch(`${baseUrl}flyers?limit=3`);
         if (!fetchFlyers.ok) {
-          toast.error("Une erreur s'est produite");
-          throw new Error("Impossible de récupérer les prospectus");
+          toast.error(t("error.generic"));
+          throw new Error(t("error.fetchFlyers"));
         }
         setFlyers((await fetchFlyers.json()).flyers);
       })();
     } catch (error) {
       console.error("Error fetching flyers:", error);
-      toast.error("Impossible de récupérer les prospectus");
+      toast.error(t("error.fetchFlyers"));
     }
   }, []);
 
@@ -111,18 +106,23 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <img
-                src={"/logowb.png"}
-                alt="Logo Topprix.re"
-                className="w-10 h-10 mr-2"
-              />
-              <h1
-                className={`text-2xl font-bold ${
-                  userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
-                }`}
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center hover:opacity-80 transition-opacity duration-200"
               >
-                Topprix.re
-              </h1>
+                <img
+                  src={"/topprix.mu.png"}
+                  alt="Logo Topprix.mu"
+                  className="w-12 h-12 mr-2"
+                />
+                <h1
+                  className={`text-2xl font-bold ${
+                    userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
+                  }`}
+                >
+                  Topprix.mu
+                </h1>
+              </button>
             </div>
 
             {/* Desktop Navigation */}
@@ -136,7 +136,9 @@ export default function Home() {
                 }`}
               >
                 <HiTag />
-                Explorer les Prospectus
+                {i18n.language === "fr"
+                  ? "Explorer les Prospectus"
+                  : "Explore Flyers"}
               </button>
               <button
                 onClick={() => navigate("/explore/flyers")}
@@ -147,7 +149,9 @@ export default function Home() {
                 }`}
               >
                 <HiNewspaper />
-                Explorer les Coupons
+                {i18n.language === "fr"
+                  ? "Explorer les Coupons"
+                  : "Explore Coupons"}
               </button>
               <button
                 onClick={() => {
@@ -168,7 +172,7 @@ export default function Home() {
                 ) : (
                   <>
                     <HiUser />
-                    Connexion
+                    {i18n.language === "fr" ? "Connexion" : "Login"}
                   </>
                 )}
               </button>
@@ -210,7 +214,9 @@ export default function Home() {
                   }`}
                 >
                   <HiTag />
-                  Explorer les Prospectus
+                  {i18n.language === "fr"
+                    ? "Explorer les Prospectus"
+                    : "Explore Flyers"}
                 </button>
                 <button
                   onClick={() => {
@@ -224,7 +230,9 @@ export default function Home() {
                   }`}
                 >
                   <HiNewspaper />
-                  Explorer les Coupons
+                  {i18n.language === "fr"
+                    ? "Explorer les Coupons"
+                    : "Explore Coupons"}
                 </button>
                 <button
                   onClick={() => {
@@ -245,7 +253,7 @@ export default function Home() {
                   ) : (
                     <>
                       <HiUser />
-                      Connexion
+                      {i18n.language === "fr" ? "Connexion" : "Login"}
                     </>
                   )}
                 </button>
@@ -280,7 +288,9 @@ export default function Home() {
                 }`}
               >
                 <HiTrendingUp className="w-4 h-4" />
-                Économisez jusqu'à 70% sur vos marques préférées
+                {i18n.language === "fr"
+                  ? "Économisez jusqu'à 70% sur vos marques préférées"
+                  : "Save up to 70% on your favorite brands"}
               </div>
             </motion.div>
 
@@ -295,13 +305,15 @@ export default function Home() {
               }`}
             >
               <h1 className="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
-                Découvrez des
+                {i18n.language === "fr" ? "Découvrez des" : "Discover"}
                 <span
                   className={`${
                     userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                   } block`}
                 >
-                  Offres Incroyables
+                  {i18n.language === "fr"
+                    ? "Offres Incroyables"
+                    : "Amazing Offers"}
                 </span>
               </h1>
             </motion.div>
@@ -312,15 +324,18 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed"
             >
-              Trouvez les meilleurs coupons et prospectus de vos magasins
-              préférés.
+              {i18n.language === "fr"
+                ? "Trouvez les meilleurs coupons et prospectus de vos magasins préférés."
+                : "Find the best coupons and flyers from your favorite stores."}
               <span
                 className={`${
                   userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                 } font-semibold`}
               >
                 {" "}
-                Économisez plus, achetez plus intelligemment.
+                {i18n.language === "fr"
+                  ? "Économisez plus, achetez plus intelligemment."
+                  : "Save more, shop smarter."}
               </span>
             </motion.p>
 
@@ -339,7 +354,9 @@ export default function Home() {
                 }`}
               >
                 <HiTag className="w-5 h-5" />
-                Parcourir les Prospectus
+                {i18n.language === "fr"
+                  ? "Parcourir les Prospectus"
+                  : "Browse Flyers"}
               </button>
               <button
                 onClick={() => navigate("/explore/coupons")}
@@ -350,7 +367,7 @@ export default function Home() {
                 }`}
               >
                 <HiNewspaper className="w-5 h-5" />
-                Voir les Coupons
+                {i18n.language === "fr" ? "Voir les Coupons" : "View Coupons"}
               </button>
             </motion.div>
           </div>
@@ -375,10 +392,14 @@ export default function Home() {
           >
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-                Prospectus Populaires
+                {i18n.language === "fr"
+                  ? "Prospectus Populaires"
+                  : "Popular Flyers"}
               </h2>
               <p className="text-gray-600">
-                Découvrez les dernières offres des meilleurs magasins
+                {i18n.language === "fr"
+                  ? "Découvrez les dernières offres des meilleurs magasins"
+                  : "Discover the latest offers from the best stores"}
               </p>
             </div>
             <button
@@ -508,10 +529,14 @@ export default function Home() {
           >
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-                Coupons Populaires
+                {i18n.language === "fr"
+                  ? "Coupons Populaires"
+                  : "Popular Coupons"}
               </h2>
               <p className="text-gray-600">
-                Économisez gros avec ces codes de réduction exclusifs
+                {i18n.language === "fr"
+                  ? "Économisez gros avec ces codes de réduction exclusifs"
+                  : "Save big with these exclusive discount codes"}
               </p>
             </div>
             <button
@@ -585,18 +610,20 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Ce que disent nos{" "}
+              {i18n.language === "fr" ? "Ce que disent nos" : "What Our"}{" "}
               <span
                 className={`${
                   userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                 }`}
               >
-                Clients
+                {i18n.language === "fr" ? "Clients" : "Customers"}
               </span>
+              {i18n.language === "fr" ? "" : " Say"}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Rejoignez des milliers de clients satisfaits qui économisent de
-              l'argent chaque jour
+              {i18n.language === "fr"
+                ? "Rejoignez des milliers de clients satisfaits qui économisent de l'argent chaque jour"
+                : "Join thousands of satisfied customers who save money every day"}
             </p>
           </motion.div>
 
@@ -620,8 +647,9 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600 mb-6 italic">
-                "Topprix m'a fait économiser des centaines d'euros ! Les offres
-                sont incroyables et l'application est si facile à utiliser."
+                {i18n.language === "fr"
+                  ? "\"Topprix m'a fait économiser des centaines d'euros ! Les offres sont incroyables et l'application est si facile à utiliser.\""
+                  : '"Topprix has saved me hundreds of euros! The offers are incredible and the app is so easy to use."'}
               </p>
               <div className="flex items-center">
                 <div
@@ -635,39 +663,10 @@ export default function Home() {
                   <div className="font-semibold text-gray-900">
                     Sarah Johnson
                   </div>
-                  <div className="text-gray-500 text-sm">Cliente Régulière</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center mb-4">
-                <div
-                  className={`flex ${
-                    userRole === "ADMIN" ? "text-blue-400" : "text-yellow-400"
-                  }`}
-                >
-                  {[...Array(5)].map((_, i) => (
-                    <HiStar key={i} className="w-5 h-5 fill-current" />
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-600 mb-6 italic">
-                "J'adore comment je peux trouver toutes les meilleures offres en
-                un seul endroit. La section prospectus est ma préférée !"
-              </p>
-              <div className="flex items-center">
-                <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold mr-4 ${
-                    userRole === "ADMIN" ? "bg-blue-500" : "bg-yellow-500"
-                  }`}
-                >
-                  M
-                </div>
-                <div>
-                  <div className="font-semibold text-gray-900">Mike Chen</div>
                   <div className="text-gray-500 text-sm">
-                    Acheteur Intelligent
+                    {i18n.language === "fr"
+                      ? "Cliente Régulière"
+                      : "Regular Customer"}
                   </div>
                 </div>
               </div>
@@ -686,8 +685,45 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-gray-600 mb-6 italic">
-                "Les coupons sont toujours valides et les économies sont
-                réelles. Je recommande vivement Topprix !"
+                {i18n.language === "fr"
+                  ? '"J\'adore comment je peux trouver toutes les meilleures offres en un seul endroit. La section prospectus est ma préférée !"'
+                  : '"I love how I can find all the best offers in one place. The flyers section is my favorite!"'}
+              </p>
+              <div className="flex items-center">
+                <div
+                  className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold mr-4 ${
+                    userRole === "ADMIN" ? "bg-blue-500" : "bg-yellow-500"
+                  }`}
+                >
+                  M
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Mike Chen</div>
+                  <div className="text-gray-500 text-sm">
+                    {i18n.language === "fr"
+                      ? "Acheteur Intelligent"
+                      : "Smart Shopper"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="flex items-center mb-4">
+                <div
+                  className={`flex ${
+                    userRole === "ADMIN" ? "text-blue-400" : "text-yellow-400"
+                  }`}
+                >
+                  {[...Array(5)].map((_, i) => (
+                    <HiStar key={i} className="w-5 h-5 fill-current" />
+                  ))}
+                </div>
+              </div>
+              <p className="text-gray-600 mb-6 italic">
+                {i18n.language === "fr"
+                  ? '"Les coupons sont toujours valides et les économies sont réelles. Je recommande vivement Topprix !"'
+                  : '"The coupons are always valid and the savings are real. I highly recommend Topprix!"'}
               </p>
               <div className="flex items-center">
                 <div
@@ -700,7 +736,9 @@ export default function Home() {
                 <div>
                   <div className="font-semibold text-gray-900">Emma Davis</div>
                   <div className="text-gray-500 text-sm">
-                    Chasseuse de Bonnes Affaires
+                    {i18n.language === "fr"
+                      ? "Chasseuse de Bonnes Affaires"
+                      : "Deal Hunter"}
                   </div>
                 </div>
               </div>
@@ -720,19 +758,23 @@ export default function Home() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-              Pourquoi choisir{" "}
+              {i18n.language === "fr" ? "Pourquoi choisir" : "Why Choose"}{" "}
               <span
                 className={`${
                   userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                 }`}
               >
-                Topprix.re
+                Topprix.mu
               </span>
               ?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Nous rendons l'économie d'argent facile et amusante. Découvrez des
-              offres incroyables de vos magasins préférés.
+              {i18n.language === "fr"
+                ? "Nous rendons l'économie d'argent facile et amusante. Découvrez des"
+                : "We make saving money easy and fun. Discover"}
+              {i18n.language === "fr"
+                ? "offres incroyables de vos magasins préférés."
+                : "amazing offers from your favorite stores."}
             </p>
           </motion.div>
 
@@ -754,10 +796,14 @@ export default function Home() {
                 <FaRegMoneyBillAlt className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Économisez de l'Argent
+                {i18n.language === "fr"
+                  ? "Économisez de l'Argent"
+                  : "Save Money"}
               </h3>
               <p className="text-gray-600">
-                Obtenez des réductions exclusives et économisez sur chaque achat
+                {i18n.language === "fr"
+                  ? "Obtenez des réductions exclusives et économisez sur chaque achat"
+                  : "Get exclusive discounts and save on every purchase"}
               </p>
             </motion.div>
 
@@ -808,10 +854,14 @@ export default function Home() {
                 <HiCheckCircle className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Offres Vérifiées
+                {i18n.language === "fr"
+                  ? "Offres Vérifiées"
+                  : "Verified Offers"}
               </h3>
               <p className="text-gray-600">
-                Toutes les offres sont vérifiées et mises à jour régulièrement
+                {i18n.language === "fr"
+                  ? "Toutes les offres sont vérifiées et mises à jour régulièrement"
+                  : "All offers are verified and updated regularly"}
               </p>
             </motion.div>
           </motion.div>
@@ -841,12 +891,14 @@ export default function Home() {
               }`}
             >
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Vous avez un Magasin ?
+                {i18n.language === "fr"
+                  ? "Vous avez un Magasin ?"
+                  : "Have a Store?"}
               </h2>
               <p className="text-xl mb-8 max-w-3xl mx-auto leading-relaxed text-gray-700">
-                Créez votre profil de magasin et commencez à partager vos
-                coupons et prospectus avec des milliers de clients potentiels.
-                Rejoignez notre communauté grandissante de détaillants !
+                {i18n.language === "fr"
+                  ? "Créez votre profil de magasin et commencez à partager vos coupons et prospectus avec des milliers de clients potentiels. Rejoignez notre communauté grandissante de détaillants !"
+                  : "Create your store profile and start sharing your coupons and flyers with thousands of potential customers. Join our growing community of retailers!"}
               </p>
               <button
                 onClick={() => {
@@ -854,14 +906,10 @@ export default function Home() {
                     navigate("stores/create-new-store");
                   } else if (userRole === "USER") {
                     navigate("/signup");
-                    toast.info(
-                      "Vous devez vous connecter en tant que Détaillant"
-                    );
+                    toast.info(t("auth.mustLoginAsRetailer"));
                   } else {
                     navigate("/signup");
-                    toast.info(
-                      "Vous devez vous connecter en tant que Détaillant"
-                    );
+                    toast.info(t("auth.mustLoginAsRetailer"));
                   }
                 }}
                 className={`flex items-center gap-3 px-8 py-4 bg-white rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold text-lg mx-auto ${
@@ -871,7 +919,9 @@ export default function Home() {
                 }`}
               >
                 <FaStore className="w-5 h-5" />
-                Créer Votre Magasin
+                {i18n.language === "fr"
+                  ? "Créer Votre Magasin"
+                  : "Create Your Store"}
               </button>
             </div>
           </motion.div>

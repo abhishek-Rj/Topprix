@@ -42,7 +42,7 @@ export default function GeneralConditions() {
                 Conditions Générales de Vente
               </h1>
               <p className="text-xl md:text-2xl text-indigo-100">
-                (CGV) – Topprix.re
+                (CGV) – Topprix.mu
               </p>
             </div>
             <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4 inline-block">
@@ -123,7 +123,7 @@ export default function GeneralConditions() {
                         <p className="font-semibold text-gray-900 mb-2">
                           📧 Contact
                         </p>
-                        <p className="text-gray-700">contact@topprix.re</p>
+                        <p className="text-gray-700">contact@topprix.mu</p>
                       </div>
                       <div className="bg-white p-4 rounded-lg border border-gray-200">
                         <p className="font-semibold text-gray-900 mb-2">
@@ -169,7 +169,7 @@ export default function GeneralConditions() {
                 <div className="p-6 bg-gray-50 border-t border-gray-200">
                   <p className="text-gray-700 mb-4">
                     Les présentes CGV ont pour objet de définir les modalités et
-                    conditions de vente des services proposés par Topprix.re.
+                    conditions de vente des services proposés par Topprix.mu.
                   </p>
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
                     <h4 className="font-semibold text-gray-900 mb-3">
@@ -219,7 +219,7 @@ export default function GeneralConditions() {
               {expandedSections.has("article2") && (
                 <div className="p-6 bg-gray-50 border-t border-gray-200">
                   <p className="text-gray-700 mb-4">
-                    Topprix.re propose différents niveaux de services :
+                    Topprix.mu propose différents niveaux de services :
                   </p>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="bg-white p-4 rounded-lg border border-gray-200">
@@ -385,10 +385,10 @@ export default function GeneralConditions() {
                   complète. Pour toute question concernant nos services,
                   n'hésitez pas à nous contacter à{" "}
                   <a
-                    href="mailto:contact@topprix.re"
+                    href="mailto:contact@topprix.mu"
                     className="font-semibold underline hover:text-yellow-900"
                   >
-                    contact@topprix.re
+                    contact@topprix.mu
                   </a>
                 </p>
               </div>

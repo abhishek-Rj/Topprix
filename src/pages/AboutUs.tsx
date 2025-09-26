@@ -428,7 +428,7 @@ export default function AboutUs() {
                       et durable.
                     </p>
                     <a
-                      href="mailto:contact@topprix.re"
+                      href="mailto:contact@topprix.mu"
                       className="inline-flex items-center gap-2 px-6 py-3 bg-yellow-600 text-white font-semibold rounded-lg hover:bg-yellow-700 transition-colors duration-200"
                     >
                       <svg

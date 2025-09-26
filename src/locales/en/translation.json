@@ -160,6 +160,14 @@
     "en": "EN",
     "fr": "FR"
   },
+  "error": {
+    "generic": "An error occurred",
+    "fetchCoupons": "Unable to fetch coupons",
+    "fetchFlyers": "Unable to fetch flyers"
+  },
+  "auth": {
+    "mustLoginAsRetailer": "You must login as a Retailer"
+  },
   "shoppingLists": {
     "title": "My Shopping Lists",
     "noLists": "No shopping lists yet"

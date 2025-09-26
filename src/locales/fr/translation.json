@@ -158,6 +158,14 @@
     "en": "EN",
     "fr": "FR"
   },
+  "error": {
+    "generic": "Une erreur s'est produite",
+    "fetchCoupons": "Impossible de récupérer les coupons",
+    "fetchFlyers": "Impossible de récupérer les prospectus"
+  },
+  "auth": {
+    "mustLoginAsRetailer": "Vous devez vous connecter en tant que Détaillant"
+  },
   "shoppingLists": {
     "title": "Mes Listes d'Achats",
     "noLists": "Aucune liste d'achats pour le moment"
