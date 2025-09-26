@@ -345,44 +345,6 @@ export default function CouponPage() {
                   {t("coupons.description")}
                 </p>
               </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex flex-wrap justify-center gap-4 mb-8"
-              >
-                <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <HiTag
-                    className={
-                      userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
-                    }
-                  />
-                  <span className="text-gray-700">
-                    {pagination?.total || 0}+ {t("coupons.activeCoupons")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <FaStore
-                    className={
-                      userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
-                    }
-                  />
-                  <span className="text-gray-700">
-                    500+ {t("coupons.partnerStores")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                  <HiUser
-                    className={
-                      userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
-                    }
-                  />
-                  <span className="text-gray-700">
-                    1M+ {t("coupons.happyUsers")}
-                  </span>
-                </div>
-              </motion.div>
             </>
           ) : (
             <></>

@@ -42,6 +42,11 @@ import {
 } from "recharts";
 import Navigation from "../../components/navigation";
 import Footer from "../../components/Footer";
+import AdminFloatingSidebar from "../../components/AdminFloatingSidebar";
+import {
+  AdminSidebarProvider,
+  useAdminSidebar,
+} from "../../contexts/AdminSidebarContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import useAuthenticate from "../../hooks/authenticationt";
 import baseUrl from "../../hooks/baseurl";
@@ -103,9 +108,10 @@ interface StoreAnalyticsResponse {
   };
 }
 
-export default function StoreAnalytics() {
+function StoreAnalyticsContent() {
   const { t } = useTranslation();
   const { user } = useAuthenticate();
+  const { isOpen } = useAdminSidebar();
   const [analyticsData, setAnalyticsData] =
     useState<StoreAnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -244,7 +250,12 @@ export default function StoreAnalytics() {
   return (
     <>
       <Navigation />
-      <main className="pt-20 pb-10 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen">
+      <AdminFloatingSidebar />
+      <main
+        className={`pt-20 pb-10 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen transition-all duration-300 ease-in-out ${
+          isOpen ? "lg:ml-80" : "lg:ml-0"
+        }`}
+      >
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div
@@ -567,4 +578,8 @@ export default function StoreAnalytics() {
       <Footer />
     </>
   );
+}
+
+export default function StoreAnalytics() {
+  return <StoreAnalyticsContent />;
 }

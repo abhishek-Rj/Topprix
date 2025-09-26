@@ -362,46 +362,6 @@ export default function FlyerPage() {
             </motion.div>
           )}
 
-          {currentPage === 1 && userRole !== "RETAILER" && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="flex flex-wrap justify-center gap-4 mb-8"
-            >
-              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                <HiNewspaper
-                  className={
-                    userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
-                  }
-                />
-                <span className="text-gray-700">
-                  {pagination?.total || 0}+ {t("flyers.activeFlyers")}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                <FaStore
-                  className={
-                    userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
-                  }
-                />
-                <span className="text-gray-700">
-                  200+ {t("flyers.partnerStores")}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
-                <HiUser
-                  className={
-                    userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
-                  }
-                />
-                <span className="text-gray-700">
-                  50K+ {t("flyers.monthlyViews")}
-                </span>
-              </div>
-            </motion.div>
-          )}
-
           {/* Results Summary */}
           <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">

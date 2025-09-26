@@ -24,12 +24,14 @@ interface Props {
   onCategoryChange: (categoryIds: string[]) => void;
   onSubcategoryChange?: (subcategoryIds: string[]) => void; // Keep for backward compatibility but not used
   allowMultiple?: boolean;
+  categoryNames?: { [key: string]: string }; // Map of category IDs to names for display
 }
 
 export default function PredefinedCategorySelector({
   selectedCategories,
   onCategoryChange,
   allowMultiple = true,
+  categoryNames = {},
 }: Props) {
   const { userRole } = useAuthenticate();
   const { t } = useTranslation();
@@ -255,7 +257,9 @@ export default function PredefinedCategorySelector({
           </h4>
           <div className="flex flex-wrap gap-2">
             {selectedCategories.map((subId) => {
-              const name = findSubcategoryName(subId) || subId;
+              // First try to find in provided categoryNames, then in subcategories, then fallback to ID
+              const name =
+                categoryNames[subId] || findSubcategoryName(subId) || subId;
               return (
                 <span
                   key={subId}

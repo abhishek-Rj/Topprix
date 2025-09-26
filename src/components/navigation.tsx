@@ -101,7 +101,7 @@ const Navigation = () => {
                     : "text-yellow-600"
                 }`}
               >
-                Topprix
+                Topprix.re
               </span>
             </Link>
 
