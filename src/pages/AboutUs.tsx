@@ -27,7 +27,7 @@ export default function AboutUs() {
                 </svg>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6">
-                À Propos de TopPrix.re
+                À Propos de TopPrix.mu
               </h1>
               <p className="text-xl md:text-2xl text-yellow-100 max-w-4xl mx-auto leading-relaxed">
                 Une initiative locale, humaine, engagée et visionnaire
@@ -89,7 +89,7 @@ export default function AboutUs() {
                 </div>
 
                 <p className="text-lg text-gray-700 leading-relaxed mb-8">
-                  TopPrix.re est né de notre observation terrain :
+                  TopPrix.mu est né de notre observation terrain :
                 </p>
 
                 <div className="bg-red-50 border border-red-200 rounded-lg p-8 mb-8">
@@ -157,7 +157,7 @@ export default function AboutUs() {
 
                 <div className="bg-blue-50 border border-blue-200 p-8 rounded-lg mb-8">
                   <h3 className="text-2xl font-bold text-blue-900 mb-4 text-center">
-                    🚀 TopPrix.re : La plateforme qui révolutionne la
+                    🚀 TopPrix.mu : La plateforme qui révolutionne la
                     consommation locale
                   </h3>
                   <p className="text-blue-800 text-center text-lg">
@@ -333,7 +333,7 @@ export default function AboutUs() {
               <div className="bg-gray-50 rounded-lg p-8 md:p-12">
                 <p className="text-lg text-gray-700 leading-relaxed mb-8 text-center">
                   Notre ambition ne s'arrête pas à La Réunion. Nous envisageons
-                  un avenir où TopPrix.re devient un modèle de référence pour la
+                  un avenir où TopPrix.mu devient un modèle de référence pour la
                   consommation locale durable.
                 </p>
 
@@ -380,7 +380,7 @@ export default function AboutUs() {
               <div className="bg-gray-50 rounded-lg p-8 md:p-12">
                 <div className="text-center mb-8">
                   <p className="text-xl text-gray-700 leading-relaxed">
-                    TopPrix.re est une startup 100% réunionnaise, créée par des
+                    TopPrix.mu est une startup 100% réunionnaise, créée par des
                     locaux, pour les locaux, avec une vision globale.
                   </p>
                 </div>
@@ -421,7 +421,7 @@ export default function AboutUs() {
                 <div className="mt-8 bg-yellow-50 border border-yellow-200 p-6 rounded-lg">
                   <div className="text-center">
                     <h3 className="text-xl font-bold text-yellow-800 mb-3">
-                      Rejoignez l'aventure TopPrix.re !
+                      Rejoignez l'aventure TopPrix.mu !
                     </h3>
                     <p className="text-yellow-800 mb-4">
                       Ensemble, construisons l'avenir de la consommation locale
