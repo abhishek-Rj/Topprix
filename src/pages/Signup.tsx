@@ -15,6 +15,7 @@ export default function Signup() {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
+  const [countryCode, setCountryCode] = useState<string>("+1");
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -32,10 +33,6 @@ export default function Signup() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const validatePhone = (phone: string): boolean => {
-    return /^[0-9]{10}$/.test(phone);
-  };
-
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -47,13 +44,6 @@ export default function Signup() {
     if (!validateEmail(email)) {
       setEmailError(true);
       setError("Please enter a valid email.");
-      setLoading(false);
-      return;
-    }
-
-    if (!validatePhone(phone)) {
-      setPhoneError(true);
-      setError("Please enter a valid phone number.");
       setLoading(false);
       return;
     }
@@ -73,7 +63,6 @@ export default function Signup() {
     }
 
     try {
-      // First, check if user already exists in the database
       const checkUserResponse = await fetch(`${baseUrl}user/${email}`, {
         method: "GET",
         headers: {
@@ -84,7 +73,6 @@ export default function Signup() {
       if (checkUserResponse.ok) {
         const existingUser = await checkUserResponse.json();
 
-        // If user exists, show error message
         if (existingUser) {
           setError(
             "An account with this email already exists. Please login instead."
@@ -94,11 +82,14 @@ export default function Signup() {
         }
       }
 
+      // Combine country code with phone number
+      const fullPhoneNumber = `${countryCode}${phone}`;
+
       // Create user in Firebase first
       const userCredential = await signUpUserWithEmailAndPassword(
         name,
         email,
-        phone,
+        fullPhoneNumber,
         password,
         roleRef.current.value
       );
@@ -107,7 +98,6 @@ export default function Signup() {
         throw new Error("Failed to create Firebase user");
       }
 
-      // Create user in the database
       const registerUserResponse = await fetch(`${baseUrl}register`, {
         method: "POST",
         headers: {
@@ -116,7 +106,7 @@ export default function Signup() {
         body: JSON.stringify({
           username: name,
           email,
-          phone,
+          phone: fullPhoneNumber,
           role: roleRef.current.value,
         }),
       });
@@ -244,15 +234,47 @@ export default function Signup() {
               />
             </div>
 
-            <div className="relative">
-              <FiPhone className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400" />
-              <Input
-                value={phone}
-                setValue={setPhone}
-                className={phoneError ? "border-red-500" : ""}
-                type="tel"
-                placeholder={t("phone")}
-              />
+            <div className="relative flex gap-2">
+              <div className="relative w-32">
+                <FiPhone className="absolute hover:scale-110 transition-transform left-3 top-3 text-gray-400 pointer-events-none" />
+                <select
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  className={`w-full pl-10 pr-2 p-2 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 ${
+                    phoneError ? "border-red-500" : ""
+                  }`}
+                >
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+33">🇫🇷 +33</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+39">🇮🇹 +39</option>
+                  <option value="+34">🇪🇸 +34</option>
+                  <option value="+91">🇮🇳 +91</option>
+                  <option value="+86">🇨🇳 +86</option>
+                  <option value="+81">🇯🇵 +81</option>
+                  <option value="+82">🇰🇷 +82</option>
+                  <option value="+61">🇦🇺 +61</option>
+                  <option value="+55">🇧🇷 +55</option>
+                  <option value="+52">🇲🇽 +52</option>
+                  <option value="+7">🇷🇺 +7</option>
+                  <option value="+27">🇿🇦 +27</option>
+                  <option value="+20">🇪🇬 +20</option>
+                  <option value="+234">🇳🇬 +234</option>
+                  <option value="+212">🇲🇦 +212</option>
+                  <option value="+213">🇩🇿 +213</option>
+                  <option value="+216">🇹🇳 +216</option>
+                </select>
+              </div>
+              <div className="flex-1 relative">
+                <Input
+                  value={phone}
+                  setValue={setPhone}
+                  className={phoneError ? "border-red-500" : ""}
+                  type="tel"
+                  placeholder={t("phone")}
+                />
+              </div>
             </div>
 
             <div className="relative">
