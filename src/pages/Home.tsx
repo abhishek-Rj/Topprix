@@ -114,7 +114,9 @@ export default function Home() {
               <img
                 src={"/logowb.png"}
                 alt="Logo Topprix.re"
-                className="w-10 h-10 mr-2"
+                className={`w-10 h-10 mr-2 rounded-lg p-1 ${
+                  userRole === "ADMIN" ? "bg-blue-100" : "bg-yellow-100"
+                }`}
               />
               <h1
                 className={`text-2xl font-bold ${

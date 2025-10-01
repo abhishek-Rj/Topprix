@@ -90,7 +90,9 @@ const Navigation = () => {
               <img
                 src="/logowb.png"
                 alt="Topprix.re"
-                className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg"
+                className={`h-8 w-8 sm:h-10 sm:w-10 rounded-lg p-1 ${
+                  userRole === "ADMIN" ? "bg-blue-100" : "bg-yellow-100"
+                }`}
               />
               <span
                 className={`text-xl sm:text-2xl font-bold ${
