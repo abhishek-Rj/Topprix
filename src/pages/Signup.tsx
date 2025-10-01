@@ -156,11 +156,11 @@ export default function Signup() {
         <div className="flex flex-col p-6 md:p-10 bg-yellow-600 rounded-xl shadow-xl w-full md:w-1/2 relative">
           <div className="flex items-center space-x-2 md:absolute top-5 left-5">
             <img
-              src="./logowb.png"
+              src="/topprix.mu.png"
               width={50}
               height={50}
-              alt="Company Logo"
-              className="rounded-lg hover:scale-105 transition-transform"
+              alt="Topprix.mu"
+              className="rounded-lg p-1 bg-yellow-200 hover:scale-105 transition-transform"
             />
             <div className="font-sans text-2xl md:text-3xl font-bold text-white hover:scale-105 transition-transform">
               Topprix.mu
