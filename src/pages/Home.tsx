@@ -113,7 +113,9 @@ export default function Home() {
                 <img
                   src={"/topprix.mu.png"}
                   alt="Logo Topprix.mu"
-                  className="w-12 h-12 mr-2"
+                  className={`w-10 h-10 mr-2 rounded-lg p-1 ${
+                  userRole === "ADMIN" ? "bg-blue-200" : "bg-yellow-200"
+                }`}
                 />
                 <h1
                   className={`text-2xl font-bold ${
