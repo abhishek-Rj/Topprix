@@ -113,7 +113,7 @@ export default function Home() {
             <div className="flex items-center">
               <img
                 src={"/logowb.png"}
-                alt="Logo Topprix"
+                alt="Logo Topprix.re"
                 className="w-10 h-10 mr-2"
               />
               <h1
@@ -121,7 +121,7 @@ export default function Home() {
                   userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                 }`}
               >
-                Topprix
+                Topprix.re
               </h1>
             </div>
 
@@ -633,10 +633,10 @@ export default function Home() {
                 Clients
               </span>
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Rejoignez des milliers de clients satisfaits qui économisent de
               l'argent chaque jour
-            </p>
+              </p>
           </motion.div>
 
           <motion.div
@@ -765,7 +765,7 @@ export default function Home() {
                   userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
                 }`}
               >
-                Topprix
+                Topprix.re
               </span>
               ?
             </h2>

@@ -22,7 +22,7 @@ export default function Footer({ sidebarOpen = false }: FooterProps) {
           {/* Company Info */}
           <div className="space-y-3 sm:space-y-4">
             <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
-              Topprix
+              Topprix.re
             </h3>
             <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
               {t("footer.companyDescription")}

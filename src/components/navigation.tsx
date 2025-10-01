@@ -89,7 +89,7 @@ const Navigation = () => {
             <Link to="/" className="flex items-center space-x-2">
               <img
                 src="/logowb.png"
-                alt="Topprix"
+                alt="Topprix.re"
                 className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg"
               />
               <span
@@ -101,7 +101,7 @@ const Navigation = () => {
                     : "text-yellow-600"
                 }`}
               >
-                Topprix
+                Topprix.re
               </span>
             </Link>
 
