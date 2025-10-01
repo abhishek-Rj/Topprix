@@ -134,12 +134,20 @@ export default function ContactUs() {
                         <span className="text-teal-600 font-semibold">📧</span>
                         <div>
                           <p className="font-semibold text-gray-900">E-mail</p>
-                          <a
-                            href="mailto:contact@clicklocal.mu"
-                            className="text-teal-600 hover:text-teal-800 underline"
-                          >
-                            contact@clicklocal.mu
-                          </a>
+                          <div className="flex flex-col gap-1">
+                            <a
+                              href="mailto:jordan@topprix.mu"
+                              className="text-teal-600 hover:text-teal-800 underline"
+                            >
+                              jordan@topprix.mu
+                            </a>
+                            <a
+                              href="mailto:contact@clicklocal.mu"
+                              className="text-teal-600 hover:text-teal-800 underline"
+                            >
+                              contact@clicklocal.mu
+                            </a>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -484,9 +492,9 @@ export default function ContactUs() {
                 Utilisez le bouton ci-dessous pour nous envoyer un e-mail
               </p>
             </div>
-            <div className="text-center">
+            <div className="text-center flex flex-col gap-3">
               <a
-                href="mailto:contact@clicklocal.mu"
+                href="mailto:jordan@topprix.mu"
                 className="inline-flex items-center gap-3 px-8 py-4 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors duration-200 text-lg"
               >
                 <svg
@@ -505,7 +513,29 @@ export default function ContactUs() {
                     clipRule="evenodd"
                   />
                 </svg>
-                Envoyer un e-mail à contact@clicklocal.mu
+                Envoyer un e-mail à jordan@topprix.mu
+              </a>
+              <a
+                href="mailto:contact@clicklocal.mu"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-teal-500 text-white font-medium rounded-lg hover:bg-teal-600 transition-colors duration-200 text-base"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
+                    clipRule="evenodd"
+                  />
+                  <path
+                    fillRule="evenodd"
+                    d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Ou contactez contact@clicklocal.mu
               </a>
             </div>
           </div>
