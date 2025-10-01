@@ -5,6 +5,11 @@ import useAuthenticate from "../../hooks/authenticationt";
 import Loader from "../../components/loading";
 import baseUrl from "../../hooks/baseurl";
 import { toast } from "react-toastify";
+import AdminFloatingSidebar from "../../components/AdminFloatingSidebar";
+import {
+  AdminSidebarProvider,
+  useAdminSidebar,
+} from "../../contexts/AdminSidebarContext";
 import {
   FiDollarSign,
   FiEdit,
@@ -36,10 +41,11 @@ interface PricingPlan {
   updatedAt?: string;
 }
 
-export default function PricingPlans() {
+function PricingPlansContent() {
   const { user, userRole, loading: authLoading } = useAuthenticate();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { isOpen } = useAdminSidebar();
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -274,7 +280,12 @@ export default function PricingPlans() {
   return (
     <>
       <Navigation />
-      <main className="pt-20 pb-10 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen">
+      <AdminFloatingSidebar />
+      <main
+        className={`pt-20 pb-10 px-4 sm:px-6 lg:px-8 bg-gray-50 min-h-screen transition-all duration-300 ease-in-out ${
+          isOpen ? "lg:ml-80" : "lg:ml-0"
+        }`}
+      >
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <motion.div
@@ -799,4 +810,8 @@ export default function PricingPlans() {
       <Footer />
     </>
   );
+}
+
+export default function PricingPlans() {
+  return <PricingPlansContent />;
 }

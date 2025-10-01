@@ -39,6 +39,7 @@ export default function EditStore() {
   const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
     []
   );
+  const [storeCategories, setStoreCategories] = useState<any[]>([]);
   const [logo, setLogo] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -80,6 +81,8 @@ export default function EditStore() {
           setZipCode(addressParts[addressParts.length - 2] || "");
           setCountry(addressParts[addressParts.length - 1] || "");
 
+          // Store the full category objects for display purposes
+          setStoreCategories(data.categories || []);
           const categoryIds = (data.categories || []).map((cat: any) => cat.id);
           setSelectedCategories(categoryIds);
           setSelectedSubcategories(categoryIds);
@@ -532,11 +535,39 @@ export default function EditStore() {
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   {t("store.categories")}
                 </label>
+
+                {/* Current Categories Display */}
+                {storeCategories.length > 0 && (
+                  <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h4 className="text-sm font-medium text-gray-700 mb-2">
+                      Current Categories:
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {storeCategories.map((category) => (
+                        <span
+                          key={category.id}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+                            userRole === "ADMIN"
+                              ? "bg-blue-100 text-blue-800 border border-blue-200"
+                              : "bg-yellow-100 text-yellow-800 border border-yellow-200"
+                          }`}
+                        >
+                          {category.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <PredefinedCategorySelector
                   selectedCategories={selectedCategories}
                   onCategoryChange={setSelectedCategories}
                   selectedSubcategories={selectedSubcategories}
                   onSubcategoryChange={setSelectedSubcategories}
+                  categoryNames={storeCategories.reduce((acc, cat) => {
+                    acc[cat.id] = cat.name;
+                    return acc;
+                  }, {} as { [key: string]: string })}
                 />
               </div>
 

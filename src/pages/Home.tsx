@@ -353,45 +353,6 @@ export default function Home() {
                 Voir les Coupons
               </button>
             </motion.div>
-
-            {/* Stats Section */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto"
-            >
-              <div className="text-center">
-                <div
-                  className={`text-3xl md:text-4xl font-bold mb-2 ${
-                    userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
-                  }`}
-                >
-                  500+
-                </div>
-                <div className="text-gray-600">Magasins Actifs</div>
-              </div>
-              <div className="text-center">
-                <div
-                  className={`text-3xl md:text-4xl font-bold mb-2 ${
-                    userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
-                  }`}
-                >
-                  10K+
-                </div>
-                <div className="text-gray-600">Clients Satisfaits</div>
-              </div>
-              <div className="text-center">
-                <div
-                  className={`text-3xl md:text-4xl font-bold mb-2 ${
-                    userRole === "ADMIN" ? "text-blue-600" : "text-yellow-600"
-                  }`}
-                >
-                  2M€+
-                </div>
-                <div className="text-gray-600">Économies Totales</div>
-              </div>
-            </motion.div>
           </div>
         </div>
       </section>

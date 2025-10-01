@@ -40,6 +40,11 @@ import {
 } from "recharts";
 import Navigation from "../../components/navigation";
 import Footer from "../../components/Footer";
+import AdminFloatingSidebar from "../../components/AdminFloatingSidebar";
+import {
+  AdminSidebarProvider,
+  useAdminSidebar,
+} from "../../contexts/AdminSidebarContext";
 import {
   Card,
   CardContent,
@@ -48,7 +53,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
 
 // Types for analytics data
 interface UserAnalytics {
@@ -228,9 +232,10 @@ interface SubscriptionAnalyticsResponse {
   };
 }
 
-export default function AdminDashboard() {
+function AdminDashboardContent() {
   const { t } = useTranslation();
   const { user } = useAuthenticate();
+  const { isOpen } = useAdminSidebar();
   const [userAnalyticsData, setUserAnalyticsData] =
     useState<UserAnalytics | null>(null);
   const [subscriptionAnalyticsData, setSubscriptionAnalyticsData] =
@@ -516,7 +521,12 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-      <main className="pt-20 sm:pt-24 lg:pt-20 pb-6 sm:pb-10 px-2 sm:px-4 lg:px-8">
+      <AdminFloatingSidebar />
+      <main
+        className={`pt-20 sm:pt-24 lg:pt-20 pb-6 sm:pb-10 px-2 sm:px-4 lg:px-8 transition-all duration-300 ease-in-out ${
+          isOpen ? "lg:ml-80" : "lg:ml-0"
+        }`}
+      >
         <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
           {/* Header */}
           <motion.div
@@ -534,78 +544,6 @@ export default function AdminDashboard() {
               <div className="mt-3 sm:mt-4 text-xs sm:text-sm text-gray-500">
                 {t("adminDashboard.lastUpdated")}: {new Date().toLocaleString()}
               </div>
-            </div>
-          </motion.div>
-
-          {/* Quick Actions */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.05 }}
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
-              <Link to="/admin/store-analytics">
-                <Card className="bg-white border border-indigo-500 shadow-sm rounded-none hover:shadow-md transition-shadow cursor-pointer h-full">
-                  <CardHeader className="pb-2 p-3 sm:p-4">
-                    <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
-                      <FiShoppingBag className="h-3 w-3 sm:h-4 sm:w-4 text-indigo-500" />
-                      {t("adminDashboard.quickActions.storeAnalytics")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 sm:p-4 pt-0">
-                    <div className="text-base sm:text-lg font-bold text-gray-900 mb-1">
-                      {t("adminDashboard.quickActions.viewStoreData")}
-                    </div>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      {t(
-                        "adminDashboard.quickActions.comprehensiveStoreInsights"
-                      )}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-
-              <Link to="/admin/flyer-analytics">
-                <Card className="bg-white border border-green-500 shadow-sm rounded-none hover:shadow-md transition-shadow cursor-pointer h-full">
-                  <CardHeader className="pb-2 p-3 sm:p-4">
-                    <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
-                      <FiFileText className="h-3 w-3 sm:h-4 sm:w-4 text-green-500" />
-                      {t("adminDashboard.quickActions.flyerAnalytics")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 sm:p-4 pt-0">
-                    <div className="text-base sm:text-lg font-bold text-gray-900 mb-1">
-                      {t("adminDashboard.quickActions.viewFlyerData")}
-                    </div>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      {t(
-                        "adminDashboard.quickActions.comprehensiveFlyerInsights"
-                      )}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
-
-              <Link to="/admin/coupon-analytics">
-                <Card className="bg-white border border-purple-500 shadow-sm rounded-none hover:shadow-md transition-shadow cursor-pointer h-full">
-                  <CardHeader className="pb-2 p-3 sm:p-4">
-                    <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
-                      <FiTag className="h-3 w-3 sm:h-4 sm:w-4 text-purple-500" />
-                      {t("adminDashboard.quickActions.couponAnalytics")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-3 sm:p-4 pt-0">
-                    <div className="text-base sm:text-lg font-bold text-gray-900 mb-1">
-                      {t("adminDashboard.quickActions.viewCouponData")}
-                    </div>
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      {t(
-                        "adminDashboard.quickActions.comprehensiveCouponInsights"
-                      )}
-                    </p>
-                  </CardContent>
-                </Card>
-              </Link>
             </div>
           </motion.div>
 
@@ -1605,4 +1543,8 @@ export default function AdminDashboard() {
       <Footer />
     </div>
   );
+}
+
+export default function AdminDashboard() {
+  return <AdminDashboardContent />;
 }

@@ -60,7 +60,7 @@ export default function FlyerPreviewModal({
         setStore(data);
       } catch (error) {
         console.error("Error fetching store:", error);
-        toast.error("Failed to load store information");
+        toast.error(t("flyerPreview.storeInformationNotAvailable"));
       } finally {
         setLoadingStore(false);
       }
@@ -199,7 +199,7 @@ export default function FlyerPreviewModal({
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
-                {t("flyers.title")} Preview
+                {t("flyerPreview.title")}
               </h2>
               <p className="text-sm text-gray-600">{flyer.title}</p>
             </div>
@@ -293,7 +293,7 @@ export default function FlyerPreviewModal({
                 <div className="flex items-center gap-2">
                   <HiCalendar className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">
-                    Valid until: {formatDate(flyer.endDate)}
+                    {t("flyerPreview.validUntil")}: {formatDate(flyer.endDate)}
                   </span>
                   <span
                     className={`text-xs px-2 py-1 rounded-full border ${
@@ -311,7 +311,7 @@ export default function FlyerPreviewModal({
               <div className="flex items-center gap-2 mb-4">
                 <FaStore className="w-5 h-5 text-yellow-600" />
                 <h4 className="text-lg font-semibold text-gray-900">
-                  Store Information
+                  {t("flyerPreview.storeInformation")}
                 </h4>
               </div>
 
@@ -352,14 +352,18 @@ export default function FlyerPreviewModal({
 
                   {store.phone && (
                     <div className="text-sm text-gray-600">
-                      <span className="font-medium">Phone: </span>
+                      <span className="font-medium">
+                        {t("flyerPreview.phone")}:{" "}
+                      </span>
                       {store.phone}
                     </div>
                   )}
 
                   {store.email && (
                     <div className="text-sm text-gray-600">
-                      <span className="font-medium">Email: </span>
+                      <span className="font-medium">
+                        {t("flyerPreview.email")}:{" "}
+                      </span>
                       {store.email}
                     </div>
                   )}
@@ -372,7 +376,7 @@ export default function FlyerPreviewModal({
                         rel="noopener noreferrer"
                         className="text-yellow-600 hover:text-yellow-700 flex items-center gap-1"
                       >
-                        Visit Website
+                        {t("flyerPreview.visitWebsite")}
                         <HiExternalLink className="w-3 h-3" />
                       </a>
                     </div>
@@ -380,7 +384,7 @@ export default function FlyerPreviewModal({
                 </div>
               ) : (
                 <p className="text-gray-500 text-sm">
-                  Store information not available
+                  {t("flyerPreview.storeInformationNotAvailable")}
                 </p>
               )}
             </div>
@@ -391,13 +395,13 @@ export default function FlyerPreviewModal({
         <div className="p-4 border-t border-gray-200 bg-gray-50">
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={onClose}>
-              Close
+              {t("flyerPreview.close")}
             </Button>
             <Button
               onClick={handleViewFullFlyer}
               className="bg-yellow-600 hover:bg-yellow-700 text-white flex items-center gap-2"
             >
-              View Full Flyer
+              {t("flyerPreview.viewFullFlyer")}
               <HiExternalLink className="w-4 h-4" />
             </Button>
           </div>
