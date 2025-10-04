@@ -158,11 +158,14 @@ export const FirebaseProvider = ({
         await reauthenticateWithCredential(user, credential);
         await deleteUser(user);
         console.log("User deleted successfully");
+        return true;
       } catch (error) {
         console.error("Error deleting user: ", error);
+        throw error;
       }
     } else {
       console.log("No user is currently signed in.");
+      throw new Error("No user is currently signed in");
     }
   };
 
@@ -177,11 +180,14 @@ export const FirebaseProvider = ({
         }
         await deleteUser(user);
         console.log("User deleted successfully");
+        return true;
       } catch (error) {
         console.error("Error deleting user: ", error);
+        throw error;
       }
     } else {
       console.log("No user is currently signed in.");
+      throw new Error("No user is currently signed in");
     }
   };
   return (

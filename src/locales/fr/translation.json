@@ -244,7 +244,13 @@
     "zipCode": "Code postal",
     "enterZipCode": "Entrer le code postal",
     "selectCountry": "Sélectionner un pays",
-    "country": "Pays"
+    "country": "Pays",
+    "loginRequired": "Connexion Requise",
+    "loginRequiredMessage": "Pour accéder à votre profil personnel et gérer vos informations de compte, vous devez être connecté.",
+    "profileFeatures": "Fonctionnalités du Profil :",
+    "featureManagePersonalInfo": "Gérez vos informations personnelles",
+    "featureSecuritySettings": "Contrôlez vos paramètres de sécurité",
+    "featureTrackSubscriptions": "Suivez vos abonnements (Détaillants)"
   },
   "subscription": {
     "title": "Plans d'abonnement",

@@ -67,6 +67,7 @@ export default function Signup() {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "user-email": email,
         },
       });
 
@@ -98,10 +99,14 @@ export default function Signup() {
         throw new Error("Failed to create Firebase user");
       }
 
+      // Store user email in localStorage for API requests
+      localStorage.setItem("userEmail", email);
+
       const registerUserResponse = await fetch(`${baseUrl}register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "user-email": email,
         },
         body: JSON.stringify({
           username: name,

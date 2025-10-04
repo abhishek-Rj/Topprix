@@ -12,6 +12,13 @@ export default function GoogleAuthButton() {
     try {
       const user = await signInWithGoogle();
       if (user) {
+        console.log("Google user signed in:", user.email);
+        
+        // Store user email in localStorage for API requests
+        if (user.email) {
+          localStorage.setItem("userEmail", user.email);
+        }
+
         const docRef = doc(db, "users", user.uid);
         const docSnap = await getDoc(docRef);
 
@@ -19,6 +26,7 @@ export default function GoogleAuthButton() {
         let isNewUser = false;
 
         if (docSnap.exists()) {
+          console.log("User exists in Firestore");
           // User exists - preserve their current role, update name and email
           const existingData = docSnap.data();
           userData = {
@@ -27,7 +35,7 @@ export default function GoogleAuthButton() {
             role: existingData.role || "USER", // Keep existing role, default to USER if not found
           };
         } else {
-          // New user - set default role as USER
+          console.log("New user detected - registering with backend");
           isNewUser = true;
           userData = {
             name: user.displayName,
@@ -36,16 +44,15 @@ export default function GoogleAuthButton() {
           };
         }
 
-        // Always update/overwrite user data
-        await setDoc(docRef, userData);
-
         // Only register with backend for new users
         if (isNewUser) {
           try {
+            console.log("Registering new user with backend:", user.email);
             const registerUser = await fetch(`${baseUrl}register`, {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                "user-email": user.email || "",
               },
               body: JSON.stringify({
                 username: user.displayName,
@@ -56,16 +63,26 @@ export default function GoogleAuthButton() {
             });
 
             const data = await registerUser.json();
+            console.log("Backend registration response:", data);
+            
             if (data.user) {
+              console.log("User successfully registered with backend");
+              // Create/update user in Firestore after successful backend registration
+              await setDoc(docRef, userData);
               navigate("/");
             } else {
               throw new Error("User registration during db save failed");
             }
           } catch (error) {
             console.error("Error sending user data to server:", error);
+            // Still create user in Firestore even if backend fails
+            await setDoc(docRef, userData);
+            navigate("/");
           }
         } else {
-          // Existing user - directly navigate to home
+          console.log("Existing user - updating Firestore and navigating");
+          // Existing user - update Firestore and navigate
+          await setDoc(docRef, userData);
           navigate("/");
         }
       }

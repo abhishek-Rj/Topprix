@@ -248,6 +248,13 @@
     "enterZipCode": "Enter ZIP code",
     "selectCountry": "Select Country",
     "country": "Country"
+    ,
+    "loginRequired": "Login Required",
+    "loginRequiredMessage": "To access your personal profile and manage account information, you need to be logged in.",
+    "profileFeatures": "Profile Features:",
+    "featureManagePersonalInfo": "Manage your personal information",
+    "featureSecuritySettings": "Control your security settings",
+    "featureTrackSubscriptions": "Track your subscriptions (Retailers)"
   },
   "subscription": {
     "title": "Subscription Plans",

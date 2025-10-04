@@ -10,6 +10,11 @@ export default function FacebookAuthButton() {
         try {
             const user = await signInWithFacebook();
             if (user) {
+                // Store user email in localStorage for API requests
+                if (user.email) {
+                    localStorage.setItem("userEmail", user.email);
+                }
+
                 try {
                     const registerUser = await fetch(
                         `${baseUrl}register`,
@@ -17,6 +22,7 @@ export default function FacebookAuthButton() {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
+                                "user-email": user.email || "",
                             },
                             body: JSON.stringify({
                                 username: user.displayName,

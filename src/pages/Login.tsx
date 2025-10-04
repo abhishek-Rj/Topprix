@@ -56,11 +56,15 @@ export default function Login() {
     }
 
     try {
+      // Store user email in localStorage for API requests
+      localStorage.setItem("userEmail", email);
+
       // First, check if user exists in the database
       const checkForUser = await fetch(`${baseUrl}user/${email}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "user-email": email,
         },
       });
 
