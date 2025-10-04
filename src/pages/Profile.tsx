@@ -110,6 +110,7 @@ export default function Profile() {
   const [editingLocation, setEditingLocation] = useState<boolean>(false);
   const [zipCode, setZipCode] = useState<string>("");
   const [country, setCountry] = useState<string>("");
+  const [deleting, setDeleting] = useState<boolean>(false);
 
   // Function to get coordinates from zip code and country (same as createNewStore)
   const getCoordinates = async (zip: string, countryCode: string) => {
@@ -282,30 +283,56 @@ export default function Profile() {
     if (!authUser) return;
 
     try {
+      setDeleting(true);
+      const userEmailHeader = localStorage.getItem("userEmail") || authUser.email || "";
+      
+      // Delete user from local database using backend API
       const userDelete = await fetch(
         `${baseUrl}user/delete/${authUser.email}`,
         {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            "user-email": userEmailHeader,
+            "Authorization": `Bearer ${await authUser.getIdToken()}`,
           },
         }
       );
-      let userDeleteFirebase: any = null;
-      if (authUser.providerData[0].providerId === "password") {
-        userDeleteFirebase = await deleteAccountwithCredentials(password);
-      } else if (authUser.providerData[0].providerId === "google.com") {
-        userDeleteFirebase = await deleteAccountwithProviders("google");
-      } else {
-        userDeleteFirebase = await deleteAccountwithProviders("facebook");
+
+      if (!userDelete.ok) {
+        const errorData = await userDelete.json();
+        throw new Error(errorData.message || "Failed to delete user from database");
       }
 
-      if (!userDelete.ok || !userDeleteFirebase) {
-        throw new Error("Failed to delete user account");
+      // After successful database deletion, delete from Firebase
+      try {
+        let userDeleteFirebase: any = null;
+        if (authUser.providerData[0].providerId === "password") {
+          userDeleteFirebase = await deleteAccountwithCredentials(password);
+        } else if (authUser.providerData[0].providerId === "google.com") {
+          userDeleteFirebase = await deleteAccountwithProviders("google");
+        } else {
+          userDeleteFirebase = await deleteAccountwithProviders("facebook");
+        }
+
+        console.log("Firebase account deleted successfully:", userDeleteFirebase);
+      } catch (firebaseError: any) {
+        console.error("Failed to delete Firebase account:", firebaseError);
+        // Still proceed since database deletion was successful
+        alert(`Account deleted from database, but Firebase deletion failed: ${firebaseError?.message || "Unknown error"}`);
       }
+
+      // Clear localStorage
+      localStorage.removeItem("userEmail");
+      
+      // Navigate to signup page
       navigate("/signup");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting user account:", error);
+      // Show error message to user
+      alert(`Failed to delete account: ${error?.message || "Unknown error"}`);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -1143,79 +1170,65 @@ export default function Profile() {
                 <FiLogOut className="mr-2" />
                 {t("signOut")}
               </button>
-              <div className="relative">
-                <button
-                  disabled
-                  className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-gray-500 bg-gray-100 cursor-not-allowed transition-colors"
-                  title="Account deletion is only available through our mobile application"
-                >
-                  <TiDelete className="mr-2" />
-                  {t("profile.deleteAccount")}
-                </button>
-                <div className="absolute -bottom-8 left-0 right-0 text-center">
-                  <span className="text-xs text-gray-500 bg-white px-2 py-1 rounded border shadow-sm">
-                    🔒 Web deletion disabled
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile App Notice */}
-            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <FiShield className="text-blue-600 mt-0.5" />
-                </div>
-                <div className="ml-3">
-                  <h4 className="text-sm font-medium text-blue-800">
-                    Suppression de compte
-                  </h4>
-                  <p className="text-xs text-blue-700 mt-1">
-                    Pour des raisons de sécurité, la suppression de compte n'est
-                    disponible que via notre application mobile. Téléchargez
-                    l'app pour gérer votre compte en toute sécurité.
-                  </p>
-                </div>
-              </div>
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="flex items-center justify-center px-4 py-2 border border-red-300 rounded-md text-red-700 hover:bg-red-50 transition-colors"
+              >
+                <TiDelete className="mr-2" />
+                {t("profile.deleteAccount")}
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile App Notice Modal */}
+      {/* Delete Account Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <div className="text-center mb-6">
-              <FiShield className="mx-auto text-6xl text-blue-500 mb-4" />
+            <div className="mb-4">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Suppression de compte non disponible
+                {t("profile.confirmDeleteTitle")}
               </h3>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Pour des raisons de sécurité, la suppression de compte n'est
-                disponible que via notre application mobile.
+                {t("profile.confirmDeleteText")}
               </p>
+              <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-700 text-xs">
+                  <strong>Warning:</strong> This will permanently delete your account from both the local database and Firebase console. This action cannot be undone.
+                </p>
+              </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-              <h4 className="font-semibold text-blue-800 mb-2 flex items-center">
-                <FiShield className="mr-2 text-blue-600" />
-                Pourquoi l'application mobile ?
-              </h4>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Vérification d'identité renforcée</li>
-                <li>• Confirmation en deux étapes</li>
-                <li>• Processus de sécurité avancé</li>
-                <li>• Support client intégré</li>
-              </ul>
-            </div>
+            {authUser?.providerData?.[0]?.providerId === "password" && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t("password")}
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  placeholder={t("password")}
+                />
+              </div>
+            )}
 
-            <div className="flex justify-center">
+            <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 hover:bg-gray-50"
+                disabled={deleting}
               >
-                Compris
+                {t("profile.cancel")}
+              </button>
+              <button
+                onClick={handleOnClickDelete}
+                className={`px-4 py-2 rounded-md text-white ${deleting ? "bg-red-300" : "bg-red-600 hover:bg-red-700"}`}
+                disabled={deleting}
+              >
+                {deleting ? t("updating") : t("profile.confirmDeleteButton")}
               </button>
             </div>
           </div>

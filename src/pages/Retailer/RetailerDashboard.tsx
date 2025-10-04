@@ -5,8 +5,6 @@ import {
   FiShoppingBag,
   FiEye,
   FiTag,
-  FiUsers,
-  FiCalendar,
 } from "react-icons/fi";
 import baseUrl from "../../hooks/baseurl";
 import useAuthenticate from "../../hooks/authenticationt";
@@ -17,7 +15,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
 
@@ -44,39 +41,6 @@ interface Coupon {
   endDate: string;
 }
 
-interface CategoryTrendsAnalytics {
-  categoryInfo: {
-    id: string;
-    name: string;
-    description: string;
-  };
-  performanceScore: {
-    orderScore: number;
-    rank: number;
-    performanceLevel: string;
-  };
-}
-
-interface CategoryTrendsResponse {
-  analytics: CategoryTrendsAnalytics[];
-  summary: {
-    analysisTimeframe: string;
-    totalCategoriesAnalyzed: number;
-    topCategoriesShown: number;
-    aggregateOrderMetrics: {
-      totalOrdersAcrossCategories: number;
-      totalCompletedOrders: number;
-      totalEngagementScore: number;
-      totalUniqueCustomers: number;
-      averageOrderCompletionRate: number;
-    };
-    topPerformers: {
-      mostOrders: string;
-      highestEngagement: string;
-      bestCompletion: string;
-    };
-  };
-}
 
 export default function RetailerDashboard() {
   const { t } = useTranslation();
@@ -90,14 +54,6 @@ export default function RetailerDashboard() {
 
   const [recentFlyers, setRecentFlyers] = useState<Flyer[]>([]);
   const [recentCoupons, setRecentCoupons] = useState<Coupon[]>([]);
-  const [categoryTrendsData, setCategoryTrendsData] = useState<
-    CategoryTrendsAnalytics[]
-  >([]);
-  const [categorySummary, setCategorySummary] = useState<
-    CategoryTrendsResponse["summary"] | null
-  >(null);
-  const [categoryLoading, setCategoryLoading] = useState(true);
-  const [categoryError, setCategoryError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -218,44 +174,6 @@ export default function RetailerDashboard() {
 
     fetchDashboardData();
   }, [userRole]);
-
-  // Fetch category trends data
-  useEffect(() => {
-    const fetchCategoryTrends = async () => {
-      const userEmail = localStorage.getItem("userEmail");
-      if (!userEmail) return;
-
-      try {
-        setCategoryLoading(true);
-        const response = await fetch(`${baseUrl}analytics/categories/trends`, {
-          headers: {
-            "Content-Type": "application/json",
-            "user-email": userEmail,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data: CategoryTrendsResponse = await response.json();
-        setCategoryTrendsData(data.analytics);
-        setCategorySummary(data.summary);
-        setCategoryError(null);
-      } catch (error) {
-        console.error("Error fetching category trends:", error);
-        setCategoryError(
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch category trends data"
-        );
-      } finally {
-        setCategoryLoading(false);
-      }
-    };
-
-    fetchCategoryTrends();
-  }, []);
 
   if (dashboardData.loading) {
     return (
@@ -542,298 +460,6 @@ export default function RetailerDashboard() {
           </div>
         </motion.div>
 
-        {/* Category Analytics Section */}
-        {categoryLoading ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <Card className="bg-white border border-gray-300 shadow-sm rounded-none">
-              <CardContent className="p-4 sm:p-8">
-                <div className="text-center">
-                  <div className="text-gray-500">{t("dashboard.loading")}</div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ) : categoryError ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <Card className="bg-white border border-red-500 shadow-sm rounded-none">
-              <CardContent className="p-4 sm:p-8">
-                <div className="text-center">
-                  <div className="text-red-500 mb-2">⚠️</div>
-                  <div className="text-gray-900 font-semibold mb-2">
-                    {t("dashboard.error")}
-                  </div>
-                  <div className="text-gray-600">{categoryError}</div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ) : categoryTrendsData.length > 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
-              {/* Category Performance Metrics */}
-              <Card className="bg-white border border-emerald-500 shadow-sm rounded-none">
-                <CardHeader className="pb-2 p-3 sm:p-4">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <FiTrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500" />
-                    {t("dashboard.categoryAnalytics.topPerformers")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">
-                        {t("dashboard.categoryAnalytics.mostOrders")}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
-                        {categorySummary?.topPerformers.mostOrders || "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">
-                        {t("dashboard.categoryAnalytics.highestEngagement")}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
-                        {categorySummary?.topPerformers.highestEngagement ||
-                          "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">
-                        {t("dashboard.categoryAnalytics.bestCompletion")}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
-                        {categorySummary?.topPerformers.bestCompletion || "N/A"}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Overall Metrics */}
-              <Card className="bg-white border border-cyan-500 shadow-sm rounded-none">
-                <CardHeader className="pb-2 p-3 sm:p-4">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <FiUsers className="h-3 w-3 sm:h-4 sm:w-4 text-cyan-500" />
-                    {t("dashboard.categoryAnalytics.overallMetrics")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">
-                        {t("dashboard.categoryAnalytics.totalOrders")}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
-                        {categorySummary?.aggregateOrderMetrics
-                          .totalOrdersAcrossCategories || 0}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">
-                        {t("dashboard.categoryAnalytics.totalCustomers")}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
-                        {categorySummary?.aggregateOrderMetrics
-                          .totalUniqueCustomers || 0}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">
-                        {t("dashboard.categoryAnalytics.completionRate")}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
-                        {categorySummary?.aggregateOrderMetrics.averageOrderCompletionRate.toFixed(
-                          1
-                        ) || 0}
-                        %
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Analysis Period */}
-              <Card className="bg-white border border-violet-500 shadow-sm rounded-none">
-                <CardHeader className="pb-2 p-3 sm:p-4">
-                  <CardTitle className="text-xs sm:text-sm font-medium text-gray-600 flex items-center gap-2">
-                    <FiCalendar className="h-3 w-3 sm:h-4 sm:w-4 text-violet-500" />
-                    {t("dashboard.categoryAnalytics.analysisPeriod")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-3 sm:p-4 pt-0">
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">
-                        {t("dashboard.categoryAnalytics.timeframe")}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
-                        {categorySummary?.analysisTimeframe || "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">
-                        {t("dashboard.categoryAnalytics.categoriesAnalyzed")}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
-                        {categorySummary?.totalCategoriesAnalyzed || 0}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs sm:text-sm text-gray-600">
-                        {t("dashboard.categoryAnalytics.topCategoriesShown")}
-                      </span>
-                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
-                        {categorySummary?.topCategoriesShown || 0}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Category Performance Chart */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-              >
-                <Card className="bg-white border border-rose-500 shadow-sm rounded-none">
-                  <CardHeader>
-                    <CardTitle>
-                      {t("dashboard.categoryAnalytics.categoryPerformance")}
-                    </CardTitle>
-                    <CardDescription>
-                      {t(
-                        "dashboard.categoryAnalytics.categoryPerformanceDescription"
-                      )}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {categoryTrendsData.slice(0, 5).map((category) => (
-                        <div
-                          key={category.categoryInfo.id}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-none border"
-                        >
-                          <div className="flex-1">
-                            <h4 className="font-medium text-gray-900">
-                              {category.categoryInfo.name}
-                            </h4>
-                            <p className="text-sm text-gray-600 truncate">
-                              {category.categoryInfo.description}
-                            </p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span
-                                className={`text-xs px-2 py-1 rounded-none ${
-                                  category.performanceScore.performanceLevel ===
-                                  "high"
-                                    ? "bg-green-100 text-green-800"
-                                    : category.performanceScore
-                                        .performanceLevel === "medium"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                Rank #{category.performanceScore.rank}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                Score: {category.performanceScore.orderScore}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.55 }}
-              >
-                <Card className="bg-white border border-lime-500 shadow-sm rounded-none">
-                  <CardHeader>
-                    <CardTitle>
-                      {t("dashboard.categoryAnalytics.engagementDistribution")}
-                    </CardTitle>
-                    <CardDescription>
-                      {t(
-                        "dashboard.categoryAnalytics.engagementDistributionDescription"
-                      )}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {categoryTrendsData.map((category) => (
-                        <div
-                          key={category.categoryInfo.id}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded-none border"
-                        >
-                          <div className="flex-1">
-                            <h4 className="text-sm font-medium text-gray-900">
-                              {category.categoryInfo.name}
-                            </h4>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span
-                                className={`text-xs px-2 py-1 rounded-none ${
-                                  category.performanceScore.performanceLevel ===
-                                  "high"
-                                    ? "bg-green-100 text-green-800"
-                                    : category.performanceScore
-                                        .performanceLevel === "medium"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-red-100 text-red-800"
-                                }`}
-                              >
-                                {category.performanceScore.performanceLevel}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mb-8"
-          >
-            <Card className="bg-white border border-gray-300 shadow-sm rounded-none">
-              <CardContent className="p-8">
-                <div className="text-center">
-                  <div className="text-gray-500 mb-2">📊</div>
-                  <div className="text-gray-900 font-semibold mb-2">
-                    {t("dashboard.categoryAnalytics.noData")}
-                  </div>
-                  <div className="text-gray-600">
-                    {t("dashboard.categoryAnalytics.noDataDescription")}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
       </div>
 
       <Footer />
