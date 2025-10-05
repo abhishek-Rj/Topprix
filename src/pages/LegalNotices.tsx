@@ -67,6 +67,29 @@ export default function LegalNotices() {
               </p>
             </div>
 
+            {/* Publication Information */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+                {i18n.language === "fr" ? "Informations de Publication" : "Publication Information"}
+              </h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <span className="text-blue-600">📝</span>
+                    {i18n.language === "fr" ? "Directeur de Publication" : "Publication Director"}
+                  </h3>
+                  <p className="text-gray-700">Mr. Jean-Pierre Martin</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <span className="text-green-600">✏️</span>
+                    {i18n.language === "fr" ? "Responsable de la Rédaction" : "Editorial Manager"}
+                  </h3>
+                  <p className="text-gray-700">Kliklokal</p>
+                </div>
+              </div>
+            </div>
+
             {/* Section 1: Information Accuracy */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
@@ -385,7 +408,7 @@ export default function LegalNotices() {
                     : "Terms of Sale"}
                 </a>
                 <a
-                  href="/privacy-policy"
+                  href="/privacy"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
                   {i18n.language === "fr"

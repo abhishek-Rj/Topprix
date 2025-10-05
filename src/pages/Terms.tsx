@@ -634,7 +634,7 @@ export default function Terms() {
                     : "Legal Notices"}
                 </a>
                 <a
-                  href="/privacy-policy"
+                  href="/privacy"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors duration-200"
                 >
                   {i18n.language === "fr"
