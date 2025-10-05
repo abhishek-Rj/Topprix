@@ -129,7 +129,7 @@ export default function GeneralConditions() {
                         <p className="font-semibold text-gray-900 mb-2">
                           📞 Téléphone
                         </p>
-                        <p className="text-gray-700">0693039840</p>
+                        <p className="text-gray-700">+262 693 03 98 40</p>
                       </div>
                     </div>
                   </div>
@@ -286,7 +286,7 @@ export default function GeneralConditions() {
                   <div className="bg-white p-4 rounded-lg border border-gray-200">
                     <div className="text-center">
                       <a
-                        href="/pricing-plans"
+                        href="/admin/pricing-plans"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors duration-200"
                       >
                         <svg
@@ -409,7 +409,7 @@ export default function GeneralConditions() {
                   Conditions d'Utilisation
                 </a>
                 <a
-                  href="/privacy-policy"
+                  href="/privacy"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors duration-200"
                 >
                   Politique de Confidentialité

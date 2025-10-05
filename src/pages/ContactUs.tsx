@@ -454,7 +454,7 @@ export default function ContactUs() {
                     rectification et de suppression des données vous concernant.
                   </p>
                   <a
-                    href="/privacy-policy"
+                    href="/privacy"
                     className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors duration-200"
                   >
                     <svg
@@ -531,7 +531,7 @@ export default function ContactUs() {
                   Conditions de Vente
                 </a>
                 <a
-                  href="/privacy-policy"
+                  href="/privacy"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
                   Politique de Confidentialité

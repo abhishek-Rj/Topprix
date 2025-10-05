@@ -3,7 +3,7 @@ import Footer from "../components/Footer";
 
 export default function LegalNotices() {
   const [expandedSections, setExpandedSections] = useState<Set<string>>(
-    new Set(["editor", "hosting"])
+    new Set(["editor", "publication-director", "hosting"])
   );
 
   const toggleSection = (sectionId: string) => {
@@ -132,7 +132,7 @@ export default function LegalNotices() {
                         <p className="font-semibold text-gray-900 mb-2">
                           📞 Téléphone
                         </p>
-                        <p className="text-gray-900">0693039840</p>
+                        <p className="text-gray-900">+262 693 03 98 40</p>
                       </div>
                       <div className="bg-white p-4 rounded-lg border border-gray-200">
                         <p className="font-semibold text-gray-900 mb-2">
@@ -146,7 +146,59 @@ export default function LegalNotices() {
               )}
             </div>
 
-            {/* Section 2: Hébergement */}
+            {/* Section 2: Directeur de Publication */}
+            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+              <button
+                onClick={() => toggleSection("publication-director")}
+                className="w-full p-6 text-left bg-indigo-50 hover:bg-indigo-100 transition-colors duration-200"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-indigo-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
+                      2
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Directeur de Publication
+                    </h3>
+                  </div>
+                  <svg
+                    className={`w-5 h-5 text-indigo-500 transform transition-transform duration-200 ${
+                      expandedSections.has("publication-director") ? "rotate-180" : ""
+                    }`}
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </button>
+              {expandedSections.has("publication-director") && (
+                <div className="p-6 bg-gray-50 border-t border-gray-200">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                        <span className="text-indigo-600">📝</span>
+                        Directeur de Publication
+                      </h4>
+                      <p className="text-gray-700">Mr. Alphonse SAMINADIN</p>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                        <span className="text-indigo-600">✏️</span>
+                        Responsable de la Rédaction
+                      </h4>
+                      <p className="text-gray-700">Kliklokal</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Section 3: Hébergement */}
             <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
               <button
                 onClick={() => toggleSection("hosting")}
@@ -155,7 +207,7 @@ export default function LegalNotices() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-green-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                      2
+                      3
                     </div>
                     <h3 className="text-xl font-bold text-gray-900">
                       Hébergement
@@ -239,7 +291,7 @@ export default function LegalNotices() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-purple-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                      3
+                      4
                     </div>
                     <h3 className="text-xl font-bold text-gray-900">
                       Propriété intellectuelle
@@ -308,7 +360,7 @@ export default function LegalNotices() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 bg-orange-500 text-white rounded-lg flex items-center justify-center text-sm font-bold">
-                      4
+                      5
                     </div>
                     <h3 className="text-xl font-bold text-gray-900">
                       Limitation de responsabilité
@@ -422,7 +474,7 @@ export default function LegalNotices() {
                   Conditions de Vente
                 </a>
                 <a
-                  href="/privacy-policy"
+                  href="/privacy"
                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
                 >
                   Politique de Confidentialité

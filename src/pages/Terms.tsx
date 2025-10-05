@@ -134,7 +134,7 @@ export default function Terms() {
                         <p className="text-gray-700 mb-2">
                           📧 contact@topprix.re
                         </p>
-                        <p className="text-gray-700 mb-3">📞 0693039840</p>
+                        <p className="text-gray-700 mb-3">📞 +262 693 03 98 40</p>
                         <div>
                           <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-lg">
                             Société Réunionnaise
